@@ -3,8 +3,6 @@
 
 **/.env
 
-Test
-
 .vscode
 .vs
 !.vscode/extensions.json
