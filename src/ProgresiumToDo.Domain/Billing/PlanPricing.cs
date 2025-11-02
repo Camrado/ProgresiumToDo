@@ -16,6 +16,8 @@ public sealed class PlanPricing : BaseEntity
     
     public Region Region { get; private set; }
     
+    public ICollection<Subscription> Subscriptions { get; private set; } = new List<Subscription>();
+    
     private PlanPricing(decimal price, BillingPeriod billingPeriod, Guid planId, Guid regionId)
     {
         Price = price;

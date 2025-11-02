@@ -10,6 +10,8 @@ public sealed class Region : BaseEntity
     
     public string Currency { get; private set; }
     
+    public ICollection<PlanPricing> PlanPricings { get; private set; } = new List<PlanPricing>();
+    
     private Region(string code, string name, string currency)
     {
         Code = code;

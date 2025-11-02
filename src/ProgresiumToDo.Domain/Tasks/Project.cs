@@ -12,4 +12,8 @@ public sealed class Project : BaseEntity
     public Guid UserId { get; private set; }
     
     public User User { get; private set; }
+    
+    public ICollection<Tag> Tags { get; private set; } = new List<Tag>();
+    
+    public ICollection<TaskItem> TaskItems { get; private set; } = new List<TaskItem>();
 }

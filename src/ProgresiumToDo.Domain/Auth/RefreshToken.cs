@@ -27,6 +27,8 @@ public sealed class RefreshToken
     public User User { get; private set; }
     
     public RefreshToken? ReplacedByToken { get; private set; }
+    
+    public ICollection<RefreshToken> ReplacedTokens { get; private set; } = new List<RefreshToken>();
 
     private RefreshToken(Guid userId, string token, DateTime expiresAt, string? deviceName, string? ipAddress,
         string? userAgent)

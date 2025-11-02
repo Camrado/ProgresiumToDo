@@ -1,6 +1,6 @@
 ﻿namespace ProgresiumToDo.Domain.Tasks;
 
-public sealed class TaskAttachments
+public sealed class TaskAttachment
 {
     public Guid Id { get; private set; } = Guid.CreateVersion7();
     
@@ -12,17 +12,17 @@ public sealed class TaskAttachments
     
     public Guid TaskId { get; private set; }
     
-    public Task Task { get; private set;  }
+    public TaskItem TaskItem { get; private set;  }
     
-    private TaskAttachments(string fileUrl, string fileName, Guid taskId)
+    private TaskAttachment(string fileUrl, string fileName, Guid taskId)
     {
         FileUrl = fileUrl;
         FileName = fileName;
         TaskId = taskId;
     }
     
-    public static TaskAttachments Create(string fileUrl, string fileName,  Guid taskId)
+    public static TaskAttachment Create(string fileUrl, string fileName,  Guid taskId)
     {
-        return new TaskAttachments(fileUrl, fileName, taskId);
+        return new TaskAttachment(fileUrl, fileName, taskId);
     }
 }

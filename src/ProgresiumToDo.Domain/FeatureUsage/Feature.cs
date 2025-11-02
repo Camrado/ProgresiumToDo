@@ -10,6 +10,10 @@ public sealed class Feature
     
     public string? Description { get; private set; }
     
+    public ICollection<FeatureUsage> FeatureUsages { get; private set; } = new List<FeatureUsage>();
+    
+    public ICollection<PlanFeature> PlanFeatures { get; private set; } = new List<PlanFeature>();
+    
     private Feature(string name, string? description)
     {
         Name = name;

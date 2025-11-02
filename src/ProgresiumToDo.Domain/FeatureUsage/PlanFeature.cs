@@ -2,7 +2,7 @@
 
 namespace ProgresiumToDo.Domain.FeatureUsage;
 
-public sealed class PlanFeatures
+public sealed class PlanFeature
 {
     public Guid PlanId { get; private set; }
     
@@ -16,7 +16,7 @@ public sealed class PlanFeatures
     
     public Feature Feature { get; private set; }
     
-    private PlanFeatures(Guid planId, Guid featureId, int dailyLimit, int monthlyLimit)
+    private PlanFeature(Guid planId, Guid featureId, int dailyLimit, int monthlyLimit)
     {
         PlanId = planId;
         FeatureId = featureId;
@@ -24,8 +24,8 @@ public sealed class PlanFeatures
         MonthlyLimit = monthlyLimit;
     }
     
-    public static PlanFeatures Create(Guid planId, Guid featureId, int dailyLimit, int monthlyLimit)
+    public static PlanFeature Create(Guid planId, Guid featureId, int dailyLimit, int monthlyLimit)
     {
-        return new PlanFeatures(planId, featureId, dailyLimit, monthlyLimit);
+        return new PlanFeature(planId, featureId, dailyLimit, monthlyLimit);
     }
 }

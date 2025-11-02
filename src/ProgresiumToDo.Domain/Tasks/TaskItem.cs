@@ -3,9 +3,9 @@ using ProgresiumToDo.Domain.Auth;
 
 namespace ProgresiumToDo.Domain.Tasks;
 
-public sealed class Task : BaseEntity
+public sealed class TaskItem : BaseEntity
 {
-    public Guid? ParentTaskId { get; private set; }
+    public Guid? ParentTaskItemId { get; private set; }
     
     public string Title { get; private set; }
     
@@ -29,11 +29,15 @@ public sealed class Task : BaseEntity
     
     public Guid ProjectId { get; private set; }
     
-    public Task? ParentTask { get; private set; }
+    public TaskItem? ParentTaskItem { get; private set; }
+    
+    public ICollection<TaskItem> SubTaskItems { get; private set; } = new List<TaskItem>();
     
     public User User { get; private set; }
     
     public Project Project { get; private set; }
     
     public ICollection<Tag> Tags { get; private set; } = new List<Tag>();
+    
+    public ICollection<TaskAttachment> TaskAttachments { get; private set; } = new List<TaskAttachment>();
 }

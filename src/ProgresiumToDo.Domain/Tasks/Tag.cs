@@ -12,7 +12,7 @@ public sealed class Tag : BaseEntity
     
     public Project Project { get; private set; }
     
-    public ICollection<Task> Tasks { get; private set; } = new List<Task>();
+    public ICollection<TaskItem> TaskItems { get; private set; } = new List<TaskItem>();
     
     private Tag(string name, string color, Guid projectId)
     {
