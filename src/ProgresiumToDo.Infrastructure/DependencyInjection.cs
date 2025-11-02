@@ -21,7 +21,7 @@ public static class DependencyInjection
     
     private static IServiceCollection AddPersistence(IServiceCollection services, IConfiguration configuration)
     {
-        var connectionString = configuration.GetConnectionString("DefaultConnection") 
+        var connectionString = configuration.GetConnectionString("Database") 
                                ?? throw new ArgumentNullException(nameof(configuration), "Database connection string is missing.");
 
         services.AddDbContext<ApplicationDbContext>(options =>
