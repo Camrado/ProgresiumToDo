@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ProgresiumToDo.Infrastructure;
@@ -11,9 +12,11 @@ using ProgresiumToDo.Infrastructure;
 namespace ProgresiumToDo.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251105173054_UserAndApplicationUserRelationship")]
+    partial class UserAndApplicationUserRelationship
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -264,11 +267,6 @@ namespace ProgresiumToDo.Infrastructure.Migrations
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("deleted_at");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("email");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
@@ -756,7 +754,7 @@ namespace ProgresiumToDo.Infrastructure.Migrations
                     b.ToTable("task_items", (string)null);
                 });
 
-            modelBuilder.Entity("ProgresiumToDo.Infrastructure.Identity.ApplicationUser", b =>
+            modelBuilder.Entity("ProgresiumToDo.Infrastructure.Auth.ApplicationUser", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -868,7 +866,7 @@ namespace ProgresiumToDo.Infrastructure.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
                 {
-                    b.HasOne("ProgresiumToDo.Infrastructure.Identity.ApplicationUser", null)
+                    b.HasOne("ProgresiumToDo.Infrastructure.Auth.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -878,7 +876,7 @@ namespace ProgresiumToDo.Infrastructure.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
                 {
-                    b.HasOne("ProgresiumToDo.Infrastructure.Identity.ApplicationUser", null)
+                    b.HasOne("ProgresiumToDo.Infrastructure.Auth.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -895,7 +893,7 @@ namespace ProgresiumToDo.Infrastructure.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_asp_net_user_roles_asp_net_roles_role_id");
 
-                    b.HasOne("ProgresiumToDo.Infrastructure.Identity.ApplicationUser", null)
+                    b.HasOne("ProgresiumToDo.Infrastructure.Auth.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -905,7 +903,7 @@ namespace ProgresiumToDo.Infrastructure.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
                 {
-                    b.HasOne("ProgresiumToDo.Infrastructure.Identity.ApplicationUser", null)
+                    b.HasOne("ProgresiumToDo.Infrastructure.Auth.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -935,7 +933,7 @@ namespace ProgresiumToDo.Infrastructure.Migrations
 
             modelBuilder.Entity("ProgresiumToDo.Domain.Auth.User", b =>
                 {
-                    b.HasOne("ProgresiumToDo.Infrastructure.Identity.ApplicationUser", null)
+                    b.HasOne("ProgresiumToDo.Infrastructure.Auth.ApplicationUser", null)
                         .WithOne()
                         .HasForeignKey("ProgresiumToDo.Domain.Auth.User", "ApplicationUserId")
                         .OnDelete(DeleteBehavior.Cascade)

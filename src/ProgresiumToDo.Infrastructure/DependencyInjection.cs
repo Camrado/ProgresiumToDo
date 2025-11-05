@@ -2,9 +2,12 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using ProgresiumToDo.Application.Abstractions.Identity;
 using ProgresiumToDo.Domain.Abstractions;
-using ProgresiumToDo.Infrastructure.Auth;
+using ProgresiumToDo.Domain.Auth;
+using ProgresiumToDo.Infrastructure.Identity;
 using ProgresiumToDo.Infrastructure.Interceptors;
+using ProgresiumToDo.Infrastructure.Repositories.Auth;
 
 namespace ProgresiumToDo.Infrastructure;
 
@@ -15,6 +18,8 @@ public static class DependencyInjection
         AddPersistence(services, configuration);
         
         AddIdentity(services);
+        
+        AddRepositories(services);
         
         return services;
     }
@@ -47,6 +52,15 @@ public static class DependencyInjection
         })
         .AddEntityFrameworkStores<ApplicationDbContext>()
         .AddDefaultTokenProviders();
+        
+        services.AddTransient<IIdentityService, IdentityService>();
+        
+        return services;
+    }
+    
+    private static IServiceCollection AddRepositories(IServiceCollection services)
+    {
+        services.AddScoped<IUserRepository, UserRepository>();
         
         return services;
     }

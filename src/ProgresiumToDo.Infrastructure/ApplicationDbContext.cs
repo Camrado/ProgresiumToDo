@@ -6,7 +6,7 @@ using ProgresiumToDo.Domain.Auth;
 using ProgresiumToDo.Domain.Billing;
 using ProgresiumToDo.Domain.FeatureUsage;
 using ProgresiumToDo.Domain.Tasks;
-using ProgresiumToDo.Infrastructure.Auth;
+using ProgresiumToDo.Infrastructure.Identity;
 
 namespace ProgresiumToDo.Infrastructure;
 

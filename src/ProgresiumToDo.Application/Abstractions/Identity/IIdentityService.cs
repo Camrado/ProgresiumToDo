@@ -1,0 +1,11 @@
+﻿using ProgresiumToDo.Domain.Abstractions;
+using ProgresiumToDo.Domain.Auth;
+
+namespace ProgresiumToDo.Application.Abstractions.Identity;
+
+public interface IIdentityService
+{
+    Task<Result<Guid>> RegisterAsync(string email, string password);
+    AuthenticationResult GenerateTokens(User user);
+    Task<Result<AuthenticationResult>> LoginAsync(string email, string password);
+}
