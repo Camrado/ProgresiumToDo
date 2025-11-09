@@ -12,9 +12,6 @@ internal sealed class PlanPricingConfiguration : IEntityTypeConfiguration<PlanPr
 
         builder.HasKey(pp => pp.Id);
 
-        builder.Property(pp => pp.Id)
-            .ValueGeneratedNever();
-
         builder.Property(pp => pp.Price)
             .IsRequired()
             .HasColumnType("numeric(10,2)");

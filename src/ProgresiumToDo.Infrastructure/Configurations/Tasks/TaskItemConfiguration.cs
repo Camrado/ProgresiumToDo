@@ -9,6 +9,8 @@ internal sealed class TaskItemConfiguration : SoftDeleteEntityConfiguration<Task
     protected override void ConfigureEntity(EntityTypeBuilder<TaskItem> builder)
     {
         builder.ToTable("task_items");
+        
+        builder.HasKey(t => t.Id);
 
         builder.Property(t => t.Title)
             .IsRequired();

@@ -12,9 +12,6 @@ internal sealed class TaskAttachmentConfiguration : IEntityTypeConfiguration<Tas
 
         builder.HasKey(ta => ta.Id);
 
-        builder.Property(ta => ta.Id)
-            .ValueGeneratedNever();
-
         builder.Property(ta => ta.FileUrl)
             .IsRequired()
             .HasMaxLength(2048);

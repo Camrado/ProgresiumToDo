@@ -12,9 +12,6 @@ internal sealed class FeatureConfiguration : IEntityTypeConfiguration<Feature>
 
         builder.HasKey(f => f.Id);
 
-        builder.Property(f => f.Id)
-            .ValueGeneratedNever();
-
         builder.Property(f => f.Name)
             .IsRequired();
 

@@ -9,6 +9,8 @@ internal sealed class ProjectConfiguration : SoftDeleteEntityConfiguration<Proje
     protected override void ConfigureEntity(EntityTypeBuilder<Project> builder)
     {
         builder.ToTable("projects");
+        
+        builder.HasKey(p => p.Id);
 
         builder.Property(p => p.Name)
             .IsRequired();

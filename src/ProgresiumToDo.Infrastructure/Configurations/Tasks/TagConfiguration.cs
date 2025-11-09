@@ -10,6 +10,8 @@ internal sealed class TagConfiguration : SoftDeleteEntityConfiguration<Tag>
     protected override void ConfigureEntity(EntityTypeBuilder<Tag> builder)
     {
         builder.ToTable("tags");
+        
+        builder.HasKey(t => t.Id);
 
         builder.Property(t => t.Name)
             .IsRequired();

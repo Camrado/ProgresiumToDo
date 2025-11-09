@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
+using ProgresiumToDo.Domain.Abstractions;
 
 namespace ProgresiumToDo.API.ExceptionHandlers;
 
@@ -53,8 +54,8 @@ public class ValidationExceptionHandler : IExceptionHandler
             HttpContext = httpContext,
             ProblemDetails = new ValidationProblemDetails
             {
-                Type = exception.GetType().Name,
-                Title = "Validation failed.",
+                Type = "https://httpstatuses.com/400",
+                Title = $"{exception.GetType().Name}: Validation failed.",
                 Detail = "One or more validation errors occurred.",
                 Errors = validationErrors
             }

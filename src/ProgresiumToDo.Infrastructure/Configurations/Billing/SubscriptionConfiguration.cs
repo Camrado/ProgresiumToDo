@@ -12,9 +12,6 @@ internal sealed class SubscriptionConfiguration : IEntityTypeConfiguration<Subsc
 
         builder.HasKey(s => s.Id);
 
-        builder.Property(s => s.Id)
-            .ValueGeneratedNever();
-
         builder.Property(s => s.StartDate)
             .IsRequired();
 

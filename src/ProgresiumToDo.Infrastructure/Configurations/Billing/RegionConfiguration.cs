@@ -12,9 +12,6 @@ internal sealed class RegionConfiguration : IEntityTypeConfiguration<Region>
 
         builder.HasKey(r => r.Id);
 
-        builder.Property(r => r.Id)
-            .ValueGeneratedNever();
-
         builder.Property(r => r.Code)
             .IsRequired()
             .HasMaxLength(10);

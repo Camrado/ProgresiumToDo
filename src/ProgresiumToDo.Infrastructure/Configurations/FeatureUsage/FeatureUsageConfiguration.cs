@@ -11,9 +11,6 @@ internal sealed class FeatureUsageConfiguration : IEntityTypeConfiguration<Domai
 
         builder.HasKey(fu => fu.Id);
 
-        builder.Property(fu => fu.Id)
-            .ValueGeneratedNever();
-
         builder.Property(fu => fu.UserId)
             .IsRequired();
 

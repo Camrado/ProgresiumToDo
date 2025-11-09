@@ -45,8 +45,8 @@ public class GlobalExceptionHandler : IExceptionHandler
             HttpContext = httpContext,
             ProblemDetails = new ProblemDetails
             {
-                Type = exception.GetType().Name,
-                Title = "An error occurred while processing your request.",
+                Type = "https://httpstatuses.com/500",
+                Title = $"{exception.GetType().Name}: An error occurred while processing your request.",
                 Detail = _webHostEnvironment.IsProduction()
                     ? "An unexpected error occurred. Please try again later."
                     : exception.Message

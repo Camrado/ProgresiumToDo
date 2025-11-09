@@ -9,13 +9,11 @@ internal sealed class RegisterUserCommandHandler : ICommandHandler<RegisterUserC
 {
     private readonly IIdentityService _identityService;
     private readonly IUserRepository _userRepository;
-    private readonly IUnitOfWork _unitOfWork;
     
-    public RegisterUserCommandHandler(IIdentityService identityService, IUserRepository userRepository, IUnitOfWork unitOfWork)
+    public RegisterUserCommandHandler(IIdentityService identityService, IUserRepository userRepository)
     {
         _identityService = identityService;
         _userRepository = userRepository;
-        _unitOfWork = unitOfWork;
     }
     
     public async Task<Result<RegisterUserCommandResponse>> Handle(RegisterUserCommand request,
@@ -33,14 +31,12 @@ internal sealed class RegisterUserCommandHandler : ICommandHandler<RegisterUserC
         
         _userRepository.Add(user);
 
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
-
-        var tokens = _identityService.GenerateTokens(user);
+        var tokens = _identityService.GenerateTokens(user, cancellationToken);
         
         return new RegisterUserCommandResponse(
             "Account created successfully.",
             tokens.AccessToken,
-            tokens.RefreshToken,
+            tokens.RefreshToken.Token,
             tokens.ExpiresIn);
     }
 }

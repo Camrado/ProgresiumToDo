@@ -1,6 +1,8 @@
-﻿namespace ProgresiumToDo.Application.Abstractions.Identity;
+﻿using ProgresiumToDo.Domain.Auth;
+
+namespace ProgresiumToDo.Application.Abstractions.Identity;
 
 public sealed record AuthenticationResult(
     string AccessToken,
-    string RefreshToken,
+    RefreshToken RefreshToken,
     int ExpiresIn);

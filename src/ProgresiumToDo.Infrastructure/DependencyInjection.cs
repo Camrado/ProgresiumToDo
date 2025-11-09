@@ -61,6 +61,8 @@ public static class DependencyInjection
     private static IServiceCollection AddRepositories(IServiceCollection services)
     {
         services.AddScoped<IUserRepository, UserRepository>();
+
+        services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         
         return services;
     }
