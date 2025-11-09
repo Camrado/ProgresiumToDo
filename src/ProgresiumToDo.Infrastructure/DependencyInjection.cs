@@ -1,10 +1,15 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 using ProgresiumToDo.Application.Abstractions.Identity;
 using ProgresiumToDo.Domain.Abstractions;
 using ProgresiumToDo.Domain.Auth;
+using ProgresiumToDo.Infrastructure.Configurations.Auth;
 using ProgresiumToDo.Infrastructure.Identity;
 using ProgresiumToDo.Infrastructure.Interceptors;
 using ProgresiumToDo.Infrastructure.Repositories.Auth;
@@ -19,12 +24,16 @@ public static class DependencyInjection
         
         AddIdentity(services);
         
+        AddAuthentication(services, configuration);
+        
+        AddAuthorization(services);
+        
         AddRepositories(services);
         
         return services;
     }
     
-    private static IServiceCollection AddPersistence(IServiceCollection services, IConfiguration configuration)
+    private static void AddPersistence(IServiceCollection services, IConfiguration configuration)
     {
         var connectionString = configuration.GetConnectionString("Database") 
                                ?? throw new ArgumentNullException(nameof(configuration), "Database connection string is missing.");
@@ -36,34 +45,71 @@ public static class DependencyInjection
                 .AddInterceptors(new AuditableEntityInterceptor()));
         
         services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<ApplicationDbContext>());
-        
-        return services;
     }
     
-    private static IServiceCollection AddIdentity(IServiceCollection services)
+    private static void AddIdentity(IServiceCollection services)
     {
         services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
+            {
+                options.Password.RequiredLength = 8;
+                options.Password.RequireDigit = true;
+                options.Password.RequireLowercase = true;
+                options.Password.RequireUppercase = true;
+                options.User.RequireUniqueEmail = true;
+            })
+            .AddEntityFrameworkStores<ApplicationDbContext>()
+            .AddDefaultTokenProviders();
+        
+        services.ConfigureApplicationCookie(options =>
         {
-            options.Password.RequiredLength = 8;
-            options.Password.RequireDigit = true;
-            options.Password.RequireLowercase = true;
-            options.Password.RequireUppercase = true;
-            options.User.RequireUniqueEmail = true;
-        })
-        .AddEntityFrameworkStores<ApplicationDbContext>()
-        .AddDefaultTokenProviders();
+            options.Events.OnRedirectToLogin = context =>
+            {
+                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                return Task.CompletedTask;
+            };
+        });
         
         services.AddTransient<IIdentityService, IdentityService>();
-        
-        return services;
     }
     
-    private static IServiceCollection AddRepositories(IServiceCollection services)
+    private static void AddAuthentication(IServiceCollection services, IConfiguration configuration)
+    {
+        var jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET") ??
+                        throw new ApplicationException("Jwt secret is missing.");
+        
+        services.AddAuthentication(options => 
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme; 
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme; 
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = configuration["Authentication:Issuer"],
+                    ValidAudience = configuration["Authentication:Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret))
+                };
+            });
+        
+        services.AddHttpContextAccessor();
+        
+        services.AddScoped<IUserContext, UserContext>();
+    }
+    
+    private static void AddAuthorization(IServiceCollection services) {
+        services.AddAuthorization();
+    }
+    
+    private static void AddRepositories(IServiceCollection services)
     {
         services.AddScoped<IUserRepository, UserRepository>();
 
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
-        
-        return services;
     }
 }

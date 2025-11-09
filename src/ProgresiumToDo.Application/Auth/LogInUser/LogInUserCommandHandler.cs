@@ -2,26 +2,26 @@
 using ProgresiumToDo.Application.Abstractions.Messaging;
 using ProgresiumToDo.Domain.Abstractions;
 
-namespace ProgresiumToDo.Application.Auth.LoginUser;
+namespace ProgresiumToDo.Application.Auth.LogInUser;
 
-internal sealed class LoginUserCommandHandler : ICommandHandler<LoginUserCommand, LoginUserCommandResponse>
+internal sealed class LogInUserCommandHandler : ICommandHandler<LogInUserCommand, LogInUserCommandResponse>
 {
     private readonly IIdentityService _identityService;
     
-    public LoginUserCommandHandler(IIdentityService identityService)
+    public LogInUserCommandHandler(IIdentityService identityService)
     {
         _identityService = identityService;
     }
     
-    public async Task<Result<LoginUserCommandResponse>> Handle(LoginUserCommand request, CancellationToken cancellationToken)
+    public async Task<Result<LogInUserCommandResponse>> Handle(LogInUserCommand request, CancellationToken cancellationToken)
     {
         var authTokens = await _identityService.LoginAsync(request.Email, request.Password, cancellationToken);
         if (authTokens.IsFailure)
         {
-            return Result.Failure<LoginUserCommandResponse>(authTokens.Errors);
+            return Result.Failure<LogInUserCommandResponse>(authTokens.Errors);
         }
         
-        return new LoginUserCommandResponse(
+        return new LogInUserCommandResponse(
             "Login successful.",
             authTokens.Value.AccessToken,
             authTokens.Value.RefreshToken.Token,

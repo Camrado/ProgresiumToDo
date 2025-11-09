@@ -17,7 +17,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
     }
     
     public DbSet<RefreshToken> RefreshTokens { get; set; }
-    public DbSet<User> Users { get; set; }
+    public new DbSet<User> Users { get; set; }
     public DbSet<Plan> Plans { get; set; }
     public DbSet<PlanPricing> PlanPricings { get; set; }
     public DbSet<Subscription> Subscriptions { get; set; }

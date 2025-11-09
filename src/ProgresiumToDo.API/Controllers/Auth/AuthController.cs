@@ -1,7 +1,8 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ProgresiumToDo.Application.Auth.LoginUser;
+using ProgresiumToDo.Application.Auth.LogInUser;
+using ProgresiumToDo.Application.Auth.LogOutUser;
 using ProgresiumToDo.Application.Auth.RefreshTokens;
 using ProgresiumToDo.Application.Auth.RegisterUser;
 
@@ -28,10 +29,10 @@ public class AuthController : ApiControllerBase
     
     [AllowAnonymous]
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginUserCommand loginUserCommand,
+    public async Task<IActionResult> Login([FromBody] LogInUserCommand logInUserCommand,
         CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(loginUserCommand, cancellationToken);
+        var result = await _mediator.Send(logInUserCommand, cancellationToken);
         return FromResult(result);
     }
 
@@ -41,6 +42,15 @@ public class AuthController : ApiControllerBase
         CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(refreshTokensCommand, cancellationToken);
+        return FromResult(result);
+    }
+
+    [Authorize]
+    [HttpPost("logout")]
+    public async Task<IActionResult> Logout([FromBody] LogOutUserCommand logOutUserCommand,
+        CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(logOutUserCommand, cancellationToken);
         return FromResult(result);
     }
 }

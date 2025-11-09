@@ -12,7 +12,7 @@ public class RefreshTokenRepository : IRefreshTokenRepository
         _dbContext = dbContext;
     }
     
-    public Task<RefreshToken?> GetByTokenAsync(string token, CancellationToken cancellationToken)
+    public Task<RefreshToken?> GetByTokenAsync(string token, CancellationToken cancellationToken = default)
     {
         return _dbContext.Set<RefreshToken>()
             .FirstOrDefaultAsync(rt => rt.Token == token, cancellationToken);

@@ -1,10 +1,10 @@
 ﻿using FluentValidation;
 
-namespace ProgresiumToDo.Application.Auth.LoginUser;
+namespace ProgresiumToDo.Application.Auth.LogInUser;
 
-internal sealed class LoginUserCommandValidator : AbstractValidator<LoginUserCommand>
+internal sealed class LogInUserCommandValidator : AbstractValidator<LogInUserCommand>
 {
-    public LoginUserCommandValidator()
+    public LogInUserCommandValidator()
     {
         RuleFor(luc => luc.Email).NotEmpty().EmailAddress(); // The existence of the email will be checked in the identity service
         
