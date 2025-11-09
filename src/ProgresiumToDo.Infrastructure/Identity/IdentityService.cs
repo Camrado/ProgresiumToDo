@@ -134,4 +134,48 @@ internal sealed class IdentityService : IIdentityService
         
         return authTokens;
     }
+
+    public async Task<Result> VerifyEmailAsync(string email, string token)
+    {
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user is null)
+        {
+            return Result.Failure<bool>([UserErrors.UserNotFound]);
+        }
+        if (user.EmailConfirmed)
+        {
+            return Result.Failure<bool>([UserErrors.EmailAlreadyVerified]);
+        }
+
+        var result = await _userManager.ConfirmEmailAsync(user, token);
+        if (!result.Succeeded)
+        {
+            return Result.Failure<bool>([UserErrors.EmailVerificationFailed]);
+        }
+        
+        return Result.Success();
+    }
+
+    public async Task<Result<bool>> IsEmailVerifiedAsync(string email)
+    {
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user is null)
+        {
+            return Result.Failure<bool>([UserErrors.UserNotFound]);
+        }
+        
+        return user.EmailConfirmed;
+    }
+    
+    public async Task<Result<string>> GenerateEmailVerificationTokenAsync(string email)
+    {
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user is null)
+        {
+            return Result.Failure<string>([UserErrors.UserNotFound]);
+        }
+
+        var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        return token;
+    }
 }

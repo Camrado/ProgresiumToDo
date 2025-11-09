@@ -5,6 +5,8 @@ using ProgresiumToDo.Application.Auth.LogInUser;
 using ProgresiumToDo.Application.Auth.LogOutUser;
 using ProgresiumToDo.Application.Auth.RefreshTokens;
 using ProgresiumToDo.Application.Auth.RegisterUser;
+using ProgresiumToDo.Application.Auth.SendVerificationEmail;
+using ProgresiumToDo.Application.Auth.VerifyEmail;
 
 namespace ProgresiumToDo.API.Controllers.Auth;
 
@@ -51,6 +53,23 @@ public class AuthController : ApiControllerBase
         CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(logOutUserCommand, cancellationToken);
+        return FromResult(result);
+    }
+
+    [Authorize]
+    [HttpPost("verify-email")]
+    public async Task<IActionResult> VerifyEmail([FromBody] VerifyEmailCommand verifyEmailCommand,
+        CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(verifyEmailCommand, cancellationToken);
+        return FromResult(result);
+    }
+    
+    [Authorize]
+    [HttpPost("send-verification-email")]
+    public async Task<IActionResult> SendVerificationEmail(CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new SendVerificationEmailCommand(), cancellationToken);
         return FromResult(result);
     }
 }

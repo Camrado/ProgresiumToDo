@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using ProgresiumToDo.Application.Abstractions.EmailService;
 using ProgresiumToDo.Application.Abstractions.Identity;
 using ProgresiumToDo.Domain.Abstractions;
 using ProgresiumToDo.Domain.Auth;
@@ -29,6 +30,8 @@ public static class DependencyInjection
         AddAuthorization(services);
         
         AddRepositories(services);
+        
+        services.AddTransient<IEmailService, EmailService.EmailService>();
         
         return services;
     }
