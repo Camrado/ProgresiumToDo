@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using ProgresiumToDo.Application.Users.DeleteAccount;
 using ProgresiumToDo.Application.Users.GetCurrentUser;
 using ProgresiumToDo.Application.Users.UpdateProfile;
 
@@ -30,6 +31,14 @@ public class UserController : ApiControllerBase
         CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(updateProfileCommand, cancellationToken);
+        return FromResult(result);
+    }
+    
+    [Authorize]
+    [HttpDelete("delete-account")]
+    public async Task<IActionResult> DeleteCurrentUser(CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new DeleteAccountCommand(), cancellationToken);
         return FromResult(result);
     }
 }

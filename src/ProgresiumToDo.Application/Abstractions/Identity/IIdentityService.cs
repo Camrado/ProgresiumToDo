@@ -7,7 +7,7 @@ public interface IIdentityService
 {
     Task<Result<Guid>> RegisterAsync(string email, string password);
     
-    AuthenticationResult GenerateTokens(User user, CancellationToken cancellationToken = default);
+    AuthenticationResult GenerateTokens(User user);
     
     Task<Result<AuthenticationResult>> LoginAsync(string email, string password, CancellationToken cancellationToken = default);
     
@@ -18,4 +18,6 @@ public interface IIdentityService
     Task<Result<string>> GenerateEmailVerificationUrlAsync(string email);
 
     Task<Result<bool>> IsEmailVerifiedAsync(string email);
+    
+    Task<Result> DeleteAccountAsync(string email);
 }

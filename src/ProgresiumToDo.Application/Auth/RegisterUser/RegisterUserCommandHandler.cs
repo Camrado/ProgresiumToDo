@@ -31,7 +31,7 @@ internal sealed class RegisterUserCommandHandler : ICommandHandler<RegisterUserC
         
         _userRepository.Add(user);
 
-        var tokens = _identityService.GenerateTokens(user, cancellationToken);
+        var tokens = _identityService.GenerateTokens(user);
         
         return new RegisterUserCommandResponse(
             "Account created successfully.",

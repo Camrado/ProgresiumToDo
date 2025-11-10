@@ -12,6 +12,13 @@ internal sealed class UserConfiguration : SoftDeleteEntityConfiguration<User>
         builder.ToTable("users");
 
         builder.HasKey(u => u.Id);
+        
+        builder.Property(u => u.Email)
+            .IsRequired();
+
+        builder.HasIndex(u => u.Email)
+            .IsUnique()
+            .HasFilter("\"deleted_at\" IS NULL");
 
         builder.Property(u => u.FirstName)
             .IsRequired();

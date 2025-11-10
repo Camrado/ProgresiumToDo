@@ -9,8 +9,13 @@ public class UserRepository : Repository<User>, IUserRepository
     {
     }
 
-    public Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
+    public async Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
     {
-        return DbContext.Set<User>().FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
+        return await DbContext.Set<User>().FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
+    }
+    
+    public void Delete(User user)
+    {
+        DbContext.Set<User>().Remove(user);
     }
 }

@@ -50,7 +50,7 @@ internal sealed class IdentityService : IIdentityService
     {
         var user = new ApplicationUser
         {
-            UserName = email,
+            UserName = $"{email}_{Guid.NewGuid()}",
             Email = email
         };
 
@@ -87,12 +87,12 @@ internal sealed class IdentityService : IIdentityService
             return Result.Failure<AuthenticationResult>([UserErrors.UserNotFound]);
         }
         
-        var authTokens = GenerateTokens(user, cancellationToken);
+        var authTokens = GenerateTokens(user);
         
         return authTokens;
     }
     
-    public AuthenticationResult GenerateTokens(User user, CancellationToken cancellationToken = default)
+    public AuthenticationResult GenerateTokens(User user)
     {
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSecret));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -119,7 +119,7 @@ internal sealed class IdentityService : IIdentityService
         return new AuthenticationResult(accessToken, refreshToken, _jwtLifespan);
     }
 
-    public async Task<Result<AuthenticationResult>> RefreshTokensAsync(string oldRefreshTokenValue, CancellationToken cancellationToken)
+    public async Task<Result<AuthenticationResult>> RefreshTokensAsync(string oldRefreshTokenValue, CancellationToken cancellationToken = default)
     {
         var oldRefreshToken = await _refreshTokenRepository.GetByTokenAsync(oldRefreshTokenValue, cancellationToken);
         if (oldRefreshToken is null || !oldRefreshToken.IsActive)
@@ -133,7 +133,7 @@ internal sealed class IdentityService : IIdentityService
             return Result.Failure<AuthenticationResult>([UserErrors.UserNotFound]);
         }
         
-        var authTokens = GenerateTokens(user, cancellationToken);
+        var authTokens = GenerateTokens(user);
         oldRefreshToken.Revoke(authTokens.RefreshToken.Id);
         
         return authTokens;
@@ -190,5 +190,19 @@ internal sealed class IdentityService : IIdentityService
         var verificationUrl = $"{_baseUrl}/api/progresium-todo/v1/auth/verify-email?userId={user.Id}&verificationToken={encodedToken}";
         
         return verificationUrl;
+    }
+
+    public async Task<Result> DeleteAccountAsync(string email)
+    {
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user is null)
+        {
+            return Result.Failure<bool>([UserErrors.UserNotFound]);
+        }
+        
+        await _userManager.SetLockoutEndDateAsync(user, DateTimeOffset.MaxValue);
+        await _userManager.UpdateSecurityStampAsync(user);
+        
+        return Result.Success();
     }
 }

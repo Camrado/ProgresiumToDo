@@ -12,10 +12,15 @@ public class RefreshTokenRepository : IRefreshTokenRepository
         _dbContext = dbContext;
     }
     
-    public Task<RefreshToken?> GetByTokenAsync(string token, CancellationToken cancellationToken = default)
+    public async Task<RefreshToken?> GetByTokenAsync(string token, CancellationToken cancellationToken = default)
     {
-        return _dbContext.Set<RefreshToken>()
+        return await _dbContext.Set<RefreshToken>()
             .FirstOrDefaultAsync(rt => rt.Token == token, cancellationToken);
+    }
+
+    public async Task<List<RefreshToken>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.Set<RefreshToken>().Where(rt => rt.UserId == userId).ToListAsync(cancellationToken);
     }
 
     public void Add(RefreshToken refreshToken)
