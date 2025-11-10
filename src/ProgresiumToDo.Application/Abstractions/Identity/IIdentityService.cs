@@ -13,9 +13,9 @@ public interface IIdentityService
     
     Task<Result<AuthenticationResult>> RefreshTokensAsync(string oldRefreshTokenValue, CancellationToken cancellationToken = default);
     
-    Task<Result> VerifyEmailAsync(string email, string token);
+    Task<Result> VerifyEmailAsync(string userId, string token);
 
-    Task<Result<string>> GenerateEmailVerificationTokenAsync(string email);
+    Task<Result<string>> GenerateEmailVerificationUrlAsync(string email);
 
     Task<Result<bool>> IsEmailVerifiedAsync(string email);
 }

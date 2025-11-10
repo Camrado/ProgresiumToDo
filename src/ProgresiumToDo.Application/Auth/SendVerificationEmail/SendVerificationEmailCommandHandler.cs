@@ -33,19 +33,20 @@ internal sealed class SendVerificationEmailCommandHandler :
             return Result.Failure<SendVerificationEmailCommandResponse>([UserErrors.EmailAlreadyVerified]);
         }
 
-        var verificationToken = await _identityService.GenerateEmailVerificationTokenAsync(_userContext.Email);
-        if (verificationToken.IsFailure)
+        var verificationUrl = await _identityService.GenerateEmailVerificationUrlAsync(_userContext.Email);
+        if (verificationUrl.IsFailure)
         {
-            return Result.Failure<SendVerificationEmailCommandResponse>(verificationToken.Errors);
+            return Result.Failure<SendVerificationEmailCommandResponse>(verificationUrl.Errors);
         }
         
         var result = await _emailService.SendEmailAsync(_userContext.Email, "Email Verification",
-            $"Please verify your email using this token: {verificationToken.Value}", cancellationToken);
+            $"Please verify your email: {verificationUrl.Value}", cancellationToken);
         if (result.IsFailure)
         {
             return Result.Failure<SendVerificationEmailCommandResponse>(result.Errors);
         }
-        
-        return new SendVerificationEmailCommandResponse("Verification email sent successfully.");
+
+        return new SendVerificationEmailCommandResponse("Verification email sent successfully.",
+            verificationUrl.Value); // TODO: Remove VerificationUrl from response after implementing email service
     }
 }

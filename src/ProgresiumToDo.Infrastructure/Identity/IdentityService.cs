@@ -2,6 +2,7 @@
 using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using ProgresiumToDo.Application.Abstractions.Identity;
@@ -21,6 +22,7 @@ internal sealed class IdentityService : IIdentityService
     private readonly string _jwtSecret;
     private readonly int _jwtLifespan;
     private readonly int _refreshTokenLifespan;
+    private readonly string _baseUrl;
     
     public IdentityService(
         UserManager<ApplicationUser> userManager,
@@ -40,6 +42,8 @@ internal sealed class IdentityService : IIdentityService
                                  throw new ApplicationException("Jwt token lifetime is missing."));
         _refreshTokenLifespan = int.Parse(Environment.GetEnvironmentVariable("REFRESH_TOKEN_LIFETIME_IN_DAYS") ??
                                          throw new ApplicationException("Refresh token lifetime is missing."));
+        _baseUrl = Environment.GetEnvironmentVariable("BASE_URL") ??
+                   throw new ApplicationException("Base url is missing.");
     }
     
     public async Task<Result<Guid>> RegisterAsync(string email, string password)
@@ -135,9 +139,9 @@ internal sealed class IdentityService : IIdentityService
         return authTokens;
     }
 
-    public async Task<Result> VerifyEmailAsync(string email, string token)
+    public async Task<Result> VerifyEmailAsync(string userId, string token)
     {
-        var user = await _userManager.FindByEmailAsync(email);
+        var user = await _userManager.FindByIdAsync(userId);
         if (user is null)
         {
             return Result.Failure<bool>([UserErrors.UserNotFound]);
@@ -146,8 +150,11 @@ internal sealed class IdentityService : IIdentityService
         {
             return Result.Failure<bool>([UserErrors.EmailAlreadyVerified]);
         }
+        
+        var decodedTokenBytes = WebEncoders.Base64UrlDecode(token);
+        var decodedToken = Encoding.UTF8.GetString(decodedTokenBytes);
 
-        var result = await _userManager.ConfirmEmailAsync(user, token);
+        var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
         if (!result.Succeeded)
         {
             return Result.Failure<bool>([UserErrors.EmailVerificationFailed]);
@@ -167,7 +174,7 @@ internal sealed class IdentityService : IIdentityService
         return user.EmailConfirmed;
     }
     
-    public async Task<Result<string>> GenerateEmailVerificationTokenAsync(string email)
+    public async Task<Result<string>> GenerateEmailVerificationUrlAsync(string email)
     {
         var user = await _userManager.FindByEmailAsync(email);
         if (user is null)
@@ -176,6 +183,12 @@ internal sealed class IdentityService : IIdentityService
         }
 
         var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-        return token;
+        
+        var tokenBytes = Encoding.UTF8.GetBytes(token);
+        var encodedToken = WebEncoders.Base64UrlEncode(tokenBytes);
+        
+        var verificationUrl = $"{_baseUrl}/api/progresium-todo/v1/auth/verify-email?userId={user.Id}&verificationToken={encodedToken}";
+        
+        return verificationUrl;
     }
 }

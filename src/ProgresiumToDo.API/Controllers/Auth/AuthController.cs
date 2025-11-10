@@ -56,9 +56,9 @@ public class AuthController : ApiControllerBase
         return FromResult(result);
     }
 
-    [Authorize]
-    [HttpPost("verify-email")]
-    public async Task<IActionResult> VerifyEmail([FromBody] VerifyEmailCommand verifyEmailCommand,
+    [AllowAnonymous]
+    [HttpGet("verify-email")]
+    public async Task<IActionResult> VerifyEmail([FromQuery] VerifyEmailCommand verifyEmailCommand,
         CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(verifyEmailCommand, cancellationToken);
