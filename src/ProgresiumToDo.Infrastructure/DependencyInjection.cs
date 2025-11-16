@@ -8,11 +8,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using ProgresiumToDo.Application.Abstractions.EmailService;
 using ProgresiumToDo.Application.Abstractions.Identity;
+using ProgresiumToDo.Application.Abstractions.OAuth;
 using ProgresiumToDo.Domain.Abstractions;
 using ProgresiumToDo.Domain.Auth;
 using ProgresiumToDo.Infrastructure.Configurations.Auth;
 using ProgresiumToDo.Infrastructure.Identity;
 using ProgresiumToDo.Infrastructure.Interceptors;
+using ProgresiumToDo.Infrastructure.OAuth;
 using ProgresiumToDo.Infrastructure.Repositories.Auth;
 
 namespace ProgresiumToDo.Infrastructure;
@@ -103,6 +105,8 @@ public static class DependencyInjection
         services.AddHttpContextAccessor();
         
         services.AddScoped<IUserContext, UserContext>();
+
+        services.AddTransient<IOAuthService, OAuthService>();
     }
     
     private static void AddAuthorization(IServiceCollection services) {

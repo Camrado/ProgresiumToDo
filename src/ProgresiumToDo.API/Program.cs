@@ -11,6 +11,8 @@ builder.Services.AddControllers();
 
 builder.Services.AddExceptionHandling();
 
+builder.Services.AddMemoryCache();
+
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
