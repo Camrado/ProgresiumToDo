@@ -6,6 +6,8 @@ namespace ProgresiumToDo.Application.Abstractions.Identity;
 public interface IIdentityService
 {
     Task<Result<Guid>> RegisterAsync(string email, string password);
+
+    Task<Result<Guid>> CreateUserAsync(string email);
     
     AuthenticationResult GenerateTokens(User user);
     
@@ -20,4 +22,7 @@ public interface IIdentityService
     Task<Result<bool>> IsEmailVerifiedAsync(string email);
     
     Task<Result> DeleteAccountAsync(string email);
+
+    Task<Result> AddGoogleLoginAsync(string email, string googleIdentitySub,
+        CancellationToken cancellationToken = default);
 }

@@ -66,6 +66,27 @@ internal sealed class IdentityService : IIdentityService
 
         return user.Id;
     }
+    
+    public async Task<Result<Guid>> CreateUserAsync(string email)
+    {
+        var user = new ApplicationUser
+        {
+            UserName = $"{email}_{Guid.NewGuid()}",
+            Email = email
+        };
+        
+        var result = await _userManager.CreateAsync(user);
+        if (!result.Succeeded)
+        {
+            var errors = result.Errors
+                .Select(e => new Error(e.Code, e.Description))
+                .Where(e => !e.Code.Contains("username", StringComparison.InvariantCultureIgnoreCase))
+                .ToList();
+            return Result.Failure<Guid>(errors);
+        }
+
+        return user.Id;
+    }
 
     public async Task<Result<AuthenticationResult>> LoginAsync(string email, string password, CancellationToken cancellationToken = default)
     {
@@ -202,6 +223,28 @@ internal sealed class IdentityService : IIdentityService
         
         await _userManager.SetLockoutEndDateAsync(user, DateTimeOffset.MaxValue);
         await _userManager.UpdateSecurityStampAsync(user);
+        
+        return Result.Success();
+    }
+    
+    public async Task<Result> AddGoogleLoginAsync(string email, string googleIdentitySub, CancellationToken cancellationToken = default)
+    {
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user is null)
+        {
+            return Result.Failure<bool>([UserErrors.UserNotFound]);
+        }
+
+        var loginInfo = new UserLoginInfo("Google", googleIdentitySub, "Google");
+        
+        var existingLogins = await _userManager.GetLoginsAsync(user);
+        if (!existingLogins.Any(userLoginInfo => userLoginInfo.LoginProvider == "Google" && userLoginInfo.ProviderKey == googleIdentitySub))
+        {
+            var addLoginResult = await _userManager.AddLoginAsync(user, loginInfo);
+            
+            if (!addLoginResult.Succeeded)
+                return Result.Failure<Result>([OAuthErrors.CannotLinkGoogleAccount]);
+        }
         
         return Result.Success();
     }

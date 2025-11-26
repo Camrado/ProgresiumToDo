@@ -13,6 +13,11 @@ public class UserRepository : Repository<User>, IUserRepository
     {
         return await DbContext.Set<User>().FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
     }
+
+    public async Task<bool> ExistsByEmailAsync(string email, CancellationToken cancellationToken = default)
+    {
+        return await DbContext.Set<User>().AnyAsync(u => u.Email == email, cancellationToken);
+    }
     
     public void Delete(User user)
     {

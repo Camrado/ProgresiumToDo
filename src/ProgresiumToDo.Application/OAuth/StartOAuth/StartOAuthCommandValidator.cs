@@ -6,7 +6,7 @@ internal sealed class StartOAuthCommandValidator : AbstractValidator<StartOAuthC
 {
     public StartOAuthCommandValidator()
     {
-        RuleFor(x => x.Provider)
+        RuleFor(soac => soac.Provider)
             .NotEmpty().WithMessage("Provider is required.")
             .Must(provider => string.Equals(provider, "google", StringComparison.OrdinalIgnoreCase))
             .WithMessage("Provider must be one of the following: 'google'.");
