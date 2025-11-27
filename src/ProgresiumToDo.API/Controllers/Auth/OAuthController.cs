@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using ProgresiumToDo.Application.OAuth.GoogleCallbackOAuth;
 using ProgresiumToDo.Application.OAuth.StartOAuth;
 
 namespace ProgresiumToDo.API.Controllers.Auth;
@@ -20,6 +21,15 @@ public class OAuthController : ApiControllerBase
     public async Task<IActionResult> StartOAuth([FromQuery] string provider, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(new StartOAuthCommand(provider), cancellationToken);
+        return FromResult(result);
+    }
+
+    [AllowAnonymous]
+    [HttpGet("callback/google")]
+    public async Task<IActionResult> GoogleCallback([FromQuery] string code, [FromQuery] string state,
+        CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new GoogleCallbackOAuthCommand(code, state), cancellationToken);
         return FromResult(result);
     }
 }
