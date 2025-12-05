@@ -10,7 +10,7 @@ public sealed class User : BaseEntity
     public string FirstName { get; private set; }
     public string LastName { get; private set; }
     
-    public Guid ApplicationUserId { get; private set; }
+    public Guid? ApplicationUserId { get; private set; }
     
     public ICollection<RefreshToken> RefreshTokens { get; private set; } = new List<RefreshToken>();
     
@@ -21,6 +21,8 @@ public sealed class User : BaseEntity
     public ICollection<Project> Projects { get; private set; } = new List<Project>();
     
     public ICollection<TaskItem> TaskItems { get; private set; } = new List<TaskItem>();
+
+    private User() {}
     
     private User(string email, string firstName, string lastName, Guid applicationUserId)
     {

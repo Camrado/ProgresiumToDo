@@ -29,6 +29,6 @@ internal sealed class UserConfiguration : SoftDeleteEntityConfiguration<User>
         builder.HasOne<ApplicationUser>()
             .WithOne()
             .HasForeignKey<User>(u => u.ApplicationUserId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.NoAction);
     }
 }

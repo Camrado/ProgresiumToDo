@@ -220,9 +220,8 @@ internal sealed class IdentityService : IIdentityService
         {
             return Result.Failure<bool>([UserErrors.UserNotFound]);
         }
-        
-        await _userManager.SetLockoutEndDateAsync(user, DateTimeOffset.MaxValue);
-        await _userManager.UpdateSecurityStampAsync(user);
+
+        await _userManager.DeleteAsync(user);
         
         return Result.Success();
     }
@@ -234,6 +233,8 @@ internal sealed class IdentityService : IIdentityService
         {
             return Result.Failure<bool>([UserErrors.UserNotFound]);
         }
+        
+        user.EmailConfirmed = true;
 
         var loginInfo = new UserLoginInfo("Google", googleIdentitySub, "Google");
         
