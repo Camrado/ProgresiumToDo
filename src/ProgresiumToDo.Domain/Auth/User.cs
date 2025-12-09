@@ -37,13 +37,16 @@ public sealed class User : BaseEntity
         return new User(email, firstName, lastName, applicationUserId);
     }
     
-    public void UpdateFirstName(string firstName)
+    public void Update(string? firstName, string? lastName)
     {
-        FirstName = firstName;
-    }
-    
-    public void UpdateLastName(string lastName)
-    {
-        LastName = lastName;
+        if (firstName is not null)
+        {
+            FirstName = firstName;
+        }
+
+        if (lastName is not null)
+        {
+            LastName = lastName;
+        }
     }
 }

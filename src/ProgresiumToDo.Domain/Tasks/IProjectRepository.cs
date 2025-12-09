@@ -8,5 +8,9 @@ public interface IProjectRepository
     
     Task<Project?> GetByIdAndUserIdAsync(Guid projectId, Guid userId, CancellationToken cancellationToken = default);
     
+    Task<List<Project>> GetAllByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
+    
     void Add(Project project);
+
+    void Delete(Project project);
 }

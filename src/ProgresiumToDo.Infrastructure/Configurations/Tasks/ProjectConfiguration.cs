@@ -22,7 +22,8 @@ internal sealed class ProjectConfiguration : SoftDeleteEntityConfiguration<Proje
             .IsRequired();
         
         builder.HasIndex(p => new { p.UserId, p.Name })
-            .IsUnique();
+            .IsUnique()
+            .HasFilter("\"deleted_at\" IS NULL");
 
         builder.HasOne(p => p.User)
             .WithMany(u => u.Projects)

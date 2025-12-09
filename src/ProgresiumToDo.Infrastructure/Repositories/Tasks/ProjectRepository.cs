@@ -20,4 +20,16 @@ internal sealed class ProjectRepository : Repository<Project>, IProjectRepositor
         return await DbContext.Set<Project>()
             .FirstOrDefaultAsync(p => p.Id == projectId && p.UserId == userId, cancellationToken);
     }
+
+    public async Task<List<Project>> GetAllByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        return await DbContext.Set<Project>()
+            .Where(p => p.UserId == userId)
+            .ToListAsync(cancellationToken);
+    }
+
+    public void Delete(Project project)
+    {
+        DbContext.Set<Project>().Remove(project);
+    }
 }

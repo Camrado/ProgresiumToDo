@@ -24,15 +24,7 @@ internal sealed class UpdateProfileCommandHandler : ICommandHandler<UpdateProfil
             return Result.Failure<UpdateProfileCommandResponse>([UserErrors.UserNotFound]);
         }
         
-        if (!string.IsNullOrWhiteSpace(request.FirstName))
-        {
-            user.UpdateFirstName(request.FirstName);
-        }
-        
-        if (!string.IsNullOrWhiteSpace(request.LastName))
-        {
-            user.UpdateLastName(request.LastName);
-        }
+        user.Update(request.FirstName, request.LastName);
 
         var updatedUserDto = new UserProfileUpdatedDto(
             user.Id,

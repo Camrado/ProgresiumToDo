@@ -2,7 +2,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProgresiumToDo.Application.Projects.CreateProject;
+using ProgresiumToDo.Application.Projects.DeleteProject;
+using ProgresiumToDo.Application.Projects.GetAllProjects;
 using ProgresiumToDo.Application.Projects.GetProject;
+using ProgresiumToDo.Application.Projects.UpdateProject;
 
 namespace ProgresiumToDo.API.Controllers.Tasks;
 
@@ -31,6 +34,34 @@ public class ProjectController : ApiControllerBase
         CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(new GetProjectQuery(projectId), cancellationToken);
+        return FromResult(result);
+    }
+    
+    [Authorize]
+    [HttpGet]
+    public async Task<IActionResult> GetAllProjects(CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new GetAllProjectsQuery(), cancellationToken);
+        return FromResult(result);
+    }
+
+    [Authorize]
+    [HttpPatch("{projectId}")]
+    public async Task<IActionResult> UpdateProject([FromRoute] Guid projectId,
+        [FromBody] UpdateProjectCommand updateProjectCommand,
+        CancellationToken cancellationToken)
+    {
+        updateProjectCommand.ProjectId = projectId;
+        var result = await _mediator.Send(updateProjectCommand, cancellationToken);
+        return FromResult(result);
+    }
+
+    [Authorize]
+    [HttpDelete("{projectId}")]
+    public async Task<IActionResult> DeleteProject([FromRoute] Guid projectId,
+        CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new DeleteProjectCommand(projectId), cancellationToken);
         return FromResult(result);
     }
 }
