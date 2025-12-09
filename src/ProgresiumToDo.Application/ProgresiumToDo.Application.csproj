@@ -11,5 +11,9 @@
     <ItemGroup>
       <ProjectReference Include="..\ProgresiumToDo.Domain\ProgresiumToDo.Domain.csproj" />
     </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Tasks\" />
+    </ItemGroup>
     
 </Project>

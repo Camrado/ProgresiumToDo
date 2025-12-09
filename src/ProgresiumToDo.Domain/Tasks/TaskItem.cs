@@ -19,9 +19,9 @@ public sealed class TaskItem : BaseEntity
     
     public TimeSpan? Duration { get; private set; }
     
-    public DateTime? StartTime { get; private set; }
+    public TimeOnly? StartTime { get; private set; }
     
-    public DateTime? EndTime { get; private set; }
+    public TimeOnly? EndTime { get; private set; }
     
     public DateTime? ClosedAt { get; private set; }
     
@@ -40,4 +40,67 @@ public sealed class TaskItem : BaseEntity
     public ICollection<Tag> Tags { get; private set; } = new List<Tag>();
     
     public ICollection<TaskAttachment> TaskAttachments { get; private set; } = new List<TaskAttachment>();
+
+    private TaskItem() { }
+
+    private TaskItem(
+        Guid projectId,
+        Guid userId,
+        string title,
+        string? description,
+        TaskStatus status,
+        Priority? priority,
+        DateOnly? dueDate,
+        TimeSpan? duration,
+        TimeOnly? startTime,
+        TimeOnly? endTime)
+    {
+        ProjectId = projectId;
+        UserId = userId;
+        Title = title;
+        Description = description;
+        Status = status;
+        Priority = priority;
+        DueDate = dueDate;
+        Duration = duration;
+        StartTime = startTime;
+        EndTime = endTime;
+
+        if (startTime.HasValue && duration.HasValue && !endTime.HasValue)
+        {
+            EndTime = startTime.Value.Add(duration.Value);
+        } 
+        else if (endTime.HasValue && duration.HasValue && !startTime.HasValue)
+        {
+            StartTime = endTime.Value.Add(-duration.Value);
+        }
+        else if (startTime.HasValue && endTime.HasValue && !duration.HasValue)
+        {
+            Duration = endTime.Value - startTime.Value;
+        }
+    }
+
+    public static TaskItem Create(
+        Guid projectId,
+        Guid userId,
+        string title,
+        string? description,
+        string? status,
+        string? priority,
+        DateOnly? dueDate,
+        TimeSpan? duration,
+        TimeOnly? startTime,
+        TimeOnly? endTime)
+    {
+        var priorityEnum = string.IsNullOrEmpty(priority) 
+            ? (Priority?)null 
+            : Enum.Parse<Priority>(priority, ignoreCase: true);
+
+        var statusEnum = string.IsNullOrEmpty(status) 
+            ? TaskStatus.Pending 
+            : Enum.Parse<TaskStatus>(status, ignoreCase: true);
+
+        return new TaskItem(projectId, userId, title, description, statusEnum, priorityEnum, dueDate, duration,
+            startTime, endTime);
+    }
 }
