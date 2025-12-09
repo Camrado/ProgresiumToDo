@@ -5,8 +5,8 @@ namespace ProgresiumToDo.Infrastructure.EmailService;
 
 internal sealed class EmailService : IEmailService
 {
-    public async Task<Result> SendEmailAsync(string to, string subject, string body, CancellationToken cancellationToken = default)
+    public Task<Result> SendEmailAsync(string to, string subject, string body, CancellationToken cancellationToken = default)
     {
-        return Result.Success();
+        return Task.FromResult(Result.Success());
     }
 }

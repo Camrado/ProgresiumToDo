@@ -24,8 +24,6 @@ internal sealed class CreateTaskCommandValidator : AbstractValidator<CreateTaskC
             .MustAsync(async (command, projectId, cancellationToken) =>
             {
                 var project = await _projectRepository.GetByIdAndUserIdAsync(projectId, _userContext.UserId, cancellationToken);
-                command.Project = project;
-
                 return project != null;
             }).WithMessage("Project not found.");
 

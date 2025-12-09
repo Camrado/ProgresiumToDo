@@ -12,7 +12,4 @@ public sealed record CreateTaskCommand(
     TimeSpan? Duration,
     TimeOnly? StartTime,
     TimeOnly? EndTime,
-    string? Status) : ICommand<CreateTaskCommandResponse>
-{
-    internal Project? Project { get; set; }
-};
+    string? Status) : ICommand<CreateTaskCommandResponse>;

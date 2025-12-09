@@ -2,7 +2,6 @@ using ProgresiumToDo.Application.Abstractions.Identity;
 using ProgresiumToDo.Application.Abstractions.Messaging;
 using ProgresiumToDo.Domain.Abstractions;
 using ProgresiumToDo.Domain.Tasks;
-using TaskStatus = ProgresiumToDo.Domain.Tasks.TaskStatus;
 
 namespace ProgresiumToDo.Application.Tasks.CreateTask;
 
