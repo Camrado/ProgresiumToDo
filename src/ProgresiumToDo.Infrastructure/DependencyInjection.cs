@@ -11,11 +11,13 @@ using ProgresiumToDo.Application.Abstractions.Identity;
 using ProgresiumToDo.Application.Abstractions.OAuth;
 using ProgresiumToDo.Domain.Abstractions;
 using ProgresiumToDo.Domain.Auth;
+using ProgresiumToDo.Domain.Tasks;
 using ProgresiumToDo.Infrastructure.Configurations.Auth;
 using ProgresiumToDo.Infrastructure.Identity;
 using ProgresiumToDo.Infrastructure.Interceptors;
 using ProgresiumToDo.Infrastructure.OAuth;
 using ProgresiumToDo.Infrastructure.Repositories.Auth;
+using ProgresiumToDo.Infrastructure.Repositories.Tasks;
 
 namespace ProgresiumToDo.Infrastructure;
 
@@ -120,5 +122,7 @@ public static class DependencyInjection
         services.AddScoped<IUserRepository, UserRepository>();
 
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+
+        services.AddScoped<IProjectRepository, ProjectRepository>();
     }
 }

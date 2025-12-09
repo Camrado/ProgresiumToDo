@@ -1,0 +1,12 @@
+﻿namespace ProgresiumToDo.Domain.Tasks;
+
+public interface IProjectRepository
+{
+    Task<Project?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+    
+    Task<Project?> GetByNameAndUserIdAsync(string name, Guid userId, CancellationToken cancellationToken = default);
+    
+    Task<Project?> GetByIdAndUserIdAsync(Guid projectId, Guid userId, CancellationToken cancellationToken = default);
+    
+    void Add(Project project);
+}

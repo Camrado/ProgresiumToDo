@@ -16,4 +16,18 @@ public sealed class Project : BaseEntity
     public ICollection<Tag> Tags { get; private set; } = new List<Tag>();
     
     public ICollection<TaskItem> TaskItems { get; private set; } = new List<TaskItem>();
+    
+    private Project() { }
+
+    private Project(string name, string? description, Guid userId)
+    {
+        Name = name;
+        Description = description;
+        UserId = userId;
+    }
+
+    public static Project Create(string name, string? description, Guid userId)
+    {
+        return new Project(name, description, userId);
+    }
 }

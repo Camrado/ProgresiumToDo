@@ -20,6 +20,9 @@ internal sealed class ProjectConfiguration : SoftDeleteEntityConfiguration<Proje
 
         builder.Property(p => p.UserId)
             .IsRequired();
+        
+        builder.HasIndex(p => new { p.UserId, p.Name })
+            .IsUnique();
 
         builder.HasOne(p => p.User)
             .WithMany(u => u.Projects)
