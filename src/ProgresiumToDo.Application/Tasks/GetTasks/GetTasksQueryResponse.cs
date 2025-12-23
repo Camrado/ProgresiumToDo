@@ -8,7 +8,6 @@ public sealed record GetTasksQueryResponse(
 public sealed record RetrievedTaskResponse(
     Guid Id, 
     string Title, 
-    string Description, 
     string Priority,
     DateTime? ClosedAt,
     string Status,

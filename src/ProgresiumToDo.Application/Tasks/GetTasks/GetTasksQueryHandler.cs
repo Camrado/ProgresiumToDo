@@ -28,7 +28,6 @@ internal sealed class GetTasksQueryHandler : IQueryHandler<GetTasksQuery, GetTas
         var taskResponses = tasks.Select(taskItem => new RetrievedTaskResponse(
             taskItem.Id,
             taskItem.Title,
-            taskItem.Description ?? string.Empty,
             (taskItem.Priority ?? Priority.None).ToString(),
             taskItem.ClosedAt,
             taskItem.Status.ToString(),
