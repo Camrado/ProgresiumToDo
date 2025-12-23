@@ -16,8 +16,11 @@ internal sealed class CreateTaskCommandHandler : ICommandHandler<CreateTaskComma
         _userContext = userContext;
     }
 
-    public Task<Result<CreateTaskCommandResponse>> Handle(CreateTaskCommand request, CancellationToken cancellationToken)
+    public async Task<Result<CreateTaskCommandResponse>> Handle(CreateTaskCommand request, CancellationToken cancellationToken)
     {
+        var maxOrderIndex = await _taskItemRepository.GetMaxOrderIndexByProjectId(
+            request.ProjectId, request.DueDate, null, cancellationToken);
+        
         var taskItem = TaskItem.Create(
             request.ProjectId,
             _userContext.UserId,
@@ -28,11 +31,12 @@ internal sealed class CreateTaskCommandHandler : ICommandHandler<CreateTaskComma
             request.DueDate,
             request.Duration,
             request.StartTime,
-            request.EndTime);
+            request.EndTime,
+            maxOrderIndex + 10);
 
         _taskItemRepository.Add(taskItem);
 
-        var taskResponse = new TaskResponse(
+        var taskResponse = new CreatedTaskResponse(
             taskItem.Id,
             taskItem.ProjectId,
             taskItem.Title,
@@ -45,7 +49,6 @@ internal sealed class CreateTaskCommandHandler : ICommandHandler<CreateTaskComma
             taskItem.Status.ToString().ToLower(),
             taskItem.CreatedAt);
 
-        return Task.FromResult<Result<CreateTaskCommandResponse>>(
-            new CreateTaskCommandResponse("Task created successfully.", taskResponse));
+        return new CreateTaskCommandResponse("CreatedTask created successfully.", taskResponse);
     }
 }

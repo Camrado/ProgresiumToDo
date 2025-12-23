@@ -25,6 +25,8 @@ public sealed class TaskItem : BaseEntity
     
     public DateTime? ClosedAt { get; private set; }
     
+    public decimal OrderIndex { get; private set; }
+    
     public Guid UserId { get; private set; }
     
     public Guid ProjectId { get; private set; }
@@ -53,7 +55,8 @@ public sealed class TaskItem : BaseEntity
         DateOnly? dueDate,
         TimeSpan? duration,
         TimeOnly? startTime,
-        TimeOnly? endTime)
+        TimeOnly? endTime,
+        decimal orderIndex)
     {
         ProjectId = projectId;
         UserId = userId;
@@ -65,6 +68,7 @@ public sealed class TaskItem : BaseEntity
         Duration = duration;
         StartTime = startTime;
         EndTime = endTime;
+        OrderIndex = orderIndex;
 
         if (startTime.HasValue && duration.HasValue && !endTime.HasValue)
         {
@@ -90,7 +94,8 @@ public sealed class TaskItem : BaseEntity
         DateOnly? dueDate,
         TimeSpan? duration,
         TimeOnly? startTime,
-        TimeOnly? endTime)
+        TimeOnly? endTime,
+        decimal orderIndex)
     {
         var priorityEnum = string.IsNullOrEmpty(priority) 
             ? (Priority?)null 
@@ -101,6 +106,6 @@ public sealed class TaskItem : BaseEntity
             : Enum.Parse<TaskStatus>(status, ignoreCase: true);
 
         return new TaskItem(projectId, userId, title, description, statusEnum, priorityEnum, dueDate, duration,
-            startTime, endTime);
+            startTime, endTime, orderIndex);
     }
 }

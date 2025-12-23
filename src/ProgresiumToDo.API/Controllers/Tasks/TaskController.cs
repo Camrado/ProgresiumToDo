@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProgresiumToDo.Application.Tasks.CreateTask;
+using ProgresiumToDo.Application.Tasks.GetTasks;
 
 namespace ProgresiumToDo.API.Controllers.Tasks;
 
@@ -21,6 +22,15 @@ public class TaskController : ApiControllerBase
         CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(createTaskCommand, cancellationToken);
+        return FromResult(result);
+    }
+    
+    [Authorize]
+    [HttpGet]
+    public async Task<IActionResult> GetTasks([FromQuery] GetTasksQuery getTasksQuery,
+        CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(getTasksQuery, cancellationToken);
         return FromResult(result);
     }
 }
