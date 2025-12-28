@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProgresiumToDo.Application.Tasks.CreateTask;
+using ProgresiumToDo.Application.Tasks.DeleteTask;
 using ProgresiumToDo.Application.Tasks.GetSingleTask;
 using ProgresiumToDo.Application.Tasks.GetTasks;
 
@@ -28,7 +29,7 @@ public class TaskController : ApiControllerBase
     
     [Authorize]
     [HttpGet]
-    public async Task<IActionResult> GetTasks([FromQuery] GetTasksQuery getTasksQuery,
+    public async Task<IActionResult> GetTasks([FromQuery] GetTasksQuery getTasksQuery, 
         CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(getTasksQuery, cancellationToken);
@@ -37,10 +38,17 @@ public class TaskController : ApiControllerBase
 
     [Authorize]
     [HttpGet("{taskId:guid}")]
-    public async Task<IActionResult> GetSingleTask([FromRoute] Guid taskId,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> GetSingleTask([FromRoute] Guid taskId, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(new GetSingleTaskQuery(taskId), cancellationToken);
+        return FromResult(result);
+    }
+
+    [Authorize]
+    [HttpDelete("{taskId:guid}")]
+    public async Task<IActionResult> DeleteTask([FromRoute] Guid taskId, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new DeleteTaskCommand(taskId), cancellationToken);
         return FromResult(result);
     }
 }

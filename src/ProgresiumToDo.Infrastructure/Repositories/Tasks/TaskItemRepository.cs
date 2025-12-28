@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using ProgresiumToDo.Application.Tasks.GetTasks;
 using ProgresiumToDo.Domain.Tasks;
 using ProgresiumToDo.Domain.Tasks.DTOs;
 
@@ -78,5 +77,15 @@ internal sealed class TaskItemRepository : Repository<TaskItem>, ITaskItemReposi
             .Include(ti => ti.SubTaskItems)
             .Include(ti => ti.Tags)
             .FirstOrDefaultAsync(ti => ti.Id == id && ti.UserId == userId, cancellationToken);
+    }
+    
+    public async Task<TaskItem?> GetByIdAsync(Guid id, Guid userId, CancellationToken cancellationToken = default)
+    {
+        return await DbContext.TaskItems.FirstOrDefaultAsync(ti => ti.Id == id && ti.UserId == userId, cancellationToken);
+    }
+
+    public void Delete(TaskItem taskItem)
+    {
+        DbContext.TaskItems.Remove(taskItem);
     }
 }

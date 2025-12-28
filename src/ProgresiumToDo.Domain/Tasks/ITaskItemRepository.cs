@@ -4,7 +4,7 @@ namespace ProgresiumToDo.Domain.Tasks;
 
 public interface ITaskItemRepository
 {
-    Task<TaskItem?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<TaskItem?> GetByIdAsync(Guid id, Guid userId, CancellationToken cancellationToken = default);
     
     Task<decimal> GetMaxOrderIndexByProjectId(Guid projectId, DateOnly? dueDate, Guid? parentTaskId, CancellationToken cancellationToken = default);
 
@@ -13,4 +13,6 @@ public interface ITaskItemRepository
     Task<TaskItem?> GetByIdIncludingProjectSubtasksTagsAsync(Guid id, Guid userId, CancellationToken cancellationToken = default);
     
     void Add(TaskItem taskItem);
+
+    void Delete(TaskItem taskItem);
 }
