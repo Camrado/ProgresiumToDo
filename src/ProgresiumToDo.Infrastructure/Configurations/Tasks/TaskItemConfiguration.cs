@@ -24,7 +24,7 @@ internal sealed class TaskItemConfiguration : SoftDeleteEntityConfiguration<Task
 
         builder.Property(t => t.Priority)
             .HasConversion<string>()
-            .IsRequired(false);
+            .IsRequired();
 
         builder.Property(t => t.DueDate)
             .HasColumnType("date")

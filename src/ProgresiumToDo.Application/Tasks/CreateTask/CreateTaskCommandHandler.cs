@@ -41,7 +41,7 @@ internal sealed class CreateTaskCommandHandler : ICommandHandler<CreateTaskComma
             taskItem.ProjectId,
             taskItem.Title,
             taskItem.Description,
-            taskItem.Priority?.ToString().ToLower() ?? "none",
+            taskItem.Priority.ToString().ToLower(),
             taskItem.DueDate,
             taskItem.Duration,
             taskItem.StartTime,

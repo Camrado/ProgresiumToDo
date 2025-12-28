@@ -21,7 +21,7 @@ internal sealed class TaskItemRepository : Repository<TaskItem>, ITaskItemReposi
             .MaxAsync(ti => (decimal?)ti.OrderIndex, cancellationToken) ?? 0;
     }
 
-    public async Task<List<TaskItem>> GetByUserIdIncludingProjectSubtasksTagsAsync(TaskQueryFilter filter, CancellationToken cancellationToken = default)
+    public async Task<List<TaskItem>> GetAllByUserIdIncludingProjectSubtasksTagsAsync(TaskQueryFilter filter, CancellationToken cancellationToken = default)
     {
         var query = DbContext.TaskItems
             .AsNoTracking()
@@ -42,8 +42,8 @@ internal sealed class TaskItemRepository : Repository<TaskItem>, ITaskItemReposi
             {
                 ("duedate", "asc") => query.OrderBy(ti => ti.DueDate ?? DateOnly.MaxValue),
                 ("duedate", "desc") => query.OrderByDescending(ti => ti.DueDate ?? DateOnly.MinValue),
-                ("priority", "asc") => query.OrderBy(ti => ti.Priority ?? Priority.None),
-                ("priority", "desc") => query.OrderByDescending(ti => ti.Priority ?? Priority.None),
+                ("priority", "asc") => query.OrderBy(ti => ti.Priority),
+                ("priority", "desc") => query.OrderByDescending(ti => ti.Priority),
                 ("createdat", "asc") => query.OrderBy(ti => ti.CreatedAt),
                 ("createdat", "desc") => query.OrderByDescending(ti => ti.CreatedAt),
                 ("orderindex", "asc") => query.OrderBy(ti => ti.OrderIndex),
@@ -69,5 +69,14 @@ internal sealed class TaskItemRepository : Repository<TaskItem>, ITaskItemReposi
         }
 
         return await query.ToListAsync(cancellationToken);
+    }
+    
+    public async Task<TaskItem?> GetByIdIncludingProjectSubtasksTagsAsync(Guid id, Guid userId, CancellationToken cancellationToken = default)
+    {
+        return await DbContext.TaskItems
+            .Include(ti => ti.Project)
+            .Include(ti => ti.SubTaskItems)
+            .Include(ti => ti.Tags)
+            .FirstOrDefaultAsync(ti => ti.Id == id && ti.UserId == userId, cancellationToken);
     }
 }

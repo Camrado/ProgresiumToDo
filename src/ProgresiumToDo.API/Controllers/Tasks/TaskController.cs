@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProgresiumToDo.Application.Tasks.CreateTask;
+using ProgresiumToDo.Application.Tasks.GetSingleTask;
 using ProgresiumToDo.Application.Tasks.GetTasks;
 
 namespace ProgresiumToDo.API.Controllers.Tasks;
@@ -31,6 +32,15 @@ public class TaskController : ApiControllerBase
         CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(getTasksQuery, cancellationToken);
+        return FromResult(result);
+    }
+
+    [Authorize]
+    [HttpGet("{taskId:guid}")]
+    public async Task<IActionResult> GetSingleTask([FromRoute] Guid taskId,
+        CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new GetSingleTaskQuery(taskId), cancellationToken);
         return FromResult(result);
     }
 }

@@ -12,8 +12,8 @@ public sealed class TaskItem : BaseEntity
     public string? Description { get; private set; }
     
     public TaskStatus Status { get; private set; }
-    
-    public Priority? Priority { get; private set; }
+
+    public Priority Priority { get; private set; }
     
     public DateOnly? DueDate { get; private set; }
     
@@ -51,7 +51,7 @@ public sealed class TaskItem : BaseEntity
         string title,
         string? description,
         TaskStatus status,
-        Priority? priority,
+        Priority priority,
         DateOnly? dueDate,
         TimeSpan? duration,
         TimeOnly? startTime,
@@ -98,7 +98,7 @@ public sealed class TaskItem : BaseEntity
         decimal orderIndex)
     {
         var priorityEnum = string.IsNullOrEmpty(priority) 
-            ? (Priority?)null 
+            ? Priority.None
             : Enum.Parse<Priority>(priority, ignoreCase: true);
 
         var statusEnum = string.IsNullOrEmpty(status) 

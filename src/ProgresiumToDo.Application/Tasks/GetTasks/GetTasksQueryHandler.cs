@@ -23,12 +23,12 @@ internal sealed class GetTasksQueryHandler : IQueryHandler<GetTasksQuery, GetTas
             _userContext.UserId, request.ProjectId, request.DueDateFrom, request.DueDateTo,
             request.Page, request.PageSize, request.SortBy, request.SortOrder);
 
-        var tasks = await _taskItemRepository.GetByUserIdIncludingProjectSubtasksTagsAsync(taskQueryFilter, cancellationToken);
+        var tasks = await _taskItemRepository.GetAllByUserIdIncludingProjectSubtasksTagsAsync(taskQueryFilter, cancellationToken);
 
         var taskResponses = tasks.Select(taskItem => new TaskListItemDto(
             taskItem.Id,
             taskItem.Title,
-            (taskItem.Priority ?? Priority.None).ToString(),
+            taskItem.Priority.ToString(),
             taskItem.ClosedAt,
             taskItem.Status.ToString(),
             taskItem.Tags.Select(t => t.Name).ToList(),
