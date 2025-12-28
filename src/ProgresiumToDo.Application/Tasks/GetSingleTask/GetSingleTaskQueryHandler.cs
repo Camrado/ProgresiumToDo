@@ -31,7 +31,8 @@ internal sealed class GetSingleTaskQueryHandler : IQueryHandler<GetSingleTaskQue
                 subtask.EndTime,
                 subtask.ClosedAt,
                 subtask.CreatedAt)),
-            taskItem.CreatedAt);
+            taskItem.CreatedAt,
+            taskItem.OrderIndex);
 
         return Task.FromResult<Result<GetSingleTaskQueryResponse>>(
             new GetSingleTaskQueryResponse("Task retrieved successfully.", taskItemDto));

@@ -6,7 +6,7 @@ public interface ITaskItemRepository
 {
     Task<TaskItem?> GetByIdAsync(Guid id, Guid userId, CancellationToken cancellationToken = default);
     
-    Task<decimal> GetMaxOrderIndexByProjectId(Guid projectId, DateOnly? dueDate, Guid? parentTaskId, CancellationToken cancellationToken = default);
+    Task<decimal> GetMaxOrderIndexByProjectId(Guid projectId, DateOnly dueDate, Guid? parentTaskId, CancellationToken cancellationToken = default);
 
     Task<List<TaskItem>> GetAllByUserIdIncludingProjectSubtasksTagsAsync(TaskQueryFilter filter, CancellationToken cancellationToken = default);
 

@@ -17,7 +17,9 @@ internal sealed class CreateTaskCommandValidator : AbstractValidator<CreateTaskC
 
         RuleFor(ctc => ctc.Title)
             .NotEmpty()
-            .WithMessage("Title is required.");
+            .WithMessage("Title is required.")
+            .MaximumLength(256)
+            .WithMessage("Title must not exceed 256 characters.");;
 
         RuleFor(ctc => ctc.ProjectId)
             .NotEmpty()
@@ -39,12 +41,15 @@ internal sealed class CreateTaskCommandValidator : AbstractValidator<CreateTaskC
             .Must(command =>
             {
                 if (command.EndTime.HasValue && !command.StartTime.HasValue)
-                    return false;
+                    return true;
+                
+                if (!command.EndTime.HasValue && command.StartTime.HasValue)
+                    return true;
 
                 if (command.StartTime.HasValue && command.EndTime.HasValue)
                     return command.EndTime.Value > command.StartTime.Value;
 
-                return true;
+                return false;
             }).WithMessage("Invalid time configuration. If endTime is provided, startTime must also be provided and endTime must be after startTime.");
     }
 }

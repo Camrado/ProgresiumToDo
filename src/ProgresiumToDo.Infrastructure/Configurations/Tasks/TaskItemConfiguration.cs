@@ -30,9 +30,6 @@ internal sealed class TaskItemConfiguration : SoftDeleteEntityConfiguration<Task
             .HasColumnType("date")
             .IsRequired(false);
 
-        builder.Property(t => t.Duration)
-            .IsRequired(false);
-
         builder.Property(t => t.StartTime)
             .IsRequired(false);
 

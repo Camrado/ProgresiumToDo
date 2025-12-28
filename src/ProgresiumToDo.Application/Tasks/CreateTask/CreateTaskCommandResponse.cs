@@ -11,7 +11,6 @@ public sealed record CreatedTaskDto(
     string? Description,
     string Priority,
     DateOnly? DueDate,
-    TimeSpan? Duration,
     TimeOnly? StartTime,
     TimeOnly? EndTime,
     string Status,

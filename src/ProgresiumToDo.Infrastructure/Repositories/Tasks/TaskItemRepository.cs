@@ -10,7 +10,7 @@ internal sealed class TaskItemRepository : Repository<TaskItem>, ITaskItemReposi
     {
     }
 
-    public async Task<decimal> GetMaxOrderIndexByProjectId(Guid projectId, DateOnly? dueDate, Guid? parentTaskId,
+    public async Task<decimal> GetMaxOrderIndexByProjectId(Guid projectId, DateOnly dueDate, Guid? parentTaskId,
         CancellationToken cancellationToken = default)
     {
         return await DbContext.TaskItems.Where(ti =>
@@ -50,6 +50,10 @@ internal sealed class TaskItemRepository : Repository<TaskItem>, ITaskItemReposi
                 _ => query.OrderBy(ti => ti.Id)
             };
         }
+        else if (filter is { ProjectId: not null, DueDateFrom: not null, DueDateTo: not null } && filter.DueDateFrom == filter.DueDateTo)
+        {
+            query = query.OrderBy(ti => ti.OrderIndex);
+        }
         else
         {
             query = query.OrderBy(ti => ti.Id);
@@ -57,10 +61,10 @@ internal sealed class TaskItemRepository : Repository<TaskItem>, ITaskItemReposi
         
         query = query
             .Include(ti => ti.Project)
-            .Include(ti => ti.SubTaskItems)
+            .Include(ti => ti.SubTaskItems.OrderBy(st => st.OrderIndex))
             .Include(ti => ti.Tags);
         
-        if (filter.Page.HasValue && filter.PageSize.HasValue)
+        if (filter is { Page: not null, PageSize: not null })
         {
             query = query
                 .Skip((filter.Page.Value - 1) * filter.PageSize.Value)

@@ -5,6 +5,7 @@ using ProgresiumToDo.Application.Tasks.CreateTask;
 using ProgresiumToDo.Application.Tasks.DeleteTask;
 using ProgresiumToDo.Application.Tasks.GetSingleTask;
 using ProgresiumToDo.Application.Tasks.GetTasks;
+using ProgresiumToDo.Application.Tasks.UpdateTask;
 
 namespace ProgresiumToDo.API.Controllers.Tasks;
 
@@ -49,6 +50,16 @@ public class TaskController : ApiControllerBase
     public async Task<IActionResult> DeleteTask([FromRoute] Guid taskId, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(new DeleteTaskCommand(taskId), cancellationToken);
+        return FromResult(result);
+    }
+
+    [Authorize]
+    [HttpPatch("{taskId:guid}")]
+    public async Task<IActionResult> UpdateTask([FromRoute] Guid taskId,
+        [FromBody] UpdateTaskCommand updateTaskCommand, CancellationToken cancellationToken)
+    {
+        updateTaskCommand.TaskId = taskId;
+        var result = await _mediator.Send(updateTaskCommand, cancellationToken);
         return FromResult(result);
     }
 }

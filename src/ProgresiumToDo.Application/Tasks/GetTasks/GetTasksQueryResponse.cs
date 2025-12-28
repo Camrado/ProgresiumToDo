@@ -14,7 +14,8 @@ public sealed record TaskListItemDto(
     IEnumerable<string> Tags,
     IEnumerable<SubTaskListItemDto> SubTasks,
     string ProjectName,
-    DateOnly? DueDate
+    DateOnly? DueDate,
+    decimal? OrderIndex
     );
     
 public sealed record SubTaskListItemDto(
