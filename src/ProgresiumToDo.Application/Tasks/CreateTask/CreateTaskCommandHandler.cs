@@ -36,7 +36,7 @@ internal sealed class CreateTaskCommandHandler : ICommandHandler<CreateTaskComma
 
         _taskItemRepository.Add(taskItem);
 
-        var taskResponse = new CreatedTaskResponse(
+        var taskResponse = new CreatedTaskDto(
             taskItem.Id,
             taskItem.ProjectId,
             taskItem.Title,

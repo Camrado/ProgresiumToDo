@@ -22,6 +22,6 @@ internal sealed class GetProjectQueryValidator : AbstractValidator<GetProjectQue
                 query.Project = project;
                 
                 return project != null;
-            }).WithMessage("Project not found.");
+            }).WithMessage("ProjectDetails not found.");
     }
 }

@@ -1,5 +1,6 @@
 ﻿using ProgresiumToDo.Application.Abstractions.Identity;
 using ProgresiumToDo.Application.Abstractions.Messaging;
+using ProgresiumToDo.Application.Projects.GetProject;
 using ProgresiumToDo.Domain.Abstractions;
 using ProgresiumToDo.Domain.Tasks;
 
@@ -22,7 +23,7 @@ internal sealed class CreateProjectCommandHandler : ICommandHandler<CreateProjec
         
         _projectRepository.Add(project);
 
-        return Task.FromResult<Result<CreateProjectCommandResponse>>(new CreateProjectCommandResponse("Project created successfully.",
-            new ProjectResponse(project.Id, project.Name, project.Description, project.CreatedAt, project.UpdatedAt)));
+        return Task.FromResult<Result<CreateProjectCommandResponse>>(new CreateProjectCommandResponse("ProjectDetails created successfully.",
+            new ProjectDetailsDto(project.Id, project.Name, project.Description, project.CreatedAt, project.UpdatedAt)));
     }
 }

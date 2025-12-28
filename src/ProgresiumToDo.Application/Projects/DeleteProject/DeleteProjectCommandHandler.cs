@@ -20,6 +20,6 @@ internal sealed class DeleteProjectCommandHandler : ICommandHandler<DeleteProjec
         _projectRepository.Delete(project);
         
         return Task.FromResult<Result<DeleteProjectCommandResponse>>(
-            new DeleteProjectCommandResponse("Project deleted successfully."));
+            new DeleteProjectCommandResponse("ProjectDetails deleted successfully."));
     }
 }

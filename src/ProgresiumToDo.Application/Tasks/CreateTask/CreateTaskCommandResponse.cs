@@ -2,9 +2,9 @@ namespace ProgresiumToDo.Application.Tasks.CreateTask;
 
 public sealed record CreateTaskCommandResponse(
     string Message,
-    CreatedTaskResponse CreatedTask);
+    CreatedTaskDto CreatedTask);
 
-public sealed record CreatedTaskResponse(
+public sealed record CreatedTaskDto(
     Guid Id,
     Guid ProjectId,
     string Title,

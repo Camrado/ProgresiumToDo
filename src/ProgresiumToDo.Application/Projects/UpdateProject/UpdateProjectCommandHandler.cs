@@ -1,5 +1,5 @@
 using ProgresiumToDo.Application.Abstractions.Messaging;
-using ProgresiumToDo.Application.Projects.CreateProject;
+using ProgresiumToDo.Application.Projects.GetProject;
 using ProgresiumToDo.Domain.Abstractions;
 
 namespace ProgresiumToDo.Application.Projects.UpdateProject;
@@ -14,7 +14,7 @@ internal sealed class UpdateProjectCommandHandler : ICommandHandler<UpdateProjec
         
         return Task.FromResult<Result<UpdateProjectCommandResponse>>(
             new UpdateProjectCommandResponse(
-                "Project updated successfully.",
-                new ProjectResponse(project.Id, project.Name, project.Description, project.CreatedAt, project.UpdatedAt)));
+                "ProjectDetails updated successfully.",
+                new ProjectDetailsDto(project.Id, project.Name, project.Description, project.CreatedAt, project.UpdatedAt)));
     }
 }

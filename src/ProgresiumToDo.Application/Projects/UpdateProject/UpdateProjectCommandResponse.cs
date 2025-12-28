@@ -1,7 +1,7 @@
-using ProgresiumToDo.Application.Projects.CreateProject;
+using ProgresiumToDo.Application.Projects.GetProject;
 
 namespace ProgresiumToDo.Application.Projects.UpdateProject;
 
 public sealed record UpdateProjectCommandResponse(
     string Message,
-    ProjectResponse Project);
+    ProjectDetailsDto ProjectDetails);

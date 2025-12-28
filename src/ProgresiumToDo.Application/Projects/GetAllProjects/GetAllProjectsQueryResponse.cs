@@ -2,9 +2,9 @@ namespace ProgresiumToDo.Application.Projects.GetAllProjects;
 
 public sealed record GetAllProjectsQueryResponse(
     string Message,
-    IEnumerable<ProjectDto> Projects);
+    IEnumerable<ProjectItemDto> Projects);
 
-public sealed record ProjectDto(
+public sealed record ProjectItemDto(
     Guid Id,
     string Name,
     string? Description);

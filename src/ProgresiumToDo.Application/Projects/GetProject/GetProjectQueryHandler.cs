@@ -10,7 +10,7 @@ internal sealed class GetProjectQueryHandler : IQueryHandler<GetProjectQuery, Ge
     {
         var project = request.Project;
         
-        return Task.FromResult<Result<GetProjectQueryResponse>>(new GetProjectQueryResponse("Project created successfully.",
-            new ProjectResponse(project!.Id, project.Name, project.Description, project.CreatedAt, project.UpdatedAt)));
+        return Task.FromResult<Result<GetProjectQueryResponse>>(new GetProjectQueryResponse("ProjectDetails created successfully.",
+            new ProjectDetailsDto(project!.Id, project.Name, project.Description, project.CreatedAt, project.UpdatedAt)));
     }
 }

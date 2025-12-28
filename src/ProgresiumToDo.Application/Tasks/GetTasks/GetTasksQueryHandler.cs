@@ -25,14 +25,14 @@ internal sealed class GetTasksQueryHandler : IQueryHandler<GetTasksQuery, GetTas
 
         var tasks = await _taskItemRepository.GetByUserIdIncludingProjectSubtasksTagsAsync(taskQueryFilter, cancellationToken);
 
-        var taskResponses = tasks.Select(taskItem => new RetrievedTaskResponse(
+        var taskResponses = tasks.Select(taskItem => new TaskListItemDto(
             taskItem.Id,
             taskItem.Title,
             (taskItem.Priority ?? Priority.None).ToString(),
             taskItem.ClosedAt,
             taskItem.Status.ToString(),
             taskItem.Tags.Select(t => t.Name).ToList(),
-            taskItem.SubTaskItems.Select(sti => new RetrievedSubTaskResponse(sti.Id, sti.Title, sti.Status.ToString())).ToList(),
+            taskItem.SubTaskItems.Select(sti => new SubTaskListItemDto(sti.Id, sti.Title, sti.Status.ToString())).ToList(),
             taskItem.Project.Name,
             taskItem.DueDate
             ))

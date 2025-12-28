@@ -2,22 +2,22 @@
 
 public sealed record GetTasksQueryResponse(
     string Message,
-    IEnumerable<RetrievedTaskResponse> Tasks
+    IEnumerable<TaskListItemDto> Tasks
     );
     
-public sealed record RetrievedTaskResponse(
+public sealed record TaskListItemDto(
     Guid Id, 
     string Title, 
     string Priority,
     DateTime? ClosedAt,
     string Status,
     IEnumerable<string> Tags,
-    IEnumerable<RetrievedSubTaskResponse> SubTasks,
+    IEnumerable<SubTaskListItemDto> SubTasks,
     string ProjectName,
     DateOnly? DueDate
     );
     
-public sealed record RetrievedSubTaskResponse(
+public sealed record SubTaskListItemDto(
     Guid Id,
     string Title,
     string Status

@@ -566,7 +566,7 @@ namespace ProgresiumToDo.Infrastructure.Migrations
                     b.ToTable("plan_features", (string)null);
                 });
 
-            modelBuilder.Entity("ProgresiumToDo.Domain.Tasks.Project", b =>
+            modelBuilder.Entity("ProgresiumToDo.Domain.Tasks.ProjectDetails", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -1045,7 +1045,7 @@ namespace ProgresiumToDo.Infrastructure.Migrations
                     b.Navigation("Plan");
                 });
 
-            modelBuilder.Entity("ProgresiumToDo.Domain.Tasks.Project", b =>
+            modelBuilder.Entity("ProgresiumToDo.Domain.Tasks.ProjectDetails", b =>
                 {
                     b.HasOne("ProgresiumToDo.Domain.Auth.User", "User")
                         .WithMany("Projects")
@@ -1059,14 +1059,14 @@ namespace ProgresiumToDo.Infrastructure.Migrations
 
             modelBuilder.Entity("ProgresiumToDo.Domain.Tasks.Tag", b =>
                 {
-                    b.HasOne("ProgresiumToDo.Domain.Tasks.Project", "Project")
+                    b.HasOne("ProgresiumToDo.Domain.Tasks.ProjectDetails", "ProjectDetails")
                         .WithMany("Tags")
                         .HasForeignKey("ProjectId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
                         .HasConstraintName("fk_tags_projects_project_id");
 
-                    b.Navigation("Project");
+                    b.Navigation("ProjectDetails");
                 });
 
             modelBuilder.Entity("ProgresiumToDo.Domain.Tasks.TaskAttachment", b =>
@@ -1089,7 +1089,7 @@ namespace ProgresiumToDo.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .HasConstraintName("fk_task_items_task_items_parent_task_item_id");
 
-                    b.HasOne("ProgresiumToDo.Domain.Tasks.Project", "Project")
+                    b.HasOne("ProgresiumToDo.Domain.Tasks.ProjectDetails", "ProjectDetails")
                         .WithMany("TaskItems")
                         .HasForeignKey("ProjectId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -1105,7 +1105,7 @@ namespace ProgresiumToDo.Infrastructure.Migrations
 
                     b.Navigation("ParentTaskItem");
 
-                    b.Navigation("Project");
+                    b.Navigation("ProjectDetails");
 
                     b.Navigation("User");
                 });
@@ -1169,7 +1169,7 @@ namespace ProgresiumToDo.Infrastructure.Migrations
                     b.Navigation("PlanFeatures");
                 });
 
-            modelBuilder.Entity("ProgresiumToDo.Domain.Tasks.Project", b =>
+            modelBuilder.Entity("ProgresiumToDo.Domain.Tasks.ProjectDetails", b =>
                 {
                     b.Navigation("Tags");
 

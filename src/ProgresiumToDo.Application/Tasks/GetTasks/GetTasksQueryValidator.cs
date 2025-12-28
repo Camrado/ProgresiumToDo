@@ -27,7 +27,7 @@ internal sealed class GetTasksQueryValidator : AbstractValidator<GetTasksQuery>
                 var project = await projectRepository.GetByIdAndUserIdAsync(projectId.Value, userContext.UserId, cancellationToken);
                 return project != null;
             })
-            .WithMessage("Project not found.");
+            .WithMessage("ProjectDetails not found.");
 
         When(gtq => gtq.Page.HasValue || gtq.PageSize.HasValue, () =>
         {
