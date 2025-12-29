@@ -49,6 +49,7 @@ internal sealed class UpdateTaskCommandValidator : AbstractValidator<UpdateTaskC
 
         When(utc => utc.TaskItem is not null, () =>
         {
+            // Validate StartTime and EndTime logic
             RuleFor(utc => utc)
                 .Must(command =>
                 {

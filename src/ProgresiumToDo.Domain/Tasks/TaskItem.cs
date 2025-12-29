@@ -23,6 +23,7 @@ public sealed class TaskItem : BaseEntity
     
     public DateTime? ClosedAt { get; private set; }
     
+    // OrderIndex exists in the (DueDate, ProjectId, ParentTaskId) container
     public decimal? OrderIndex { get; private set; }
     
     public Guid UserId { get; private set; }

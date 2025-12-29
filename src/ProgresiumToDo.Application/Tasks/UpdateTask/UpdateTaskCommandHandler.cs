@@ -18,6 +18,7 @@ internal sealed class UpdateTaskCommandHandler : ICommandHandler<UpdateTaskComma
         request.TaskItem!.Update(request.Title, request.Description, request.Status, request.Priority,
             request.DueDate, request.StartTime, request.EndTime, request.OrderIndex, request.ProjectId);
 
+        // Recalculate order index if due date or project changed
         if ((request.DueDate is not null) || (request.ProjectId is not null && request.TaskItem!.DueDate is not null))
         {
             var maxOrderIndex = await _taskItemRepository.GetMaxOrderIndexByProjectId(request.TaskItem!.ProjectId,

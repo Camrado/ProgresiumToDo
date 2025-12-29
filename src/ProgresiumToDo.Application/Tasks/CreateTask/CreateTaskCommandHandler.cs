@@ -20,6 +20,7 @@ internal sealed class CreateTaskCommandHandler : ICommandHandler<CreateTaskComma
     {
         decimal? orderIndex = null;
 
+        // ProjectId is required field, so we are checking only for DueDate to set orderIndex
         if (request.DueDate.HasValue)
         {
             orderIndex = await _taskItemRepository.GetMaxOrderIndexByProjectId(
