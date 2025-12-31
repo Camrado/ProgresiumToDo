@@ -19,23 +19,24 @@ internal sealed class GetTasksQueryHandler : IQueryHandler<GetTasksQuery, GetTas
     
     public async Task<Result<GetTasksQueryResponse>> Handle(GetTasksQuery request, CancellationToken cancellationToken)
     {
+        OrderType? orderType = string.IsNullOrEmpty(request.OrderType) ? null : Enum.Parse<OrderType>(request.OrderType, ignoreCase: true);
         var taskQueryFilter = new TaskQueryFilter(
-            _userContext.UserId, request.ProjectId, request.DueDateFrom, request.DueDateTo,
+            _userContext.UserId, request.ProjectId, request.DueDateFrom, request.DueDateTo, orderType,
             request.Page, request.PageSize, request.SortBy, request.SortOrder);
 
-        var tasks = await _taskItemRepository.GetAllByUserIdIncludingProjectSubtasksTagsAsync(taskQueryFilter, cancellationToken);
+        var result = await _taskItemRepository.GetAllByUserIdIncludingProjectSubtasksTagsAsync(taskQueryFilter, cancellationToken);
 
-        var taskResponses = tasks.Select(taskItem => new TaskListItemDto(
-            taskItem.Id,
-            taskItem.Title,
-            taskItem.Priority.ToString(),
-            taskItem.ClosedAt,
-            taskItem.Status.ToString(),
-            taskItem.Tags.Select(t => t.Name).ToList(),
-            taskItem.SubTaskItems.Select(sti => new SubTaskListItemDto(sti.Id, sti.Title, sti.Status.ToString())).ToList(),
-            taskItem.Project.Name,
-            taskItem.DueDate,
-            taskItem.OrderIndex
+        var taskResponses = result.Select(item => new TaskListItemDto(
+            item.TaskItem.Id,
+            item.TaskItem.Title,
+            item.TaskItem.Priority.ToString(),
+            item.TaskItem.ClosedAt,
+            item.TaskItem.Status.ToString(),
+            item.TaskItem.Tags.Select(t => t.Name).ToList(),
+            item.TaskItem.SubTaskItems.Select(sti => new SubTaskListItemDto(sti.Id, sti.Title, sti.Status.ToString())).ToList(),
+            item.TaskItem.Project?.Name ?? string.Empty,
+            item.TaskItem.DueDate,
+            item.OrderIndex
             ))
             .ToList();
         

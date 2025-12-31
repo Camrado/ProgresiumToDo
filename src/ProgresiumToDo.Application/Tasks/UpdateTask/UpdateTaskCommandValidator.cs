@@ -31,6 +31,28 @@ internal sealed class UpdateTaskCommandValidator : AbstractValidator<UpdateTaskC
         RuleFor(utc => utc.Status)
             .Must(status => string.IsNullOrEmpty(status) || Enum.TryParse<TaskStatus>(status, ignoreCase: true, out _))
             .WithMessage("Invalid status. Valid values are: pending, inprogress, completed, cancelled.");
+
+        RuleFor(utc => utc)
+            .Must(command =>
+            {
+                var hasBoth = command.OrderIndex.HasValue && !string.IsNullOrEmpty(command.OrderType);
+                var hasNone = !command.OrderIndex.HasValue && string.IsNullOrEmpty(command.OrderType);
+
+                if (!(hasBoth || hasNone))
+                    return false;
+
+                if (hasBoth)
+                {
+                    if (command.OrderIndex <= 0)
+                        return false;
+
+                    if (!Enum.TryParse<OrderType>(command.OrderType, ignoreCase: true, out _))
+                        return false;
+                }
+
+                return true;
+            })
+            .WithMessage("Both OrderIndex and OrderType must be provided together. OrderIndex must be > 0 and OrderType must be valid.");
         
         RuleFor(utc => utc.OrderIndex)
             .GreaterThanOrEqualTo(0)

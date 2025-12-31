@@ -22,10 +22,12 @@ internal sealed class CreateTaskCommandValidator : AbstractValidator<CreateTaskC
             .WithMessage("Title must not exceed 256 characters.");;
 
         RuleFor(ctc => ctc.ProjectId)
-            .NotEmpty()
             .MustAsync(async (command, projectId, cancellationToken) =>
             {
-                var project = await _projectRepository.GetByIdAndUserIdAsync(projectId, _userContext.UserId, cancellationToken);
+                if (!projectId.HasValue)
+                    return true;
+                
+                var project = await _projectRepository.GetByIdAndUserIdAsync(projectId.Value, _userContext.UserId, cancellationToken);
                 return project != null;
             }).WithMessage("ProjectDetails not found.");
 
@@ -49,7 +51,7 @@ internal sealed class CreateTaskCommandValidator : AbstractValidator<CreateTaskC
                 if (command.StartTime.HasValue && command.EndTime.HasValue)
                     return command.EndTime.Value > command.StartTime.Value;
 
-                return false;
+                return true;
             }).WithMessage("Invalid time configuration. If endTime is provided, startTime must also be provided and endTime must be after startTime.");
     }
 }

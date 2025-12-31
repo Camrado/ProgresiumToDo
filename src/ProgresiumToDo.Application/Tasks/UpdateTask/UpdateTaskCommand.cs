@@ -12,6 +12,7 @@ public sealed record UpdateTaskCommand(
     TimeOnly? StartTime,
     TimeOnly? EndTime,
     decimal? OrderIndex,
+    string? OrderType,
     Guid? ProjectId) : ICommand<UpdateTaskCommandResponse>
 {
     public Guid TaskId { get; set; }

@@ -17,8 +17,7 @@ public sealed record TaskDetailsDto(
     string ProjectName,
     IEnumerable<string> Tags,
     IEnumerable<SubTaskDetailsDto> SubTasks,
-    DateTime CreatedAt,
-    decimal? OrderIndex);
+    DateTime CreatedAt);
     
 public sealed record SubTaskDetailsDto(
     Guid Id,

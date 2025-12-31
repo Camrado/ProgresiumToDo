@@ -8,26 +8,30 @@ internal sealed class GetTasksQueryValidator : AbstractValidator<GetTasksQuery>
 {
     public GetTasksQueryValidator(IProjectRepository projectRepository, IUserContext userContext)
     {
-        RuleFor(gtq => gtq.DueDateTo)
-            .NotEmpty()
-            .WithMessage("'DueDateTo' must be provided.");
-        
-        RuleFor(gtq => gtq.DueDateFrom)
-            .NotEmpty()
-            .WithMessage("'DueDateFrom' must be provided.")
-            .LessThanOrEqualTo(gtq => gtq.DueDateTo)
+        RuleFor(gtq => gtq)
+            .Must(query =>
+            {
+                if (query.DueDateFrom.HasValue && query.DueDateTo.HasValue)
+                    return query.DueDateFrom.Value <= query.DueDateTo.Value;
+                
+                return true;
+            })
             .WithMessage("'DueDateFrom' must be less than or equal to 'DueDateTo'.");
         
         RuleFor(gtq => gtq.ProjectId)
             .MustAsync(async (command, projectId, cancellationToken) =>
             {
-                if (!projectId.HasValue)
+                if (!projectId.HasValue || projectId == Guid.Empty)
                     return true;
                 
                 var project = await projectRepository.GetByIdAndUserIdAsync(projectId.Value, userContext.UserId, cancellationToken);
                 return project != null;
             })
             .WithMessage("ProjectDetails not found.");
+        
+        RuleFor(gtq => gtq.OrderType)
+            .Must(orderType => string.IsNullOrEmpty(orderType) || Enum.TryParse<OrderType>(orderType, ignoreCase: true, out _))
+            .WithMessage("Invalid OrderType. Valid values are: ByDueDate, ByProject.");
 
         When(gtq => gtq.Page.HasValue || gtq.PageSize.HasValue, () =>
         {

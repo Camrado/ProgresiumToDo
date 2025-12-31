@@ -5,6 +5,7 @@ public sealed record TaskQueryFilter(
     Guid? ProjectId = null,
     DateOnly? DueDateFrom = null,
     DateOnly? DueDateTo = null,
+    OrderType? OrderType = null,
     int? Page = null,
     int? PageSize = null,
     string? SortBy = null,

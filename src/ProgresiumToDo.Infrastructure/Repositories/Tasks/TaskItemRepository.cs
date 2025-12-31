@@ -10,24 +10,16 @@ internal sealed class TaskItemRepository : Repository<TaskItem>, ITaskItemReposi
     {
     }
 
-    public async Task<decimal> GetMaxOrderIndexByProjectId(Guid projectId, DateOnly dueDate, Guid? parentTaskId,
-        CancellationToken cancellationToken = default)
-    {
-        return await DbContext.TaskItems.Where(ti =>
-            ti.ProjectId == projectId &&
-            ti.DueDate == dueDate && 
-            ti.ParentTaskItemId == parentTaskId)
-            .MaxAsync(ti => (decimal?)ti.OrderIndex, cancellationToken) ?? 0;
-    }
-
-    public async Task<List<TaskItem>> GetAllByUserIdIncludingProjectSubtasksTagsAsync(TaskQueryFilter filter, CancellationToken cancellationToken = default)
+    public async Task<List<TaskItemWithOrder>> GetAllByUserIdIncludingProjectSubtasksTagsAsync(TaskQueryFilter filter, CancellationToken cancellationToken = default)
     {
         var query = DbContext.TaskItems
             .AsNoTracking()
             .Where(ti => ti.UserId == filter.UserId);
 
-        if (filter.ProjectId.HasValue)
+        if (filter.ProjectId.HasValue && filter.ProjectId != Guid.Empty)
             query = query.Where(ti => ti.ProjectId == filter.ProjectId.Value);
+        else if (filter.ProjectId == Guid.Empty)
+            query = query.Where(ti => ti.ProjectId == null);
     
         if (filter.DueDateFrom.HasValue)
             query = query.Where(ti => ti.DueDate >= filter.DueDateFrom.Value);
@@ -35,6 +27,8 @@ internal sealed class TaskItemRepository : Repository<TaskItem>, ITaskItemReposi
         if (filter.DueDateTo.HasValue)
             query = query.Where(ti => ti.DueDate <= filter.DueDateTo.Value);
 
+        Dictionary<Guid, decimal>? taskOrderMap = null;
+        
         if (!string.IsNullOrEmpty(filter.SortBy) && !string.IsNullOrEmpty(filter.SortOrder))
         {
             query = (filter.SortBy.ToLower(), filter.SortOrder.ToLower()) switch
@@ -45,14 +39,29 @@ internal sealed class TaskItemRepository : Repository<TaskItem>, ITaskItemReposi
                 ("priority", "desc") => query.OrderByDescending(ti => ti.Priority),
                 ("createdat", "asc") => query.OrderBy(ti => ti.CreatedAt),
                 ("createdat", "desc") => query.OrderByDescending(ti => ti.CreatedAt),
-                ("orderindex", "asc") => query.OrderBy(ti => ti.OrderIndex),
-                ("orderindex", "desc") => query.OrderByDescending(ti => ti.OrderIndex),
                 _ => query.OrderBy(ti => ti.Id)
             };
         }
-        else if (filter is { ProjectId: not null, DueDateFrom: not null, DueDateTo: not null } && filter.DueDateFrom == filter.DueDateTo)
+        else if (filter.OrderType.HasValue)
         {
-            query = query.OrderBy(ti => ti.OrderIndex);
+            var queryWithOrder = query
+                .GroupJoin(
+                    DbContext.TaskOrders.Where(to => to.OrderType == filter.OrderType.Value),
+                    task => task.Id,
+                    order => order.TaskId,
+                    (task, orders) => new { task, orders })
+                .SelectMany(
+                    x => x.orders.DefaultIfEmpty(),
+                    (x, order) => new { x.task, orderIndex = order != null ? order.OrderIndex : int.MaxValue })
+                .OrderBy(x => x.orderIndex);
+            
+            var pagedQuery = filter.Page.HasValue && filter.PageSize.HasValue
+                ? queryWithOrder.Skip((filter.Page.Value - 1) * filter.PageSize.Value).Take(filter.PageSize.Value)
+                : queryWithOrder;
+
+            query = queryWithOrder.Select(qwo => qwo.task);
+
+            taskOrderMap = pagedQuery.ToDictionary(qwo => qwo.task.Id, qwo => qwo.orderIndex);
         }
         else
         {
@@ -61,7 +70,7 @@ internal sealed class TaskItemRepository : Repository<TaskItem>, ITaskItemReposi
         
         query = query
             .Include(ti => ti.Project)
-            .Include(ti => ti.SubTaskItems.OrderBy(st => st.OrderIndex))
+            .Include(ti => ti.SubTaskItems)
             .Include(ti => ti.Tags);
         
         if (filter is { Page: not null, PageSize: not null })
@@ -71,7 +80,9 @@ internal sealed class TaskItemRepository : Repository<TaskItem>, ITaskItemReposi
                 .Take(filter.PageSize.Value);
         }
 
-        return await query.ToListAsync(cancellationToken);
+        var result = await query.ToListAsync(cancellationToken);
+        
+        return result.Select(ti => new TaskItemWithOrder(ti, taskOrderMap?.GetValueOrDefault(ti.Id) ?? null)).ToList();
     }
     
     public async Task<TaskItem?> GetByIdIncludingProjectSubtasksTagsAsync(Guid id, Guid userId, CancellationToken cancellationToken = default)

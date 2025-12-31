@@ -6,7 +6,7 @@ public sealed record CreateTaskCommandResponse(
 
 public sealed record CreatedTaskDto(
     Guid Id,
-    Guid ProjectId,
+    Guid? ProjectId,
     string Title,
     string? Description,
     string Priority,

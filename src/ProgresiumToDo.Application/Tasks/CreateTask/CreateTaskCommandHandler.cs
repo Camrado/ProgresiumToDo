@@ -8,25 +8,18 @@ namespace ProgresiumToDo.Application.Tasks.CreateTask;
 internal sealed class CreateTaskCommandHandler : ICommandHandler<CreateTaskCommand, CreateTaskCommandResponse>
 {
     private readonly ITaskItemRepository _taskItemRepository;
+    private readonly ITaskOrderRepository _taskOrderRepository;
     private readonly IUserContext _userContext;
 
-    public CreateTaskCommandHandler(ITaskItemRepository taskItemRepository, IUserContext userContext)
+    public CreateTaskCommandHandler(ITaskItemRepository taskItemRepository, ITaskOrderRepository taskOrderRepository, IUserContext userContext)
     {
         _taskItemRepository = taskItemRepository;
+        _taskOrderRepository = taskOrderRepository;
         _userContext = userContext;
     }
 
     public async Task<Result<CreateTaskCommandResponse>> Handle(CreateTaskCommand request, CancellationToken cancellationToken)
     {
-        decimal? orderIndex = null;
-
-        // ProjectId is required field, so we are checking only for DueDate to set orderIndex
-        if (request.DueDate.HasValue)
-        {
-            orderIndex = await _taskItemRepository.GetMaxOrderIndexByProjectId(
-                request.ProjectId, request.DueDate.Value, null, cancellationToken) + 10;
-        }
-        
         var taskItem = TaskItem.Create(
             request.ProjectId,
             _userContext.UserId,
@@ -36,10 +29,23 @@ internal sealed class CreateTaskCommandHandler : ICommandHandler<CreateTaskComma
             request.Priority,
             request.DueDate,
             request.StartTime,
-            request.EndTime,
-            orderIndex);
+            request.EndTime);
 
         _taskItemRepository.Add(taskItem);
+        
+        // Create TaskOrder entries for all OrderTypes
+        foreach (OrderType orderType in Enum.GetValues(typeof(OrderType)))
+        {
+            var nextOrderIndex = await _taskOrderRepository.GetNextOrderIndexAsync(orderType, request.ProjectId,
+                request.DueDate, null, cancellationToken);
+            
+            if (nextOrderIndex.HasValue)
+            {
+                var taskOrder = TaskOrder.Create(taskItem.Id, orderType, nextOrderIndex.Value, request.ProjectId,
+                    request.DueDate, null);
+                _taskOrderRepository.Add(taskOrder);
+            }
+        }
 
         var taskResponse = new CreatedTaskDto(
             taskItem.Id,

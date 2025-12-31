@@ -3,7 +3,7 @@ using ProgresiumToDo.Application.Abstractions.Messaging;
 namespace ProgresiumToDo.Application.Tasks.CreateTask;
 
 public sealed record CreateTaskCommand(
-    Guid ProjectId,
+    Guid? ProjectId,
     string Title,
     string? Description,
     string? Priority,

@@ -23,12 +23,9 @@ public sealed class TaskItem : BaseEntity
     
     public DateTime? ClosedAt { get; private set; }
     
-    // OrderIndex exists in the (DueDate, ProjectId, ParentTaskId) container
-    public decimal? OrderIndex { get; private set; }
-    
     public Guid UserId { get; private set; }
     
-    public Guid ProjectId { get; private set; }
+    public Guid? ProjectId { get; private set; }
     
     public TaskItem? ParentTaskItem { get; private set; }
     
@@ -36,7 +33,7 @@ public sealed class TaskItem : BaseEntity
     
     public User User { get; private set; }
     
-    public Project Project { get; private set; }
+    public Project? Project { get; private set; }
     
     public ICollection<Tag> Tags { get; private set; } = new List<Tag>();
     
@@ -45,7 +42,7 @@ public sealed class TaskItem : BaseEntity
     private TaskItem() { }
 
     private TaskItem(
-        Guid projectId,
+        Guid? projectId,
         Guid userId,
         string title,
         string? description,
@@ -53,8 +50,7 @@ public sealed class TaskItem : BaseEntity
         Priority priority,
         DateOnly? dueDate,
         TimeOnly? startTime,
-        TimeOnly? endTime,
-        decimal? orderIndex)
+        TimeOnly? endTime)
     {
         ProjectId = projectId;
         UserId = userId;
@@ -65,11 +61,10 @@ public sealed class TaskItem : BaseEntity
         DueDate = dueDate;
         StartTime = startTime;
         EndTime = endTime;
-        OrderIndex = orderIndex;
     }
 
     public static TaskItem Create(
-        Guid projectId,
+        Guid? projectId,
         Guid userId,
         string title,
         string? description,
@@ -77,8 +72,7 @@ public sealed class TaskItem : BaseEntity
         string? priority,
         DateOnly? dueDate,
         TimeOnly? startTime,
-        TimeOnly? endTime,
-        decimal? orderIndex)
+        TimeOnly? endTime)
     {
         var priorityEnum = string.IsNullOrEmpty(priority) 
             ? Priority.None
@@ -89,7 +83,7 @@ public sealed class TaskItem : BaseEntity
             : Enum.Parse<TaskStatus>(status, ignoreCase: true);
 
         return new TaskItem(projectId, userId, title, description, statusEnum, priorityEnum, dueDate,
-            startTime, endTime, orderIndex);
+            startTime, endTime);
     }
     
     public void Update(
@@ -100,7 +94,6 @@ public sealed class TaskItem : BaseEntity
         DateOnly? dueDate,
         TimeOnly? startTime,
         TimeOnly? endTime,
-        decimal? orderIndex,
         Guid? projectId)
     {
         if (title is not null)
@@ -124,16 +117,8 @@ public sealed class TaskItem : BaseEntity
         if (endTime is not null)
             EndTime = endTime;
         
-        if (orderIndex is not null)
-            OrderIndex = orderIndex.Value;
-        
         if (projectId is not null)
             ProjectId = projectId.Value;
-    }
-    
-    public void UpdateOrderIndex(decimal newOrderIndex)
-    {
-        OrderIndex = newOrderIndex;
     }
     
     private void UpdateStatus(TaskStatus newStatus)

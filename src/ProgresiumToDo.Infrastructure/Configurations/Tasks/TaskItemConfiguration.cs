@@ -43,7 +43,7 @@ internal sealed class TaskItemConfiguration : SoftDeleteEntityConfiguration<Task
             .IsRequired();
 
         builder.Property(t => t.ProjectId)
-            .IsRequired();
+            .IsRequired(false);
 
         builder.Property(t => t.ParentTaskItemId)
             .IsRequired(false);

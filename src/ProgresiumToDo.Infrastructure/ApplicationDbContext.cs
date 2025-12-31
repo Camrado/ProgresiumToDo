@@ -28,6 +28,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
     public DbSet<Project> Projects { get; set; }
     public DbSet<Tag> Tags { get; set; }
     public DbSet<TaskItem> TaskItems { get; set; }
+    public DbSet<TaskOrder> TaskOrders { get; set; }
     public DbSet<TaskAttachment> TaskAttachments { get; set; }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
