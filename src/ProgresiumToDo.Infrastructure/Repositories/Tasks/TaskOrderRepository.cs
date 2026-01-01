@@ -16,40 +16,50 @@ internal sealed class TaskOrderRepository : ITaskOrderRepository
     {
         _dbContext.TaskOrders.Add(taskOrder);
     }
+    
+    public void Delete(TaskOrder taskOrder)
+    {
+        _dbContext.TaskOrders.Remove(taskOrder);
+    }
+    
+    public void DeleteRange(IEnumerable<TaskOrder> taskOrders)
+    {
+        _dbContext.TaskOrders.RemoveRange(taskOrders);
+    }
 
-    public async Task<decimal?> GetNextOrderIndexAsync(OrderType orderType, Guid? projectId, DateOnly? dueDate, Guid? parentTaskId,
+    public async Task<TaskOrder> GetByTaskIdAndOrderTypeAsync(Guid taskId, OrderType orderType,
         CancellationToken cancellationToken = default)
     {
-        if (orderType == OrderType.ByDueDate)
-        {
-            if (!dueDate.HasValue)
-                return null;
+        return await _dbContext.TaskOrders
+            .Where(to => to.OrderType == orderType && to.TaskId == taskId)
+            .OrderByDescending(to => to.OrderIndex)
+            .FirstAsync(cancellationToken);
+    }
 
-            var query = _dbContext.TaskOrders
-                .Where(to => to.OrderType == OrderType.ByDueDate && to.DueDate == dueDate.Value);
+    public async Task<List<TaskOrder>> GetByTaskId(Guid taskId, CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.TaskOrders
+            .Where(to => to.TaskId == taskId)
+            .ToListAsync(cancellationToken);
+    }
 
-            var maxOrderIndex = await query.AnyAsync(cancellationToken) 
-                ? await query.MaxAsync(to => to.OrderIndex, cancellationToken) 
-                : 0;
-            
-            return maxOrderIndex + 10;
-        } 
-        
-        if (orderType == OrderType.ByProject)
-        {
-            if (!projectId.HasValue)
-                return null;
+    public async Task<decimal> GetMaxOrderIndexByDueDateAsync(DateOnly dueDate, CancellationToken cancellationToken)
+    {
+        var query = _dbContext.TaskOrders
+            .Where(to => to.OrderType == OrderType.ByDueDate && to.DueDate == dueDate);
 
-            var query = _dbContext.TaskOrders
-                .Where(to => to.OrderType == OrderType.ByProject && to.ProjectId == projectId.Value);
-            
-            var maxOrderIndex = await query.AnyAsync(cancellationToken) 
-                ? await query.MaxAsync(to => to.OrderIndex, cancellationToken) 
-                : 0;
-            
-            return maxOrderIndex + 10;
-        }
+        return await query.AnyAsync(cancellationToken) 
+            ? await query.MaxAsync(to => to.OrderIndex, cancellationToken) 
+            : 0;
+    }
 
-        return null;
+    public async Task<decimal> GetMaxOrderIndexByProjectAsync(Guid projectId, CancellationToken cancellationToken)
+    {
+        var query = _dbContext.TaskOrders
+            .Where(to => to.OrderType == OrderType.ByProject && to.ProjectId == projectId);
+
+        return await query.AnyAsync(cancellationToken) 
+            ? await query.MaxAsync(to => to.OrderIndex, cancellationToken) 
+            : 0;
     }
 }

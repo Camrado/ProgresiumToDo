@@ -9,6 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 using ProgresiumToDo.Application.Abstractions.EmailService;
 using ProgresiumToDo.Application.Abstractions.Identity;
 using ProgresiumToDo.Application.Abstractions.OAuth;
+using ProgresiumToDo.Application.Abstractions.Tasks;
 using ProgresiumToDo.Domain.Abstractions;
 using ProgresiumToDo.Domain.Auth;
 using ProgresiumToDo.Domain.Tasks;
@@ -18,6 +19,7 @@ using ProgresiumToDo.Infrastructure.Interceptors;
 using ProgresiumToDo.Infrastructure.OAuth;
 using ProgresiumToDo.Infrastructure.Repositories.Auth;
 using ProgresiumToDo.Infrastructure.Repositories.Tasks;
+using ProgresiumToDo.Infrastructure.Tasks;
 
 namespace ProgresiumToDo.Infrastructure;
 
@@ -38,6 +40,10 @@ public static class DependencyInjection
         AddRepositories(services);
         
         services.AddTransient<IEmailService, EmailService.EmailService>();
+
+        services.AddTransient<ITaskOrderingService, TaskOrderingService>();
+        
+        services.AddTransient<ITaskStatusPolicy, TaskStatusPolicy>();
         
         return services;
     }

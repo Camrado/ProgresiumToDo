@@ -1,5 +1,6 @@
 using ProgresiumToDo.Application.Abstractions.Identity;
 using ProgresiumToDo.Application.Abstractions.Messaging;
+using ProgresiumToDo.Application.Abstractions.Tasks;
 using ProgresiumToDo.Domain.Abstractions;
 using ProgresiumToDo.Domain.Tasks;
 
@@ -8,13 +9,13 @@ namespace ProgresiumToDo.Application.Tasks.CreateTask;
 internal sealed class CreateTaskCommandHandler : ICommandHandler<CreateTaskCommand, CreateTaskCommandResponse>
 {
     private readonly ITaskItemRepository _taskItemRepository;
-    private readonly ITaskOrderRepository _taskOrderRepository;
+    private readonly ITaskOrderingService _taskOrderingService;
     private readonly IUserContext _userContext;
 
-    public CreateTaskCommandHandler(ITaskItemRepository taskItemRepository, ITaskOrderRepository taskOrderRepository, IUserContext userContext)
+    public CreateTaskCommandHandler(ITaskItemRepository taskItemRepository, ITaskOrderingService taskOrderingService, IUserContext userContext)
     {
         _taskItemRepository = taskItemRepository;
-        _taskOrderRepository = taskOrderRepository;
+        _taskOrderingService = taskOrderingService;
         _userContext = userContext;
     }
 
@@ -32,20 +33,9 @@ internal sealed class CreateTaskCommandHandler : ICommandHandler<CreateTaskComma
             request.EndTime);
 
         _taskItemRepository.Add(taskItem);
-        
-        // Create TaskOrder entries for all OrderTypes
-        foreach (OrderType orderType in Enum.GetValues(typeof(OrderType)))
-        {
-            var nextOrderIndex = await _taskOrderRepository.GetNextOrderIndexAsync(orderType, request.ProjectId,
-                request.DueDate, null, cancellationToken);
-            
-            if (nextOrderIndex.HasValue)
-            {
-                var taskOrder = TaskOrder.Create(taskItem.Id, orderType, nextOrderIndex.Value, request.ProjectId,
-                    request.DueDate, null);
-                _taskOrderRepository.Add(taskOrder);
-            }
-        }
+
+        await _taskOrderingService.CreateInitialOrdersAsync(taskItem, request.ProjectId, request.DueDate,
+            cancellationToken);
 
         var taskResponse = new CreatedTaskDto(
             taskItem.Id,

@@ -40,4 +40,19 @@ public sealed class TaskOrder
     {
         return new TaskOrder(taskId, orderType, orderIndex, projectId, dueDate, parentTaskId);
     }
+    
+    public void UpdateOrderIndex(decimal newOrderIndex)
+    {
+        OrderIndex = newOrderIndex;
+    }
+    
+    public void UpdateProjectId(Guid? newProjectId)
+    {
+        ProjectId = newProjectId;
+    }
+    
+    public void UpdateDueDate(DateOnly? newDueDate)
+    {
+        DueDate = newDueDate;
+    }
 }
