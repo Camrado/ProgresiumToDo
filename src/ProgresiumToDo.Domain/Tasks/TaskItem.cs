@@ -38,6 +38,8 @@ public sealed class TaskItem : BaseEntity
     public ICollection<Tag> Tags { get; private set; } = new List<Tag>();
     
     public ICollection<TaskAttachment> TaskAttachments { get; private set; } = new List<TaskAttachment>();
+    
+    public ICollection<TaskOrder> TaskOrders { get; private set; } = new List<TaskOrder>();
 
     private TaskItem() { }
 

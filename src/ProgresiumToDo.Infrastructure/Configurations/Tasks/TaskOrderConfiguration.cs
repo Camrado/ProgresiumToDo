@@ -31,18 +31,18 @@ internal sealed class TaskOrderConfiguration : IEntityTypeConfiguration<TaskOrde
             .IsRequired(false);
         
         builder.HasOne(to => to.TaskItem)
-            .WithMany()
+            .WithMany(t => t.TaskOrders)
             .HasForeignKey(to => to.TaskId)
             .OnDelete(DeleteBehavior.Cascade);
         
         builder.HasOne(to => to.Project)
             .WithMany()
             .HasForeignKey(to => to.ProjectId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.NoAction);
         
         builder.HasOne<TaskItem>()
             .WithMany()
             .HasForeignKey(to => to.ParentTaskId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.NoAction);
     }
 }
