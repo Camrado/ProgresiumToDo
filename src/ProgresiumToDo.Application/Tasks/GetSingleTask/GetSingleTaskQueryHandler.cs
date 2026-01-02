@@ -7,10 +7,11 @@ internal sealed class GetSingleTaskQueryHandler : IQueryHandler<GetSingleTaskQue
 {
     public Task<Result<GetSingleTaskQueryResponse>> Handle(GetSingleTaskQuery request, CancellationToken cancellationToken)
     {
-        var taskItem = request.TaskItem!;
+        var taskItemWithOrder = request.TaskItemWithOrder;
+        var taskItem = taskItemWithOrder!.TaskItem;
 
         var taskItemDto = new TaskDetailsDto(
-            taskItem.Id,
+            taskItem!.Id,
             taskItem.Title,
             taskItem.Description ?? string.Empty,
             taskItem.Priority.ToString(),
@@ -19,18 +20,19 @@ internal sealed class GetSingleTaskQueryHandler : IQueryHandler<GetSingleTaskQue
             taskItem.EndTime,
             taskItem.ClosedAt,
             taskItem.Status.ToString(),
-            taskItem.Project.Name,
+            taskItem.Project?.Name ?? string.Empty,
             taskItem.Tags.Select(t => t.Name),
-            taskItem.SubTaskItems.Select(subtask => new SubTaskDetailsDto(
-                subtask.Id,
-                subtask.Title,
-                subtask.Description ?? string.Empty,
-                subtask.Priority.ToString(),
-                subtask.Status.ToString(),
-                subtask.StartTime,
-                subtask.EndTime,
-                subtask.ClosedAt,
-                subtask.CreatedAt)),
+            taskItemWithOrder.Subtasks?.Select(subtaskWithOrder => new SubTaskDetailsDto(
+                subtaskWithOrder.SubtaskItem.Id,
+                subtaskWithOrder.SubtaskItem.Title,
+                subtaskWithOrder.SubtaskItem.Description ?? string.Empty,
+                subtaskWithOrder.SubtaskItem.Priority.ToString(),
+                subtaskWithOrder.SubtaskItem.Status.ToString(),
+                subtaskWithOrder.SubtaskItem.StartTime,
+                subtaskWithOrder.SubtaskItem.EndTime,
+                subtaskWithOrder.SubtaskItem.ClosedAt,
+                subtaskWithOrder.SubtaskItem.CreatedAt,
+                subtaskWithOrder.OrderIndex)) ?? [],
             taskItem.CreatedAt);
 
         return Task.FromResult<Result<GetSingleTaskQueryResponse>>(

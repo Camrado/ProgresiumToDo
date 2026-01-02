@@ -28,4 +28,5 @@ public sealed record SubTaskDetailsDto(
     TimeOnly? StartTime,
     TimeOnly? EndTime,
     DateTime? ClosedAt,
-    DateTime CreatedAt);
+    DateTime CreatedAt,
+    decimal? OrderIndex);

@@ -3,5 +3,6 @@
 public enum OrderType
 {
     ByDueDate = 0,
-    ByProject = 1
+    ByProject = 1,
+    ByParentTask = 2
 }

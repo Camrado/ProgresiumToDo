@@ -21,5 +21,6 @@ public sealed record TaskListItemDto(
 public sealed record SubTaskListItemDto(
     Guid Id,
     string Title,
-    string Status
+    string Status,
+    decimal? OrderIndex
     );

@@ -55,4 +55,9 @@ public sealed class TaskOrder
     {
         DueDate = newDueDate;
     }
+    
+    public void UpdateParentTaskId(Guid? newParentTaskId)
+    {
+        ParentTaskId = newParentTaskId;
+    }
 }

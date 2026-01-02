@@ -33,7 +33,7 @@ internal sealed class GetTasksQueryHandler : IQueryHandler<GetTasksQuery, GetTas
             item.TaskItem.ClosedAt,
             item.TaskItem.Status.ToString(),
             item.TaskItem.Tags.Select(t => t.Name).ToList(),
-            item.TaskItem.SubTaskItems.Select(sti => new SubTaskListItemDto(sti.Id, sti.Title, sti.Status.ToString())).ToList(),
+            item.Subtasks.Select(sti => new SubTaskListItemDto(sti.SubtaskItem.Id, sti.SubtaskItem.Title, sti.SubtaskItem.Status.ToString(), sti.OrderIndex)).ToList(),
             item.TaskItem.Project?.Name ?? string.Empty,
             item.TaskItem.DueDate,
             item.OrderIndex

@@ -12,12 +12,12 @@ internal sealed class GetSingleTaskQueryValidator : AbstractValidator<GetSingleT
             .NotEmpty()
             .MustAsync(async (query, taskId, cancellationToken) =>
             {
-                var taskItem = await taskItemRepository
+                var taskItemWithOrder = await taskItemRepository
                     .GetByIdIncludingProjectSubtasksTagsAsync(taskId, userContext.UserId, cancellationToken);
-                query.TaskItem = taskItem;
+                query.TaskItemWithOrder = taskItemWithOrder;
                 
-                return taskItem != null;
+                return taskItemWithOrder is { TaskItem.ParentTaskItemId: null };
             })
-            .WithMessage("TaskItem not found.");
+            .WithMessage("TaskItemWithOrder not found.");
     }
 }

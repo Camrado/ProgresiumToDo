@@ -62,4 +62,14 @@ internal sealed class TaskOrderRepository : ITaskOrderRepository
             ? await query.MaxAsync(to => to.OrderIndex, cancellationToken) 
             : 0;
     }
+    
+    public async Task<decimal> GetMaxOrderIndexByParentTaskAsync(Guid parentTaskId, CancellationToken cancellationToken)
+    {
+        var query = _dbContext.TaskOrders
+            .Where(to => to.OrderType == OrderType.ByParentTask && to.ParentTaskId == parentTaskId);
+
+        return await query.AnyAsync(cancellationToken) 
+            ? await query.MaxAsync(to => to.OrderIndex, cancellationToken) 
+            : 0;
+    }
 }

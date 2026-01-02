@@ -15,53 +15,85 @@ internal sealed class TaskOrderingService : ITaskOrderingService
         _taskOrderRepository = taskOrderRepository;
     }
     
-    public async Task CreateInitialOrdersAsync(TaskItem taskItem, Guid? projectId, DateOnly? dueDate,
+    public async Task UpdateOrderAsync(Guid taskId, TaskOrderContext orderContext, decimal newOrderIndex,
         CancellationToken cancellationToken)
     {
-        if (projectId.HasValue)
+        var taskOrder = await _taskOrderRepository
+            .GetByTaskIdAndOrderTypeAsync(taskId, orderContext.OrderType, cancellationToken);
+
+        if (orderContext.OrderType == OrderType.ByProject)
+        {
+            taskOrder.UpdateProjectId(orderContext.ProjectId);
+        }
+        else if (orderContext.OrderType == OrderType.ByDueDate)
+        {
+            taskOrder.UpdateDueDate(orderContext.DueDate);
+        }
+        else if (orderContext.OrderType == OrderType.ByParentTask)
+        {
+            taskOrder.UpdateParentTaskId(orderContext.ParentTaskId);
+        }
+
+        taskOrder.UpdateOrderIndex(newOrderIndex);
+    }
+    
+    public async Task CreateInitialOrdersAsync(TaskItem taskItem, TaskOrderContext orderContext,
+        CancellationToken cancellationToken)
+    {
+        if (orderContext.ProjectId is { } projectId)
         {
             var maxOrderIndex = await _taskOrderRepository
-                .GetMaxOrderIndexByProjectAsync(projectId.Value, cancellationToken);
+                .GetMaxOrderIndexByProjectAsync(projectId, cancellationToken);
 
             var taskOrder = TaskOrder.Create(taskItem.Id, OrderType.ByProject, maxOrderIndex + OrderIncrement,
                 projectId, null, null);
             _taskOrderRepository.Add(taskOrder);
         }
 
-        if (dueDate.HasValue)
+        if (orderContext.DueDate is { } dueDate)
         {
             var maxOrderIndex = await _taskOrderRepository
-                .GetMaxOrderIndexByDueDateAsync(dueDate.Value, cancellationToken);
+                .GetMaxOrderIndexByDueDateAsync(dueDate, cancellationToken);
                 
             var taskOrder = TaskOrder.Create(taskItem.Id, OrderType.ByDueDate, maxOrderIndex + OrderIncrement, 
                 null, dueDate, null);
             _taskOrderRepository.Add(taskOrder);
         }
+        
+        if (orderContext.ParentTaskId is { } parentTaskId)
+        {
+            var maxOrderIndex = await _taskOrderRepository
+                .GetMaxOrderIndexByParentTaskAsync(parentTaskId, cancellationToken);
+                
+            var taskOrder = TaskOrder.Create(taskItem.Id, OrderType.ByParentTask, maxOrderIndex + OrderIncrement, 
+                null, null, parentTaskId);
+            _taskOrderRepository.Add(taskOrder);
+        }
     }
 
-    public async Task RecalculateOrdersAsync(Guid taskId, Guid? newProjectId, DateOnly? newDueDate, CancellationToken cancellationToken)
+    public async Task RecalculateOrdersAsync(Guid taskId, TaskOrderContext orderContext, CancellationToken cancellationToken)
     {
-        if (newProjectId.HasValue)
+        if (orderContext.ProjectId is { } newProjectId)
         {
             var taskOrder = await _taskOrderRepository
                 .GetByTaskIdAndOrderTypeAsync(taskId, OrderType.ByProject, cancellationToken);
 
             var maxOrderIndex = await _taskOrderRepository
-                .GetMaxOrderIndexByProjectAsync(newProjectId.Value, cancellationToken);
+                .GetMaxOrderIndexByProjectAsync(newProjectId, cancellationToken);
 
-            taskOrder.UpdateProjectId(newProjectId.Value);
+            taskOrder.UpdateProjectId(newProjectId);
             taskOrder.UpdateOrderIndex(maxOrderIndex + OrderIncrement);
         }
 
-        if (newDueDate.HasValue)
+        if (orderContext.DueDate is { } newDueDate)
         {
             var taskOrder = await _taskOrderRepository
                 .GetByTaskIdAndOrderTypeAsync(taskId, OrderType.ByDueDate, cancellationToken);
 
             var maxOrderIndex = await _taskOrderRepository
-                .GetMaxOrderIndexByDueDateAsync(newDueDate.Value, cancellationToken);
+                .GetMaxOrderIndexByDueDateAsync(newDueDate, cancellationToken);
 
-            taskOrder.UpdateDueDate(newDueDate.Value);
+            taskOrder.UpdateDueDate(newDueDate);
             taskOrder.UpdateOrderIndex(maxOrderIndex + OrderIncrement);
         }
     }
@@ -75,7 +107,27 @@ internal sealed class TaskOrderingService : ITaskOrderingService
         }
         else
         {
-            await CreateInitialOrdersAsync(taskItem, taskItem.ProjectId, taskItem.DueDate, cancellationToken);
+            TaskOrderContext orderContext;
+
+            // It means it's a top-level task
+            if (taskItem.ParentTaskItemId is null)
+            {
+                orderContext = new TaskOrderContext
+                {
+                    ProjectId = taskItem.ProjectId,
+                    DueDate = taskItem.DueDate
+                };
+            }
+            // It's a sub-task
+            else
+            {
+                orderContext = new TaskOrderContext
+                {
+                    ParentTaskId = taskItem.ParentTaskItemId
+                };
+            }
+
+            await CreateInitialOrdersAsync(taskItem, orderContext, cancellationToken);
         }
     }
 }

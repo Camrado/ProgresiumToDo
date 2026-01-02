@@ -63,6 +63,26 @@ public sealed class TaskItem : BaseEntity
         EndTime = endTime;
     }
 
+    private TaskItem(
+        Guid userId,
+        Guid parentTaskItemId,
+        string title,
+        string? description,
+        TimeOnly? startTime,
+        TimeOnly? endTime,
+        Priority priority,
+        TaskStatus status)
+    {
+        UserId = userId;
+        ParentTaskItemId = parentTaskItemId;
+        Title = title;
+        Description = description;
+        StartTime = startTime;
+        EndTime = endTime;
+        Priority = priority;
+        Status = status;
+    }
+
     public static TaskItem Create(
         Guid? projectId,
         Guid userId,
@@ -84,6 +104,27 @@ public sealed class TaskItem : BaseEntity
 
         return new TaskItem(projectId, userId, title, description, statusEnum, priorityEnum, dueDate,
             startTime, endTime);
+    }
+
+    public static TaskItem CreateSubtask(
+        Guid userId,
+        Guid parentTaskItemId,
+        string title,
+        string? description,
+        TimeOnly? startTime,
+        TimeOnly? endTime,
+        string? priority,
+        string? status)
+    {
+        var priorityEnum = string.IsNullOrEmpty(priority) 
+            ? Priority.None
+            : Enum.Parse<Priority>(priority, ignoreCase: true);
+        
+        var statusEnum = string.IsNullOrEmpty(status) 
+            ? TaskStatus.Pending 
+            : Enum.Parse<TaskStatus>(status, ignoreCase: true);
+        
+        return new TaskItem(userId, parentTaskItemId, title, description, startTime, endTime, priorityEnum, statusEnum);
     }
     
     public void Update(
@@ -119,6 +160,33 @@ public sealed class TaskItem : BaseEntity
         
         if (projectId is not null)
             ProjectId = projectId.Value;
+    }
+
+    public void UpdateSubtask(
+        string? title,
+        string? description,
+        TimeOnly? startTime,
+        TimeOnly? endTime,
+        string? priority,
+        string? status)
+    {
+        if (title is not null)
+            Title = title;
+        
+        if (description is not null)
+            Description = description;
+        
+        if (status is not null)
+            UpdateStatus(Enum.Parse<TaskStatus>(status, ignoreCase: true));
+        
+        if (priority is not null)
+            Priority = Enum.Parse<Priority>(priority, ignoreCase: true);
+        
+        if (startTime is not null)
+            StartTime = startTime;
+        
+        if (endTime is not null)
+            EndTime = endTime;
     }
     
     private void UpdateStatus(TaskStatus newStatus)

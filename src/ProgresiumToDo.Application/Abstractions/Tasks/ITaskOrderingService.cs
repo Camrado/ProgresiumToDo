@@ -5,9 +5,11 @@ namespace ProgresiumToDo.Application.Abstractions.Tasks;
 
 public interface ITaskOrderingService
 {
-    Task CreateInitialOrdersAsync(TaskItem taskItem, Guid? projectId, DateOnly? dueDate, CancellationToken cancellationToken);
+    Task UpdateOrderAsync(Guid taskId, TaskOrderContext orderContext, decimal newOrderIndex, CancellationToken cancellationToken);
     
-    Task RecalculateOrdersAsync(Guid taskId, Guid? projectId, DateOnly? dueDate, CancellationToken cancellationToken);
+    Task CreateInitialOrdersAsync(TaskItem taskItem, TaskOrderContext orderContext, CancellationToken cancellationToken);
+    
+    Task RecalculateOrdersAsync(Guid taskId, TaskOrderContext orderContext, CancellationToken cancellationToken);
 
     Task ApplyStatusChangeAsync(TaskStatus newStatus, TaskItem taskItem, CancellationToken cancellationToken);
 }

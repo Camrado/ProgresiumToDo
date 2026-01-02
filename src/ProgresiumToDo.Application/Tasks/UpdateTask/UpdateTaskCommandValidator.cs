@@ -18,74 +18,133 @@ internal sealed class UpdateTaskCommandValidator : AbstractValidator<UpdateTaskC
                 
                 return taskItem != null;
             })
-            .WithMessage("TaskItem not found.");
+            .WithMessage("TaskItemWithOrder not found.");
         
-        RuleFor(utc => utc.Title)
-            .MaximumLength(256)
-            .WithMessage("Title must not exceed 256 characters.");
-        
-        RuleFor(utc => utc.Priority)
-            .Must(priority => string.IsNullOrEmpty(priority) || Enum.TryParse<Priority>(priority, ignoreCase: true, out _))
-            .WithMessage("Invalid priority. Valid values are: none, low, medium, high.");
-
-        RuleFor(utc => utc.Status)
-            .Must(status => string.IsNullOrEmpty(status) || Enum.TryParse<TaskStatus>(status, ignoreCase: true, out _))
-            .WithMessage("Invalid status. Valid values are: pending, inprogress, completed, cancelled.");
-
         RuleFor(utc => utc)
-            .Must(command =>
-            {
-                var hasBoth = command.OrderIndex.HasValue && !string.IsNullOrEmpty(command.OrderType);
-                var hasNone = !command.OrderIndex.HasValue && string.IsNullOrEmpty(command.OrderType);
-
-                if (!(hasBoth || hasNone))
-                    return false;
-
-                if (hasBoth)
-                {
-                    if (command.OrderIndex <= 0)
-                        return false;
-
-                    if (!Enum.TryParse<OrderType>(command.OrderType, ignoreCase: true, out _))
-                        return false;
-                }
-
-                return true;
-            })
-            .WithMessage("Both OrderIndex and OrderType must be provided together. OrderIndex must be > 0 and OrderType must be valid.");
+            .Must(IsValidUpdateCombination)
+            .WithMessage("Invalid update combination. Either update Status only, OrderIndex with OrderType only, or regular fields only.");
         
-        RuleFor(utc => utc.OrderIndex)
-            .GreaterThanOrEqualTo(0)
-            .WithMessage("OrderIndex must be greater than or equal to 0.");
-
-        RuleFor(utc => utc.ProjectId)
-            .MustAsync(async (command, projectId, cancellationToken) =>
-            {
-                if (!projectId.HasValue)
-                    return true;
-                
-                var project = await projectRepository
-                    .GetByIdAndUserIdAsync(projectId.Value, userContext.UserId, cancellationToken);
-                return project != null;
-            }).WithMessage("Project not found.");
-
-        When(utc => utc.TaskItem is not null, () =>
+        When(utc => IsStatusUpdated(utc) && !IsOrderUpdated(utc) && !IsRegularFieldUpdated(utc), () =>
         {
-            // Validate StartTime and EndTime logic
-            RuleFor(utc => utc)
-                .Must(command =>
-                {
-                    if (command.EndTime.HasValue && !command.StartTime.HasValue && command.TaskItem!.StartTime.HasValue)
-                        return command.EndTime > command.TaskItem!.StartTime;
-
-                    if (command.StartTime.HasValue && !command.EndTime.HasValue && command.TaskItem!.EndTime.HasValue)
-                        return command.StartTime < command.TaskItem!.EndTime;
-                    
-                    if (command.StartTime.HasValue && command.EndTime.HasValue)
-                        return command.EndTime > command.StartTime;
-
-                    return true;
-                }).WithMessage("EndTime must be later than StartTime.");
+            RuleFor(utc => utc.Status)
+                .Must(status => string.IsNullOrEmpty(status) || Enum.TryParse<TaskStatus>(status, ignoreCase: true, out _))
+                .WithMessage("Invalid status. Valid values are: pending, inprogress, completed, cancelled.");
         });
+
+        When(utc => IsOrderCorrectlyUpdated(utc) && !IsStatusUpdated(utc) && !IsRegularFieldUpdated(utc), () =>
+        {
+            RuleFor(utc => utc.OrderIndex)
+                .GreaterThan(0)
+                .WithMessage("OrderIndex must be greater than 0.");
+
+            RuleFor(utc => utc.OrderType)
+                .Must(orderType => Enum.TryParse<OrderType>(orderType, ignoreCase: true, out _))
+                .WithMessage("Invalid OrderType. Valid values are: ByDueDate, ByProject, ByParentTask.");
+        });
+
+        When(utc => IsRegularFieldUpdated(utc) && !IsOrderUpdated(utc) && !IsStatusUpdated(utc), () =>
+        {
+            RuleFor(utc => utc.Title)
+                .MaximumLength(256)
+                .WithMessage("Title must not exceed 256 characters.");
+        
+            RuleFor(utc => utc.Priority)
+                .Must(priority => string.IsNullOrEmpty(priority) || Enum.TryParse<Priority>(priority, ignoreCase: true, out _))
+                .WithMessage("Invalid priority. Valid values are: none, low, medium, high.");
+
+            RuleFor(utc => utc.ProjectId)
+                .MustAsync(async (command, projectId, cancellationToken) =>
+                {
+                    if (!projectId.HasValue)
+                        return true;
+                
+                    var project = await projectRepository
+                        .GetByIdAndUserIdAsync(projectId.Value, userContext.UserId, cancellationToken);
+                    return project != null;
+                }).WithMessage("Project not found.");
+
+            When(utc => utc.TaskItem is not null, () =>
+            {
+                // Validate StartTime and EndTime logic
+                RuleFor(utc => utc)
+                    .Must(command =>
+                    {
+                        if (command.EndTime.HasValue && !command.StartTime.HasValue && command.TaskItem!.StartTime.HasValue)
+                            return command.EndTime > command.TaskItem!.StartTime;
+
+                        if (command.StartTime.HasValue && !command.EndTime.HasValue && command.TaskItem!.EndTime.HasValue)
+                            return command.StartTime < command.TaskItem!.EndTime;
+                    
+                        if (command.StartTime.HasValue && command.EndTime.HasValue)
+                            return command.EndTime > command.StartTime;
+
+                        return true;
+                    }).WithMessage("EndTime must be later than StartTime.");
+            });
+        });
+    }
+    private static bool IsValidUpdateCombination(UpdateTaskCommand command)
+    {
+        var isStatusUpdate = IsStatusUpdated(command);
+        var isOrderUpdate = command.OrderIndex.HasValue && !string.IsNullOrEmpty(command.OrderType);
+        var isMixedOrder = command.OrderIndex.HasValue ^ !string.IsNullOrEmpty(command.OrderType);
+
+        if (isMixedOrder)
+            return false;
+
+        if (isStatusUpdate)
+        {
+            return
+                command.Title is null &&
+                command.Description is null &&
+                command.Priority is null &&
+                command.DueDate is null &&
+                command.StartTime is null &&
+                command.EndTime is null &&
+                command.ProjectId is null &&
+                command.OrderIndex is null &&
+                string.IsNullOrEmpty(command.OrderType);
+        }
+
+        if (isOrderUpdate)
+        {
+            return
+                command.Title is null &&
+                command.Description is null &&
+                command.Priority is null &&
+                command.DueDate is null &&
+                command.StartTime is null &&
+                command.EndTime is null &&
+                command.ProjectId is null &&
+                string.IsNullOrEmpty(command.Status);
+        }
+
+        return true;
+    }
+    
+    private static bool IsStatusUpdated(UpdateTaskCommand command)
+    {
+        return !string.IsNullOrEmpty(command.Status);
+    }
+    
+    private static bool IsOrderCorrectlyUpdated(UpdateTaskCommand command)
+    {
+        return command.OrderIndex.HasValue && !string.IsNullOrEmpty(command.OrderType);
+    }
+    
+    private static bool IsOrderUpdated(UpdateTaskCommand command)
+    {
+        return command.OrderIndex.HasValue || !string.IsNullOrEmpty(command.OrderType);
+    }
+    
+    private static bool IsRegularFieldUpdated(UpdateTaskCommand command)
+    {
+        return command.Title is not null ||
+               command.Description is not null ||
+               command.Priority is not null ||
+               command.DueDate is not null ||
+               command.StartTime is not null ||
+               command.EndTime is not null ||
+               command.ProjectId is not null;
     }
 }

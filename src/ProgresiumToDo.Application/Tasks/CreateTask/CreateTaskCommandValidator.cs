@@ -7,14 +7,8 @@ namespace ProgresiumToDo.Application.Tasks.CreateTask;
 
 internal sealed class CreateTaskCommandValidator : AbstractValidator<CreateTaskCommand>
 {
-    private readonly IProjectRepository _projectRepository;
-    private readonly IUserContext _userContext;
-
     public CreateTaskCommandValidator(IProjectRepository projectRepository, IUserContext userContext)
     {
-        _projectRepository = projectRepository;
-        _userContext = userContext;
-
         RuleFor(ctc => ctc.Title)
             .NotEmpty()
             .WithMessage("Title is required.")
@@ -27,7 +21,7 @@ internal sealed class CreateTaskCommandValidator : AbstractValidator<CreateTaskC
                 if (!projectId.HasValue)
                     return true;
                 
-                var project = await _projectRepository.GetByIdAndUserIdAsync(projectId.Value, _userContext.UserId, cancellationToken);
+                var project = await projectRepository.GetByIdAndUserIdAsync(projectId.Value, userContext.UserId, cancellationToken);
                 return project != null;
             }).WithMessage("ProjectDetails not found.");
 

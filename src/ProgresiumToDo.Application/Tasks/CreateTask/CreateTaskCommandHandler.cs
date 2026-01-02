@@ -34,8 +34,12 @@ internal sealed class CreateTaskCommandHandler : ICommandHandler<CreateTaskComma
 
         _taskItemRepository.Add(taskItem);
 
-        await _taskOrderingService.CreateInitialOrdersAsync(taskItem, request.ProjectId, request.DueDate,
-            cancellationToken);
+        var orderContext = new TaskOrderContext
+        {
+            DueDate = request.DueDate,
+            ProjectId = request.ProjectId
+        };
+        await _taskOrderingService.CreateInitialOrdersAsync(taskItem, orderContext, cancellationToken);
 
         var taskResponse = new CreatedTaskDto(
             taskItem.Id,

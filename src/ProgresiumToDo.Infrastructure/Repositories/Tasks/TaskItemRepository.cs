@@ -44,6 +44,7 @@ internal sealed class TaskItemRepository : Repository<TaskItem>, ITaskItemReposi
         }
         else if (filter.OrderType.HasValue)
         {
+            // Join with TaskOrders to get the order index for each task item
             var queryWithOrder = query
                 .GroupJoin(
                     DbContext.TaskOrders.Where(to => to.OrderType == filter.OrderType.Value),
@@ -80,18 +81,67 @@ internal sealed class TaskItemRepository : Repository<TaskItem>, ITaskItemReposi
                 .Take(filter.PageSize.Value);
         }
 
-        var result = await query.ToListAsync(cancellationToken);
+        var taskItems = await query.ToListAsync(cancellationToken);
         
-        return result.Select(ti => new TaskItemWithOrder(ti, taskOrderMap?.GetValueOrDefault(ti.Id) ?? null)).ToList();
+        var taskItemsWithSubtasksWithOrder = await ApplySubtaskOrderingAsync(taskItems, cancellationToken);
+
+        return taskItemsWithSubtasksWithOrder
+            .Select(ti => ti with { OrderIndex = taskOrderMap?.GetValueOrDefault(ti.TaskItem.Id) ?? null })
+            .ToList();
+    }
+
+    private async Task<List<TaskItemWithOrder>> ApplySubtaskOrderingAsync(
+        List<TaskItem> taskItems, CancellationToken cancellationToken)
+    {
+        var parentTaskIds = taskItems.Select(t => t.Id).ToList();
+
+        var subtaskOrders = await DbContext.TaskOrders
+            .Where(to => to.OrderType == OrderType.ByParentTask && parentTaskIds.Contains(to.ParentTaskId!.Value))
+            .Select(to => new { to.TaskId, to.ParentTaskId, to.OrderIndex })
+            .ToListAsync(cancellationToken);
+
+        var subtaskOrderLookup = subtaskOrders
+            .GroupBy(so => so.ParentTaskId)
+            .ToDictionary(
+                g => g.Key,
+                g => g.ToDictionary(x => x.TaskId, x => x.OrderIndex));
+
+        var result = taskItems.Select(taskItem =>
+        {
+            var subtasks = subtaskOrderLookup.TryGetValue(taskItem.Id, out var subtasksOrder)
+                ? taskItem.SubTaskItems
+                    .Select(st =>
+                    {
+                        var subtaskOrder = subtasksOrder.TryGetValue(st.Id, out var orderIndex) ? (decimal?)orderIndex : null;
+                        return new SubtaskItemWithOrder(st, subtaskOrder);
+                    })
+                    .OrderBy(st => st.OrderIndex)
+                    .ToList()
+                : [];
+
+            return new TaskItemWithOrder(taskItem, null, subtasks);
+        });
+
+        return result.ToList();
     }
     
-    public async Task<TaskItem?> GetByIdIncludingProjectSubtasksTagsAsync(Guid id, Guid userId, CancellationToken cancellationToken = default)
+    public async Task<TaskItemWithOrder?> GetByIdIncludingProjectSubtasksTagsAsync(Guid id, Guid userId, CancellationToken cancellationToken = default)
     {
-        return await DbContext.TaskItems
+        var taskItem = await DbContext.TaskItems
             .Include(ti => ti.Project)
             .Include(ti => ti.SubTaskItems)
             .Include(ti => ti.Tags)
             .FirstOrDefaultAsync(ti => ti.Id == id && ti.UserId == userId, cancellationToken);
+
+        var result = new TaskItemWithOrder(taskItem, null, null);
+        
+        if (taskItem is not null)
+        {
+            var taskItemWithSubtasksWithOrder = await ApplySubtaskOrderingAsync([taskItem], cancellationToken);
+            result = taskItemWithSubtasksWithOrder[0];
+        }
+
+        return result;
     }
     
     public async Task<TaskItem?> GetByIdAsync(Guid id, Guid userId, CancellationToken cancellationToken = default)

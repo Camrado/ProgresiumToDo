@@ -16,4 +16,6 @@ public interface ITaskOrderRepository
     Task<decimal> GetMaxOrderIndexByDueDateAsync(DateOnly dueDate, CancellationToken cancellationToken);
 
     Task<decimal> GetMaxOrderIndexByProjectAsync(Guid projectId, CancellationToken cancellationToken);
+    
+    Task<decimal> GetMaxOrderIndexByParentTaskAsync(Guid parentTaskId, CancellationToken cancellationToken);
 }

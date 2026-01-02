@@ -1,10 +1,12 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using ProgresiumToDo.Application.Tasks.CreateSubtask;
 using ProgresiumToDo.Application.Tasks.CreateTask;
 using ProgresiumToDo.Application.Tasks.DeleteTask;
 using ProgresiumToDo.Application.Tasks.GetSingleTask;
 using ProgresiumToDo.Application.Tasks.GetTasks;
+using ProgresiumToDo.Application.Tasks.UpdateSubtask;
 using ProgresiumToDo.Application.Tasks.UpdateTask;
 
 namespace ProgresiumToDo.API.Controllers.Tasks;
@@ -60,6 +62,27 @@ public class TaskController : ApiControllerBase
     {
         updateTaskCommand.TaskId = taskId;
         var result = await _mediator.Send(updateTaskCommand, cancellationToken);
+        return FromResult(result);
+    }
+    
+    [Authorize]
+    [HttpPost("{taskId:guid}/subtasks")]
+    public async Task<IActionResult> CreateSubTask([FromRoute] Guid taskId,
+        [FromBody] CreateSubtaskCommand createTaskCommand, CancellationToken cancellationToken)
+    {
+        createTaskCommand.ParentTaskId = taskId;
+        var result = await _mediator.Send(createTaskCommand, cancellationToken);
+        return FromResult(result);
+    }
+    
+    [Authorize]
+    [HttpPatch("{parentTaskId:guid}/subtasks/{subtaskId:guid}")]
+    public async Task<IActionResult> UpdateSubTask([FromRoute] Guid parentTaskId, [FromRoute] Guid subtaskId,
+        [FromBody] UpdateSubtaskCommand updateSubtaskCommand, CancellationToken cancellationToken)
+    {
+        updateSubtaskCommand.ParentTaskId = parentTaskId;
+        updateSubtaskCommand.SubtaskId = subtaskId;
+        var result = await _mediator.Send(updateSubtaskCommand, cancellationToken);
         return FromResult(result);
     }
 }
