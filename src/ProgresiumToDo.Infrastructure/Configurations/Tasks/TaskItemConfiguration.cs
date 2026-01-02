@@ -57,11 +57,11 @@ internal sealed class TaskItemConfiguration : SoftDeleteEntityConfiguration<Task
         builder.HasOne(t => t.Project)
             .WithMany(p => p.TaskItems)
             .HasForeignKey(t => t.ProjectId)
-            .OnDelete(DeleteBehavior.NoAction);
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(t => t.ParentTaskItem)
             .WithMany(t => t.SubTaskItems)
             .HasForeignKey(t => t.ParentTaskItemId)
-            .OnDelete(DeleteBehavior.NoAction);
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

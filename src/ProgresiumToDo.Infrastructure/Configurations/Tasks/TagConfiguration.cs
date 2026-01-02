@@ -25,7 +25,7 @@ internal sealed class TagConfiguration : SoftDeleteEntityConfiguration<Tag>
         builder.HasOne(t => t.Project)
             .WithMany(p => p.Tags)
             .HasForeignKey(t => t.ProjectId)
-            .OnDelete(DeleteBehavior.NoAction);
+            .OnDelete(DeleteBehavior.Cascade);
         
         builder
             .HasMany(t => t.TaskItems)
