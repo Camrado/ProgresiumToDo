@@ -134,5 +134,7 @@ public static class DependencyInjection
         services.AddScoped<ITaskItemRepository, TaskItemRepository>();
 
         services.AddScoped<ITaskOrderRepository, TaskOrderRepository>();
+        
+        services.AddScoped<ITagRepository, TagRepository>();
     }
 }

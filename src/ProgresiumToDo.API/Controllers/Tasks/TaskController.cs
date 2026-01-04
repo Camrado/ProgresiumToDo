@@ -14,19 +14,16 @@ namespace ProgresiumToDo.API.Controllers.Tasks;
 [Route("api/progresium-todo/v1/tasks")]
 public class TaskController : ApiControllerBase
 {
-    private readonly IMediator _mediator;
-    
-    public TaskController(IMediator mediator)
+    public TaskController(IMediator mediator) : base(mediator)
     {
-        _mediator = mediator;
     }
-    
+
     [Authorize]
     [HttpPost]
     public async Task<IActionResult> CreateTask([FromBody] CreateTaskCommand createTaskCommand,
         CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(createTaskCommand, cancellationToken);
+        var result = await Mediator.Send(createTaskCommand, cancellationToken);
         return FromResult(result);
     }
     
@@ -35,7 +32,7 @@ public class TaskController : ApiControllerBase
     public async Task<IActionResult> GetTasks([FromQuery] GetTasksQuery getTasksQuery, 
         CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(getTasksQuery, cancellationToken);
+        var result = await Mediator.Send(getTasksQuery, cancellationToken);
         return FromResult(result);
     }
 
@@ -43,7 +40,7 @@ public class TaskController : ApiControllerBase
     [HttpGet("{taskId:guid}")]
     public async Task<IActionResult> GetSingleTask([FromRoute] Guid taskId, CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(new GetSingleTaskQuery(taskId), cancellationToken);
+        var result = await Mediator.Send(new GetSingleTaskQuery(taskId), cancellationToken);
         return FromResult(result);
     }
 
@@ -51,7 +48,7 @@ public class TaskController : ApiControllerBase
     [HttpDelete("{taskId:guid}")]
     public async Task<IActionResult> DeleteTask([FromRoute] Guid taskId, CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(new DeleteTaskCommand(taskId), cancellationToken);
+        var result = await Mediator.Send(new DeleteTaskCommand(taskId), cancellationToken);
         return FromResult(result);
     }
 
@@ -61,7 +58,7 @@ public class TaskController : ApiControllerBase
         [FromBody] UpdateTaskCommand updateTaskCommand, CancellationToken cancellationToken)
     {
         updateTaskCommand.TaskId = taskId;
-        var result = await _mediator.Send(updateTaskCommand, cancellationToken);
+        var result = await Mediator.Send(updateTaskCommand, cancellationToken);
         return FromResult(result);
     }
     
@@ -71,7 +68,7 @@ public class TaskController : ApiControllerBase
         [FromBody] CreateSubtaskCommand createTaskCommand, CancellationToken cancellationToken)
     {
         createTaskCommand.ParentTaskId = taskId;
-        var result = await _mediator.Send(createTaskCommand, cancellationToken);
+        var result = await Mediator.Send(createTaskCommand, cancellationToken);
         return FromResult(result);
     }
     
@@ -82,7 +79,7 @@ public class TaskController : ApiControllerBase
     {
         updateSubtaskCommand.ParentTaskId = parentTaskId;
         updateSubtaskCommand.SubtaskId = subtaskId;
-        var result = await _mediator.Send(updateSubtaskCommand, cancellationToken);
+        var result = await Mediator.Send(updateSubtaskCommand, cancellationToken);
         return FromResult(result);
     }
 }

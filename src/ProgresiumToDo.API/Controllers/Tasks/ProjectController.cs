@@ -12,19 +12,16 @@ namespace ProgresiumToDo.API.Controllers.Tasks;
 [Route("api/progresium-todo/v1/projects")]
 public class ProjectController : ApiControllerBase
 {
-    private readonly IMediator _mediator;
-    
-    public ProjectController(IMediator mediator)
+    public ProjectController(IMediator mediator) : base(mediator)
     {
-        _mediator = mediator;
     }
-    
+
     [Authorize]
     [HttpPost]
     public async Task<IActionResult> CreateProject([FromBody] CreateProjectCommand createProjectCommand,
         CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(createProjectCommand, cancellationToken);
+        var result = await Mediator.Send(createProjectCommand, cancellationToken);
         return FromResult(result);
     }
 
@@ -33,7 +30,7 @@ public class ProjectController : ApiControllerBase
     public async Task<IActionResult> GetProjectById([FromRoute] Guid projectId,
         CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(new GetProjectQuery(projectId), cancellationToken);
+        var result = await Mediator.Send(new GetProjectQuery(projectId), cancellationToken);
         return FromResult(result);
     }
     
@@ -41,7 +38,7 @@ public class ProjectController : ApiControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAllProjects(CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(new GetAllProjectsQuery(), cancellationToken);
+        var result = await Mediator.Send(new GetAllProjectsQuery(), cancellationToken);
         return FromResult(result);
     }
 
@@ -52,7 +49,7 @@ public class ProjectController : ApiControllerBase
         CancellationToken cancellationToken)
     {
         updateProjectCommand.ProjectId = projectId;
-        var result = await _mediator.Send(updateProjectCommand, cancellationToken);
+        var result = await Mediator.Send(updateProjectCommand, cancellationToken);
         return FromResult(result);
     }
 
@@ -61,7 +58,7 @@ public class ProjectController : ApiControllerBase
     public async Task<IActionResult> DeleteProject([FromRoute] Guid projectId,
         CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(new DeleteProjectCommand(projectId), cancellationToken);
+        var result = await Mediator.Send(new DeleteProjectCommand(projectId), cancellationToken);
         return FromResult(result);
     }
 }

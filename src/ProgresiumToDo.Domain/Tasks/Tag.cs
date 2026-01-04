@@ -25,4 +25,13 @@ public sealed class Tag : BaseEntity
     {
         return new Tag(name, color, projectId);
     }
+    
+    public void Update(string? name, string? color)
+    {
+        if (name is not null)
+            Name = name;
+
+        if (color is not null)
+            Color = color;
+    }
 }

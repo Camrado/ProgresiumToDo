@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http.Features;
+﻿using MediatR;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using ProgresiumToDo.Domain.Abstractions;
 
@@ -7,6 +8,13 @@ namespace ProgresiumToDo.API.Controllers;
 [ApiController]
 public abstract class ApiControllerBase : ControllerBase
 {
+    protected readonly IMediator Mediator;
+    
+    protected ApiControllerBase(IMediator mediator)
+    {
+        Mediator = mediator;
+    }
+    
     protected IActionResult FromResult<T>(Result<T> result)
     {
         if (result.IsSuccess)

@@ -9,18 +9,15 @@ namespace ProgresiumToDo.API.Controllers.Auth;
 [Route("api/progresium-todo/v1/oauth")]
 public class OAuthController : ApiControllerBase
 {
-    private readonly IMediator _mediator;
-    
-    public OAuthController(IMediator mediator)
+    public OAuthController(IMediator mediator) : base(mediator)
     {
-        _mediator = mediator;
     }
 
     [AllowAnonymous]
     [HttpGet("start")]
     public async Task<IActionResult> StartOAuth([FromQuery] string provider, CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(new StartOAuthCommand(provider), cancellationToken);
+        var result = await Mediator.Send(new StartOAuthCommand(provider), cancellationToken);
         return FromResult(result);
     }
 
@@ -29,7 +26,7 @@ public class OAuthController : ApiControllerBase
     public async Task<IActionResult> GoogleCallback([FromQuery] string code, [FromQuery] string state,
         CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(new GoogleCallbackOAuthCommand(code, state), cancellationToken);
+        var result = await Mediator.Send(new GoogleCallbackOAuthCommand(code, state), cancellationToken);
         return FromResult(result);
     }
 }

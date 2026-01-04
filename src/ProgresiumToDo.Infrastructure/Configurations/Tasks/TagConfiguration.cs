@@ -21,6 +21,10 @@ internal sealed class TagConfiguration : SoftDeleteEntityConfiguration<Tag>
 
         builder.Property(t => t.ProjectId)
             .IsRequired();
+        
+        builder.HasIndex(t => new { t.ProjectId, t.Name })
+            .IsUnique()
+            .HasFilter("\"deleted_at\" IS NULL");
 
         builder.HasOne(t => t.Project)
             .WithMany(p => p.Tags)

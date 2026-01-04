@@ -13,11 +13,8 @@ namespace ProgresiumToDo.API.Controllers.Auth;
 [Route("api/progresium-todo/v1/auth")]
 public class AuthController : ApiControllerBase
 {
-    private readonly IMediator _mediator;
-    
-    public AuthController(IMediator mediator)
+    public AuthController(IMediator mediator) : base(mediator)
     {
-        _mediator = mediator;
     }
 
     [AllowAnonymous]
@@ -25,7 +22,7 @@ public class AuthController : ApiControllerBase
     public async Task<IActionResult> Register([FromBody] RegisterUserCommand registerUserCommand,
         CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(registerUserCommand, cancellationToken);
+        var result = await Mediator.Send(registerUserCommand, cancellationToken);
         return FromResult(result);
     } 
     
@@ -34,7 +31,7 @@ public class AuthController : ApiControllerBase
     public async Task<IActionResult> Login([FromBody] LogInUserCommand logInUserCommand,
         CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(logInUserCommand, cancellationToken);
+        var result = await Mediator.Send(logInUserCommand, cancellationToken);
         return FromResult(result);
     }
 
@@ -43,7 +40,7 @@ public class AuthController : ApiControllerBase
     public async Task<IActionResult> RefreshTokens([FromBody] RefreshTokensCommand refreshTokensCommand,
         CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(refreshTokensCommand, cancellationToken);
+        var result = await Mediator.Send(refreshTokensCommand, cancellationToken);
         return FromResult(result);
     }
 
@@ -52,7 +49,7 @@ public class AuthController : ApiControllerBase
     public async Task<IActionResult> Logout([FromBody] LogOutUserCommand logOutUserCommand,
         CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(logOutUserCommand, cancellationToken);
+        var result = await Mediator.Send(logOutUserCommand, cancellationToken);
         return FromResult(result);
     }
 
@@ -61,7 +58,7 @@ public class AuthController : ApiControllerBase
     public async Task<IActionResult> VerifyEmail([FromQuery] VerifyEmailCommand verifyEmailCommand,
         CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(verifyEmailCommand, cancellationToken);
+        var result = await Mediator.Send(verifyEmailCommand, cancellationToken);
         return FromResult(result);
     }
     
@@ -69,7 +66,7 @@ public class AuthController : ApiControllerBase
     [HttpPost("send-verification-email")]
     public async Task<IActionResult> SendVerificationEmail(CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(new SendVerificationEmailCommand(), cancellationToken);
+        var result = await Mediator.Send(new SendVerificationEmailCommand(), cancellationToken);
         return FromResult(result);
     }
 }
