@@ -148,6 +148,13 @@ internal sealed class TaskItemRepository : Repository<TaskItem>, ITaskItemReposi
     {
         return await DbContext.TaskItems.FirstOrDefaultAsync(ti => ti.Id == id && ti.UserId == userId, cancellationToken);
     }
+    
+    public async Task<TaskItem?> GetByIdWithTagsIncludedAsync(Guid id, Guid userId, CancellationToken cancellationToken = default)
+    {
+        return await DbContext.TaskItems
+            .Include(ti => ti.Tags)
+            .FirstOrDefaultAsync(ti => ti.Id == id && ti.UserId == userId, cancellationToken);
+    }
 
     public void Delete(TaskItem taskItem)
     {

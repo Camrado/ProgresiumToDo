@@ -1,11 +1,13 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using ProgresiumToDo.Application.Tasks.AddTagToTask;
 using ProgresiumToDo.Application.Tasks.CreateSubtask;
 using ProgresiumToDo.Application.Tasks.CreateTask;
 using ProgresiumToDo.Application.Tasks.DeleteTask;
 using ProgresiumToDo.Application.Tasks.GetSingleTask;
 using ProgresiumToDo.Application.Tasks.GetTasks;
+using ProgresiumToDo.Application.Tasks.RemoveTagFromTask;
 using ProgresiumToDo.Application.Tasks.UpdateSubtask;
 using ProgresiumToDo.Application.Tasks.UpdateTask;
 
@@ -80,6 +82,26 @@ public class TaskController : ApiControllerBase
         updateSubtaskCommand.ParentTaskId = parentTaskId;
         updateSubtaskCommand.SubtaskId = subtaskId;
         var result = await Mediator.Send(updateSubtaskCommand, cancellationToken);
+        return FromResult(result);
+    }
+    
+    [Authorize]
+    [HttpPost("{taskId:guid}/tags/{tagId:guid}")]
+    public async Task<IActionResult> AddTagToTask([FromRoute] Guid taskId,
+        [FromRoute] AddTagToTaskCommand addTagToTaskCommand, CancellationToken cancellationToken)
+    {
+        addTagToTaskCommand.TaskId = taskId;
+        var result = await Mediator.Send(addTagToTaskCommand, cancellationToken);
+        return FromResult(result);
+    }
+    
+    [Authorize]
+    [HttpDelete("{taskId:guid}/tags/{tagId:guid}")]
+    public async Task<IActionResult> RemoveTagFromTask([FromRoute] Guid taskId,
+        [FromRoute] RemoveTagFromTaskCommand removeTagFromTaskCommand, CancellationToken cancellationToken)
+    {
+        removeTagFromTaskCommand.TaskId = taskId;
+        var result = await Mediator.Send(removeTagFromTaskCommand, cancellationToken);
         return FromResult(result);
     }
 }

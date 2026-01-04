@@ -203,4 +203,20 @@ public sealed class TaskItem : BaseEntity
             ClosedAt = null;
         }
     }
+    
+    public void AddTag(Tag tag)
+    {
+        if (!Tags.Contains(tag))
+        {
+            Tags.Add(tag);
+        }
+    }
+    
+    public void RemoveTag(Tag tag)
+    {
+        if (Tags.Contains(tag))
+        {
+            Tags.Remove(tag);
+        }
+    }
 }
