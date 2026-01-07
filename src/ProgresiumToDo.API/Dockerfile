@@ -7,6 +7,8 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
+COPY Directory.Build.props ./
+COPY Directory.Build.targets ./
 COPY ["src/ProgresiumToDo.API/ProgresiumToDo.API.csproj", "src/ProgresiumToDo.API/"]
 COPY ["src/ProgresiumToDo.Infrastructure/ProgresiumToDo.Infrastructure.csproj", "src/ProgresiumToDo.Infrastructure/"]
 COPY ["src/ProgresiumToDo.Application/ProgresiumToDo.Application.csproj", "src/ProgresiumToDo.Application/"]
