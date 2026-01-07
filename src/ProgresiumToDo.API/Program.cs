@@ -1,4 +1,5 @@
 using dotenv.net;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using ProgresiumToDo.API.Extensions;
 using ProgresiumToDo.Application;
@@ -28,20 +29,51 @@ builder.Services.AddMemoryCache();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
+// var origins = (Environment.GetEnvironmentVariable("CORS_ORIGINS") ??
+//                throw new ApplicationException("CORS origins secret is missing."))
+//     .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("Frontend", policy =>
+    {
+        // policy
+        //     .WithOrigins(origins)
+        //     .AllowAnyHeader()
+        //     .AllowAnyMethod()
+        //     .AllowCredentials();
+        policy
+            .AllowAnyOrigin()
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+// Remove this block in future in production deployments
+if (app.Environment.IsProduction())
 {
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    db.Database.Migrate();
+}
+
+// Temporarily enable Swagger in all environments
+// if (app.Environment.IsDevelopment())
+// {
     app.UseSwagger();
     app.UseSwaggerUI(options =>
     {
         options.SwaggerEndpoint("/swagger/v1/swagger.json", "Progresium ToDo API v1");
     });
-}
+// }
 
 app.UseHttpsRedirection();
 
 app.UseRouting();
+
+app.UseCors("Frontend");
 
 app.UseExceptionHandler();
 
