@@ -29,7 +29,7 @@ public static class DependencyInjection
     {
         services.AddHttpClient();
         
-        AddPersistence(services, configuration);
+        AddPersistence(services);
         
         AddIdentity(services);
         
@@ -48,10 +48,10 @@ public static class DependencyInjection
         return services;
     }
     
-    private static void AddPersistence(IServiceCollection services, IConfiguration configuration)
+    private static void AddPersistence(IServiceCollection services)
     {
-        var connectionString = configuration.GetConnectionString("Database") 
-                               ?? throw new ArgumentNullException(nameof(configuration), "Database connection string is missing.");
+        var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING") ??
+                               throw new ApplicationException("Database connection string secret is missing.");
 
         services.AddDbContext<ApplicationDbContext>(options =>
             options
