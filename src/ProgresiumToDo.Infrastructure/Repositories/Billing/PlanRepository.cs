@@ -9,6 +9,17 @@ internal sealed class PlanRepository : Repository<Plan>, IPlanRepository
     {
     }
 
+    public async Task<Plan?> GetByIdWithPricingsAndFeaturesIncludedAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        return await DbContext.Plans
+            .Include(p => p.PlanPricings)
+            .ThenInclude(pp => pp.Region)
+            .Include(p => p.PlanFeatures)
+            .ThenInclude(pf => pf.Feature)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
+    }
+
     public async Task<List<Plan>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         return await DbContext.Plans

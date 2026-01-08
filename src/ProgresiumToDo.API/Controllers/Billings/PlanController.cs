@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using ProgresiumToDo.Application.Billing.GetAllPlans;
+using ProgresiumToDo.Application.Billing.GetSinglePlan;
 
 namespace ProgresiumToDo.API.Controllers.Billings;
 
@@ -15,6 +16,14 @@ public class PlanController : ApiControllerBase
     public async Task<IActionResult> GetAllPlans(CancellationToken cancellationToken)
     {
         var result = await Mediator.Send(new GetAllPlansQuery(), cancellationToken);
+        return FromResult(result);
+    }
+
+    [HttpGet("{planId:guid}")]
+    public async Task<IActionResult> GetPlanById([FromRoute] GetSinglePlanQuery getSinglePlanQuery,
+        CancellationToken cancellationToken)
+    {
+        var result = await Mediator.Send(getSinglePlanQuery, cancellationToken);
         return FromResult(result);
     }
 }
