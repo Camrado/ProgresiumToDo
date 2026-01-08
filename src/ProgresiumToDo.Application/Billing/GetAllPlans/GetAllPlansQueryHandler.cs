@@ -15,7 +15,7 @@ internal sealed class GetAllPlansQueryHandler : IQueryHandler<GetAllPlansQuery, 
     
     public async Task<Result<GetAllPlansQueryResponse>> Handle(GetAllPlansQuery request, CancellationToken cancellationToken)
     {
-        var plans = await _planRepository.GetAllAsync(cancellationToken);
+        var plans = await _planRepository.GetAllWithPricingsAndFeaturesIncludedAsync(cancellationToken);
 
         var plansDto = plans
             .Select(p => new PlanListItemDto(

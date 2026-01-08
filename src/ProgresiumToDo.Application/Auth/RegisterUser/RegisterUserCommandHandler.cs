@@ -1,42 +1,31 @@
-﻿using ProgresiumToDo.Application.Abstractions.Identity;
-using ProgresiumToDo.Application.Abstractions.Messaging;
+﻿using ProgresiumToDo.Application.Abstractions.Messaging;
+using ProgresiumToDo.Application.Abstractions.Onboarding;
 using ProgresiumToDo.Domain.Abstractions;
-using ProgresiumToDo.Domain.Auth;
 
 namespace ProgresiumToDo.Application.Auth.RegisterUser;
 
 internal sealed class RegisterUserCommandHandler : ICommandHandler<RegisterUserCommand, RegisterUserCommandResponse>
 {
-    private readonly IIdentityService _identityService;
-    private readonly IUserRepository _userRepository;
+    private readonly IUserOnboardingService _userOnboardingService;
     
-    public RegisterUserCommandHandler(IIdentityService identityService, IUserRepository userRepository)
+    public RegisterUserCommandHandler(IUserOnboardingService userOnboardingService)
     {
-        _identityService = identityService;
-        _userRepository = userRepository;
+        _userOnboardingService = userOnboardingService;
     }
     
     public async Task<Result<RegisterUserCommandResponse>> Handle(RegisterUserCommand request,
         CancellationToken cancellationToken)
     {
-        var authenticationResult = await _identityService.RegisterAsync(request.Email, request.Password);
-
-        if (authenticationResult.IsFailure)
-        {
-            return Result.Failure<RegisterUserCommandResponse>(authenticationResult.Errors);
-        }
-
-        var user = User.Create(request.Email, request.FirstName, request.LastName,
-            authenticationResult.Value);
+        var onboardingResult = await _userOnboardingService.RegisterAndOnboardUserAsync(request.Email, request.Password,
+            request.FirstName, request.LastName, cancellationToken);
         
-        _userRepository.Add(user);
-
-        var tokens = _identityService.GenerateTokens(user);
+        if (onboardingResult.IsFailure)
+            return Result.Failure<RegisterUserCommandResponse>(onboardingResult.Errors);
         
         return new RegisterUserCommandResponse(
             "Account created successfully.",
-            tokens.AccessToken,
-            tokens.RefreshToken.Token,
-            tokens.ExpiresIn);
+            onboardingResult.Value.AccessToken,
+            onboardingResult.Value.RefreshToken.Token,
+            onboardingResult.Value.ExpiresIn);
     }
 }

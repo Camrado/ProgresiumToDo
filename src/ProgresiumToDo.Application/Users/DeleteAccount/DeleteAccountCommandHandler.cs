@@ -23,6 +23,8 @@ internal sealed class DeleteAccountCommandHandler : ICommandHandler<DeleteAccoun
 
     public async Task<Result<DeleteAccountCommandResponse>> Handle(DeleteAccountCommand request, CancellationToken cancellationToken)
     {
+        
+        
         var user = await _userRepository.GetByIdAsync(_userContext.UserId, cancellationToken);
         if (user is null)
         {
