@@ -4,9 +4,9 @@ using ProgresiumToDo.Domain.Billing;
 
 namespace ProgresiumToDo.Infrastructure.Configurations.Billing;
 
-internal sealed class PlanPricingConfiguration : IEntityTypeConfiguration<PlanPricing>
+internal sealed class PlanPricingConfiguration : SoftDeleteEntityConfiguration<PlanPricing>
 {
-    public void Configure(EntityTypeBuilder<PlanPricing> builder)
+    protected override void ConfigureEntity(EntityTypeBuilder<PlanPricing> builder)
     {
         builder.ToTable("plan_pricings");
 

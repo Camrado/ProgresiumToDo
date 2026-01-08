@@ -8,13 +8,15 @@ public sealed class PlanFeature
     
     public Guid FeatureId { get; private set; }
     
-    public int DailyLimit { get; private set; }
+    public int? DailyLimit { get; private set; }
     
-    public int MonthlyLimit { get; private set; }
+    public int? MonthlyLimit { get; private set; }
     
     public Plan Plan { get; private set; }
     
     public Feature Feature { get; private set; }
+    
+    private PlanFeature() {}
     
     private PlanFeature(Guid planId, Guid featureId, int dailyLimit, int monthlyLimit)
     {

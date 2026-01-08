@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ProgresiumToDo.Infrastructure;
@@ -11,9 +12,11 @@ using ProgresiumToDo.Infrastructure;
 namespace ProgresiumToDo.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260108143749_FixedTheTableStructureOfPlanPricing")]
+    partial class FixedTheTableStructureOfPlanPricing
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -553,11 +556,11 @@ namespace ProgresiumToDo.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("feature_id");
 
-                    b.Property<int?>("DailyLimit")
+                    b.Property<int>("DailyLimit")
                         .HasColumnType("integer")
                         .HasColumnName("daily_limit");
 
-                    b.Property<int?>("MonthlyLimit")
+                    b.Property<int>("MonthlyLimit")
                         .HasColumnType("integer")
                         .HasColumnName("monthly_limit");
 

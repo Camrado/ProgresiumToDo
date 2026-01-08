@@ -12,12 +12,14 @@ using ProgresiumToDo.Application.Abstractions.OAuth;
 using ProgresiumToDo.Application.Abstractions.Tasks;
 using ProgresiumToDo.Domain.Abstractions;
 using ProgresiumToDo.Domain.Auth;
+using ProgresiumToDo.Domain.Billing;
 using ProgresiumToDo.Domain.Tasks;
 using ProgresiumToDo.Infrastructure.Configurations.Auth;
 using ProgresiumToDo.Infrastructure.Identity;
 using ProgresiumToDo.Infrastructure.Interceptors;
 using ProgresiumToDo.Infrastructure.OAuth;
 using ProgresiumToDo.Infrastructure.Repositories.Auth;
+using ProgresiumToDo.Infrastructure.Repositories.Billing;
 using ProgresiumToDo.Infrastructure.Repositories.Tasks;
 using ProgresiumToDo.Infrastructure.Tasks;
 
@@ -136,5 +138,7 @@ public static class DependencyInjection
         services.AddScoped<ITaskOrderRepository, TaskOrderRepository>();
         
         services.AddScoped<ITagRepository, TagRepository>();
+
+        services.AddScoped<IPlanRepository, PlanRepository>();
     }
 }

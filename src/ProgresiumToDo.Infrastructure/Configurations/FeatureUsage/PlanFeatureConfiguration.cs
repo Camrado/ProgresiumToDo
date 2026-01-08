@@ -19,10 +19,10 @@ internal sealed class PlanFeaturesConfiguration : IEntityTypeConfiguration<PlanF
             .IsRequired();
 
         builder.Property(pf => pf.DailyLimit)
-            .IsRequired();
+            .IsRequired(false);
 
         builder.Property(pf => pf.MonthlyLimit)
-            .IsRequired();
+            .IsRequired(false);
 
         builder.HasOne(pf => pf.Plan)
             .WithMany(p => p.PlanFeatures)
