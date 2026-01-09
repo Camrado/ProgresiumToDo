@@ -7,7 +7,7 @@ public sealed class Subscription : BaseEntity
 {
     public DateTime StartDate { get; private set; }
     
-    public DateTime? EndDate { get; private set; }
+    public DateTime EndDate { get; private set; }
     
     public bool IsAutoRenew { get; private set; }
     
@@ -21,7 +21,7 @@ public sealed class Subscription : BaseEntity
     
     public PlanPricing PlanPricing { get; private set; }
     
-    private Subscription(DateTime startDate, DateTime? endDate, bool isAutoRenew, SubscriptionStatus status, 
+    private Subscription(DateTime startDate, DateTime endDate, bool isAutoRenew, SubscriptionStatus status, 
         Guid userId, Guid planPricingId)
     {
         StartDate = startDate;
@@ -32,9 +32,14 @@ public sealed class Subscription : BaseEntity
         PlanPricingId = planPricingId;
     }
     
-    public static Subscription Create(DateTime startDate, DateTime? endDate, bool isAutoRenew,
-        SubscriptionStatus status, Guid userId, Guid planPricingId)
+    public static Subscription Create(DateTime startDate, DateTime endDate, bool isAutoRenew, Guid userId, Guid planPricingId)
     {
-        return new Subscription(startDate, endDate, isAutoRenew, status, userId, planPricingId);
+        return new Subscription(startDate, endDate, isAutoRenew, SubscriptionStatus.Active, userId, planPricingId);
+    }
+    
+    public void EndSubscription(DateTime endDate)
+    {
+        EndDate = endDate;
+        Status = SubscriptionStatus.Cancelled;
     }
 }

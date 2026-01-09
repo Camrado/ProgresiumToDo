@@ -1,7 +1,9 @@
 ﻿using ProgresiumToDo.Application.Abstractions.Identity;
 using ProgresiumToDo.Application.Abstractions.Messaging;
+using ProgresiumToDo.Application.Billing.SubscribeToPlan;
 using ProgresiumToDo.Domain.Abstractions;
 using ProgresiumToDo.Domain.Auth;
+using ProgresiumToDo.Domain.Billing;
 
 namespace ProgresiumToDo.Application.Users.GetCurrentUser;
 
@@ -10,14 +12,17 @@ internal sealed class GetCurrentUserQueryHandler : IQueryHandler<GetCurrentUserQ
     private readonly IUserRepository _userRepository;
     private readonly IUserContext _userContext;
     private readonly IIdentityService _identityService;
-    
-    public GetCurrentUserQueryHandler(IUserRepository userRepository, IUserContext userContext, IIdentityService identityService)
+    private readonly ISubscriptionRepository _subscriptionRepository;
+
+    public GetCurrentUserQueryHandler(IUserRepository userRepository, IUserContext userContext,
+        IIdentityService identityService, ISubscriptionRepository subscriptionRepository)
     {
         _userRepository = userRepository;
         _userContext = userContext;
         _identityService = identityService;
+        _subscriptionRepository = subscriptionRepository;
     }
-    
+
     public async Task<Result<GetCurrentUserQueryResponse>> Handle(GetCurrentUserQuery request, CancellationToken cancellationToken)
     {
         var user = await _userRepository.GetByIdAsync(_userContext.UserId, cancellationToken);
@@ -31,6 +36,15 @@ internal sealed class GetCurrentUserQueryHandler : IQueryHandler<GetCurrentUserQ
         {
             return Result.Failure<GetCurrentUserQueryResponse>(isEmailVerified.Errors);
         }
+        
+        var activeSubscription = await _subscriptionRepository.GetActiveSubscriptionByUserIdAsync(user.Id, cancellationToken);
+        var subscriptionDto = new SubscriptionDto(
+            activeSubscription.Id,
+            activeSubscription.PlanPricingId,
+            activeSubscription.Status.ToString(),
+            activeSubscription.StartDate,
+            activeSubscription.EndDate,
+            activeSubscription.IsAutoRenew);
 
         var userDto = new CurrentUserDto(
             user.Id,
@@ -39,7 +53,8 @@ internal sealed class GetCurrentUserQueryHandler : IQueryHandler<GetCurrentUserQ
             user.LastName,
             isEmailVerified.Value,
             user.CreatedAt,
-            user.UpdatedAt);
+            user.UpdatedAt,
+            subscriptionDto);
         
         return new GetCurrentUserQueryResponse("User profile retrieved successfully.", userDto);
     }

@@ -1,4 +1,6 @@
-﻿namespace ProgresiumToDo.Application.Users.GetCurrentUser;
+﻿using ProgresiumToDo.Application.Billing.SubscribeToPlan;
+
+namespace ProgresiumToDo.Application.Users.GetCurrentUser;
 
 public sealed record GetCurrentUserQueryResponse(
     string Message,
@@ -11,4 +13,5 @@ public sealed record CurrentUserDto(
     string LastName,
     bool IsEmailVerified,
     DateTime CreatedAt,
-    DateTime UpdatedAt);
+    DateTime UpdatedAt,
+    SubscriptionDto Subscription);

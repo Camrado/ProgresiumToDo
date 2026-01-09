@@ -149,5 +149,7 @@ public static class DependencyInjection
         services.AddScoped<IPlanRepository, PlanRepository>();
         
         services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
+
+        services.AddScoped<IPlanPricingRepository, PlanPricingRepository>();
     }
 }

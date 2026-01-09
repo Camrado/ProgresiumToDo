@@ -28,15 +28,37 @@ internal sealed class SubscriptionService : ISubscriptionService
             return Result.Failure([BillingErrors.PlanPricingNotFound]);
 
         var subscription = Subscription.Create(
-            DateTime.UtcNow, null, true, SubscriptionStatus.Active, userId, freePlanPricing.Id);
+            DateTime.UtcNow, DateTime.UtcNow.AddMonths(1), true, userId, freePlanPricing.Id);
 
         _subscriptionRepository.Add(subscription);
         
         return Result.Success();
     }
 
-    public async Task<Result> SubscribeUserToPlanAsync(Guid userId, Guid planPricingId, CancellationToken cancellationToken = default)
+    // TODO: Add proration logic for mid-cycle subscriptions
+    public async Task<Result<Subscription>> SubscribeUserToPlanAsync(Guid userId, PlanPricing planPricing,
+        bool isAutoRenew, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        var existingSubscription =
+            await _subscriptionRepository.GetActiveSubscriptionByUserIdAsync(userId, cancellationToken);
+
+        if (existingSubscription.PlanPricingId == planPricing.Id)
+        {
+            return Result.Failure<Subscription>([BillingErrors.AlreadySubscribedToThisPlan]);
+        }
+
+        var newStartDate = DateTime.UtcNow;
+
+        existingSubscription.EndSubscription(newStartDate);
+
+        var newEndDate = planPricing.BillingPeriod == BillingPeriod.Monthly
+            ? newStartDate.AddMonths(1)
+            : newStartDate.AddYears(1);
+
+        var subscription = Subscription.Create(newStartDate, newEndDate, isAutoRenew, userId, planPricing.Id);
+
+        _subscriptionRepository.Add(subscription);
+
+        return subscription;
     }
 }

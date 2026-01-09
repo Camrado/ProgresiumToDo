@@ -15,7 +15,8 @@ internal sealed class SubscriptionConfiguration : IEntityTypeConfiguration<Subsc
         builder.Property(s => s.StartDate)
             .IsRequired();
 
-        builder.Property(s => s.EndDate);
+        builder.Property(s => s.EndDate)
+            .IsRequired();
 
         builder.Property(s => s.IsAutoRenew);
 

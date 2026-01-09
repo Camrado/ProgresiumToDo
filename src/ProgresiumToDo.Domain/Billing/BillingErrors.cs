@@ -11,4 +11,8 @@ public static class BillingErrors
     public static Error PlanPricingNotFound => new(
         "Billing.PlanPricingNotFound",
         "The specified plan pricing was not found.");
+    
+    public static Error AlreadySubscribedToThisPlan => new(
+        "Billing.AlreadySubscribedToThisPlan",
+        "The user is already subscribed to this plan.");
 }
