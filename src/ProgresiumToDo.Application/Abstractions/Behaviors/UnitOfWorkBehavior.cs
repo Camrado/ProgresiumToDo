@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using ProgresiumToDo.Application.Abstractions.Messaging;
 using ProgresiumToDo.Domain.Abstractions;
 
 namespace ProgresiumToDo.Application.Abstractions.Behaviors;
@@ -16,10 +17,26 @@ public sealed class UnitOfWorkBehavior<TRequest, TResponse> : IPipelineBehavior<
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next,
         CancellationToken cancellationToken)
     {
-        var response = await next(cancellationToken);
+        if (request is IBaseQuery)
+        {
+            return await next(cancellationToken);
+        }
+        
+        await using var transaction = await _unitOfWork.BeginTransactionAsync(cancellationToken);
 
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        try
+        {
+            var response = await next(cancellationToken);
 
-        return response;
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+
+            return response;
+        }
+        catch
+        {
+            await transaction.RollbackAsync(cancellationToken);
+            throw;
+        }
     }
 }

@@ -1,12 +1,13 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using ProgresiumToDo.Domain.Abstractions;
+using ProgresiumToDo.Application.Abstractions.Behaviors;
 using ProgresiumToDo.Domain.Auth;
 using ProgresiumToDo.Domain.Billing;
 using ProgresiumToDo.Domain.FeatureUsage;
 using ProgresiumToDo.Domain.Tasks;
 using ProgresiumToDo.Infrastructure.Identity;
+using ProgresiumToDo.Infrastructure.Persistence;
 
 namespace ProgresiumToDo.Infrastructure;
 
@@ -31,11 +32,10 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
     public DbSet<TaskOrder> TaskOrders { get; set; }
     public DbSet<TaskAttachment> TaskAttachments { get; set; }
 
-    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    public async Task<IApplicationTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default)
     {
-        var result = await base.SaveChangesAsync(cancellationToken);
-        
-        return result;
+        var efTransaction = await Database.BeginTransactionAsync(cancellationToken);
+        return new EfTransactionWrapper(efTransaction);
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

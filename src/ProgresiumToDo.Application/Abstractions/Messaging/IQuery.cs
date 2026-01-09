@@ -3,4 +3,6 @@ using ProgresiumToDo.Domain.Abstractions;
 
 namespace ProgresiumToDo.Application.Abstractions.Messaging;
 
-public interface IQuery<TResponse> : IRequest<Result<TResponse>>;
+public interface IQuery<TResponse> : IRequest<Result<TResponse>>, IBaseQuery;
+
+public interface IBaseQuery;
