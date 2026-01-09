@@ -1,6 +1,7 @@
 ﻿using ProgresiumToDo.Application.Abstractions.Billing;
 using ProgresiumToDo.Application.Abstractions.Identity;
 using ProgresiumToDo.Application.Abstractions.Messaging;
+using ProgresiumToDo.Application.Billing.GetAllPlans;
 using ProgresiumToDo.Domain.Abstractions;
 
 namespace ProgresiumToDo.Application.Billing.SubscribeToPlan;
@@ -29,13 +30,7 @@ internal sealed class SubscribeToPlanCommandHandler : ICommandHandler<SubscribeT
             return Result.Failure<SubscribeToPlanCommandResponse>(subscriptionResult.Errors);
         }
         
-        var subscriptionDto = new SubscriptionDto(
-            subscriptionResult.Value.Id, 
-            subscriptionResult.Value.PlanPricingId, 
-            subscriptionResult.Value.Status.ToString(), 
-            subscriptionResult.Value.StartDate, 
-            subscriptionResult.Value.EndDate, 
-            subscriptionResult.Value.IsAutoRenew);
+        var subscriptionDto = SubscriptionDto.FromDomain(subscriptionResult.Value);
         
         return new SubscribeToPlanCommandResponse("Subscription successful.", subscriptionDto);
     }

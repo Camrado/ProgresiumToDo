@@ -14,4 +14,13 @@ internal sealed class SubscriptionRepository : Repository<Subscription>, ISubscr
         return await DbContext.Subscriptions
             .FirstAsync(s => s.UserId == userId && s.Status == SubscriptionStatus.Active, cancellationToken);
     }
+
+    public async Task<Subscription> GetActiveSubscriptionByUserIdWithPlanIncludedAsync(Guid userId,
+        CancellationToken cancellationToken = default)
+    {
+        return await DbContext.Subscriptions
+            .Include(s => s.PlanPricing).ThenInclude(pp => pp.Plan)
+            .Include(s => s.PlanPricing).ThenInclude(pp => pp.Region)
+            .FirstAsync(s => s.UserId == userId && s.Status == SubscriptionStatus.Active, cancellationToken);
+    }
 }

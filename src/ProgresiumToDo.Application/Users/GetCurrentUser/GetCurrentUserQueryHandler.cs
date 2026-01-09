@@ -1,5 +1,6 @@
 ﻿using ProgresiumToDo.Application.Abstractions.Identity;
 using ProgresiumToDo.Application.Abstractions.Messaging;
+using ProgresiumToDo.Application.Billing.GetAllPlans;
 using ProgresiumToDo.Application.Billing.SubscribeToPlan;
 using ProgresiumToDo.Domain.Abstractions;
 using ProgresiumToDo.Domain.Auth;
@@ -37,14 +38,9 @@ internal sealed class GetCurrentUserQueryHandler : IQueryHandler<GetCurrentUserQ
             return Result.Failure<GetCurrentUserQueryResponse>(isEmailVerified.Errors);
         }
         
-        var activeSubscription = await _subscriptionRepository.GetActiveSubscriptionByUserIdAsync(user.Id, cancellationToken);
-        var subscriptionDto = new SubscriptionDto(
-            activeSubscription.Id,
-            activeSubscription.PlanPricingId,
-            activeSubscription.Status.ToString(),
-            activeSubscription.StartDate,
-            activeSubscription.EndDate,
-            activeSubscription.IsAutoRenew);
+        var activeSubscription = await _subscriptionRepository
+            .GetActiveSubscriptionByUserIdWithPlanIncludedAsync(user.Id, cancellationToken);
+        var subscriptionDto = SubscriptionDto.FromDomain(activeSubscription);
 
         var userDto = new CurrentUserDto(
             user.Id,
