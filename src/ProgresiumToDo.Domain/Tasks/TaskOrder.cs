@@ -1,4 +1,6 @@
-﻿namespace ProgresiumToDo.Domain.Tasks;
+﻿using ProgresiumToDo.Domain.Projects;
+
+namespace ProgresiumToDo.Domain.Tasks;
 
 public sealed class TaskOrder
 {

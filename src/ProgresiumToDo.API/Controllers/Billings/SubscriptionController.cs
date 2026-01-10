@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ProgresiumToDo.Application.Billing.SubscribeToPlan;
+using ProgresiumToDo.Application.Billing.Commands.SubscribeToPlan;
 
 namespace ProgresiumToDo.API.Controllers.Billings;
 

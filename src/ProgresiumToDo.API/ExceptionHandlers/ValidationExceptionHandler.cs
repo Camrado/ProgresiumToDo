@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
-using ProgresiumToDo.Domain.Abstractions;
 
 namespace ProgresiumToDo.API.ExceptionHandlers;
 

@@ -1,5 +1,4 @@
 ﻿using System.Security.Cryptography;
-using ProgresiumToDo.Domain.Abstractions;
 
 namespace ProgresiumToDo.Domain.Auth;
 

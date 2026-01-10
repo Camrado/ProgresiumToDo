@@ -1,6 +1,5 @@
 ﻿using ProgresiumToDo.Application.Abstractions.Identity;
 using ProgresiumToDo.Domain.Abstractions;
-using ProgresiumToDo.Domain.Auth;
 
 namespace ProgresiumToDo.Application.Abstractions.Onboarding;
 

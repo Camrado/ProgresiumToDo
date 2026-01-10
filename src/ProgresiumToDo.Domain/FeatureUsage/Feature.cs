@@ -1,6 +1,4 @@
-﻿using ProgresiumToDo.Domain.Abstractions;
-
-namespace ProgresiumToDo.Domain.FeatureUsage;
+﻿namespace ProgresiumToDo.Domain.FeatureUsage;
 
 public sealed class Feature
 {

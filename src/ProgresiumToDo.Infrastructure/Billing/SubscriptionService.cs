@@ -1,6 +1,8 @@
 ﻿using ProgresiumToDo.Application.Abstractions.Billing;
+using ProgresiumToDo.Application.Billing.Repositories;
 using ProgresiumToDo.Domain.Abstractions;
 using ProgresiumToDo.Domain.Billing;
+using ProgresiumToDo.Domain.Billing.Errors;
 
 namespace ProgresiumToDo.Infrastructure.Billing;
 
@@ -20,12 +22,12 @@ internal sealed class SubscriptionService : ISubscriptionService
         var freePlan = await _planRepository.GeyByNameWithPricingsIncludedAsync("Free", cancellationToken);
         
         if (freePlan is null)
-            return Result.Failure([BillingErrors.PlanNotFound]);
+            return Result.Failure([PlanErrors.NotFound]);
         
         var freePlanPricing = freePlan.PlanPricings.FirstOrDefault(pp => pp.BillingPeriod == BillingPeriod.Monthly);
         
         if (freePlanPricing is null)
-            return Result.Failure([BillingErrors.PlanPricingNotFound]);
+            return Result.Failure([PlanPricingErrors.NotFound]);
 
         var subscription = Subscription.Create(
             DateTime.UtcNow, DateTime.UtcNow.AddMonths(1), true, userId, freePlanPricing.Id);
@@ -44,7 +46,7 @@ internal sealed class SubscriptionService : ISubscriptionService
 
         if (existingSubscription.PlanPricingId == planPricing.Id)
         {
-            return Result.Failure<Subscription>([BillingErrors.AlreadySubscribedToThisPlan]);
+            return Result.Failure<Subscription>([SubscriptionErrors.AlreadySubscribedToThisPlan]);
         }
 
         var newStartDate = DateTime.UtcNow;

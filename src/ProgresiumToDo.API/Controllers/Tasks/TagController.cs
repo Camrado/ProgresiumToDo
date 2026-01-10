@@ -1,11 +1,11 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ProgresiumToDo.Application.Tags.CreateTag;
-using ProgresiumToDo.Application.Tags.DeleteTag;
-using ProgresiumToDo.Application.Tags.GetAllTagsForProject;
-using ProgresiumToDo.Application.Tags.GetSingleTag;
-using ProgresiumToDo.Application.Tags.UpdateTag;
+using ProgresiumToDo.Application.Tags.Commands.CreateTag;
+using ProgresiumToDo.Application.Tags.Commands.DeleteTag;
+using ProgresiumToDo.Application.Tags.Commands.UpdateTag;
+using ProgresiumToDo.Application.Tags.Queries.GetAllTagsForProject;
+using ProgresiumToDo.Application.Tags.Queries.GetSingleTag;
 
 namespace ProgresiumToDo.API.Controllers.Tasks;
 

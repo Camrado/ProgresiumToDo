@@ -1,6 +1,5 @@
 ﻿using MediatR;
 using ProgresiumToDo.Application.Abstractions.Messaging;
-using ProgresiumToDo.Domain.Abstractions;
 
 namespace ProgresiumToDo.Application.Abstractions.Behaviors;
 

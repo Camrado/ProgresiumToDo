@@ -5,10 +5,8 @@ namespace ProgresiumToDo.Application.Abstractions.Identity;
 
 public interface IIdentityService
 {
-    Task<Result<Guid>> RegisterAsync(string email, string password);
+    Task<Result<Guid>> RegisterUserAsync(string email, string? password = null);
 
-    Task<Result<Guid>> CreateUserAsync(string email);
-    
     AuthenticationResult GenerateTokens(User user);
     
     Task<Result<AuthenticationResult>> LoginAsync(string email, string password, CancellationToken cancellationToken = default);
