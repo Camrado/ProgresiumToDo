@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using ProgresiumToDo.Application.Billing.GetAllPlans;
-using ProgresiumToDo.Application.Billing.GetSinglePlan;
+using ProgresiumToDo.Application.Billing.Queries.GetAllPlans;
+using ProgresiumToDo.Application.Billing.Queries.GetSinglePlan;
 
 namespace ProgresiumToDo.API.Controllers.Billings;
 

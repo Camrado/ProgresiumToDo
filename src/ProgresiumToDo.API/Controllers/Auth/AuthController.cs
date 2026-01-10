@@ -1,12 +1,12 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ProgresiumToDo.Application.Auth.LogInUser;
-using ProgresiumToDo.Application.Auth.LogOutUser;
-using ProgresiumToDo.Application.Auth.RefreshTokens;
-using ProgresiumToDo.Application.Auth.RegisterUser;
-using ProgresiumToDo.Application.Auth.SendVerificationEmail;
-using ProgresiumToDo.Application.Auth.VerifyEmail;
+using ProgresiumToDo.Application.Auth.Commands.LogInUser;
+using ProgresiumToDo.Application.Auth.Commands.LogOutUser;
+using ProgresiumToDo.Application.Auth.Commands.RefreshTokens;
+using ProgresiumToDo.Application.Auth.Commands.RegisterUser;
+using ProgresiumToDo.Application.Auth.Commands.SendVerificationEmail;
+using ProgresiumToDo.Application.Auth.Commands.VerifyEmail;
 
 namespace ProgresiumToDo.API.Controllers.Auth;
 

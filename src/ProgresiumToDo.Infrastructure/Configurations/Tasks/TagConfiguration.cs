@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using ProgresiumToDo.Domain.Tasks;
-using Task = System.Threading.Tasks.Task;
+using ProgresiumToDo.Domain.Tags;
 
 namespace ProgresiumToDo.Infrastructure.Configurations.Tasks;
 

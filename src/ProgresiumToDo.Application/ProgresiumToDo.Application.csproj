@@ -11,5 +11,20 @@
     <ItemGroup>
       <ProjectReference Include="..\ProgresiumToDo.Domain\ProgresiumToDo.Domain.csproj" />
     </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Auth\Commands\" />
+      <Folder Include="Billing\Commands\" />
+      <Folder Include="Billing\Queries\" />
+      <Folder Include="OAuth\Commands\" />
+      <Folder Include="Projects\Commands\" />
+      <Folder Include="Projects\Queries\" />
+      <Folder Include="Tags\Commands\" />
+      <Folder Include="Tags\Queries\" />
+      <Folder Include="Tasks\Commands\" />
+      <Folder Include="Tasks\Queries\" />
+      <Folder Include="Users\Commands\" />
+      <Folder Include="Users\Queries\" />
+    </ItemGroup>
     
 </Project>

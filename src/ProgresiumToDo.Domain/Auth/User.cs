@@ -1,5 +1,6 @@
 ﻿using ProgresiumToDo.Domain.Abstractions;
 using ProgresiumToDo.Domain.Billing;
+using ProgresiumToDo.Domain.Projects;
 using ProgresiumToDo.Domain.Tasks;
 
 namespace ProgresiumToDo.Domain.Auth;

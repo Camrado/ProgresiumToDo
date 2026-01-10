@@ -1,4 +1,5 @@
-﻿using ProgresiumToDo.Domain.Billing;
+﻿using ProgresiumToDo.Application.Billing.Repositories;
+using ProgresiumToDo.Domain.Billing;
 
 namespace ProgresiumToDo.Infrastructure.Repositories.Billing;
 

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using ProgresiumToDo.Application.Auth.Repositories;
 using ProgresiumToDo.Domain.Auth;
 
 namespace ProgresiumToDo.Infrastructure.Repositories.Auth;

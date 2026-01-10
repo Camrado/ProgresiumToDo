@@ -1,9 +1,9 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ProgresiumToDo.Application.Users.DeleteAccount;
-using ProgresiumToDo.Application.Users.GetCurrentUser;
-using ProgresiumToDo.Application.Users.UpdateProfile;
+using ProgresiumToDo.Application.Users.Commands.DeleteAccount;
+using ProgresiumToDo.Application.Users.Commands.UpdateProfile;
+using ProgresiumToDo.Application.Users.Queries.GetCurrentUser;
 
 namespace ProgresiumToDo.API.Controllers.Auth;
 

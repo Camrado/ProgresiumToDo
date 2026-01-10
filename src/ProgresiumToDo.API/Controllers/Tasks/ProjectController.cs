@@ -1,11 +1,11 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ProgresiumToDo.Application.Projects.CreateProject;
-using ProgresiumToDo.Application.Projects.DeleteProject;
-using ProgresiumToDo.Application.Projects.GetAllProjects;
-using ProgresiumToDo.Application.Projects.GetProject;
-using ProgresiumToDo.Application.Projects.UpdateProject;
+using ProgresiumToDo.Application.Projects.Commands.CreateProject;
+using ProgresiumToDo.Application.Projects.Commands.DeleteProject;
+using ProgresiumToDo.Application.Projects.Commands.UpdateProject;
+using ProgresiumToDo.Application.Projects.Queries.GetAllProjects;
+using ProgresiumToDo.Application.Projects.Queries.GetProject;
 
 namespace ProgresiumToDo.API.Controllers.Tasks;
 

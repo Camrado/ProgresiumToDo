@@ -5,6 +5,8 @@ using ProgresiumToDo.Application.Abstractions.Behaviors;
 using ProgresiumToDo.Domain.Auth;
 using ProgresiumToDo.Domain.Billing;
 using ProgresiumToDo.Domain.FeatureUsage;
+using ProgresiumToDo.Domain.Projects;
+using ProgresiumToDo.Domain.Tags;
 using ProgresiumToDo.Domain.Tasks;
 using ProgresiumToDo.Infrastructure.Identity;
 using ProgresiumToDo.Infrastructure.Persistence;

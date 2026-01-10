@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using ProgresiumToDo.Domain.Tasks;
+using ProgresiumToDo.Application.Tags.Repositories;
+using ProgresiumToDo.Domain.Tags;
 
 namespace ProgresiumToDo.Infrastructure.Repositories.Tasks;
 

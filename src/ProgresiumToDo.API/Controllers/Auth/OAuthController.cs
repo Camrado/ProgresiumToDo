@@ -1,8 +1,8 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ProgresiumToDo.Application.OAuth.GoogleCallbackOAuth;
-using ProgresiumToDo.Application.OAuth.StartOAuth;
+using ProgresiumToDo.Application.OAuth.Commands.GoogleCallbackOAuth;
+using ProgresiumToDo.Application.OAuth.Commands.StartOAuth;
 
 namespace ProgresiumToDo.API.Controllers.Auth;
 
