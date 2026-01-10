@@ -57,11 +57,9 @@ internal sealed class IdentityService : IIdentityService
             Email = email
         };
 
-        IdentityResult result;
-        if (password is not null)
-            result = await _userManager.CreateAsync(user, password);
-        else
-            result = await _userManager.CreateAsync(user);
+        var result = password is not null ?
+            await _userManager.CreateAsync(user, password) :
+            await _userManager.CreateAsync(user);
         
         if (!result.Succeeded)
         {
