@@ -24,7 +24,7 @@ internal sealed class UserOnboardingService : IUserOnboardingService
     public async Task<Result<AuthenticationResult>> RegisterAndOnboardUserAsync(string email,
         string password, string firstName, string lastName, CancellationToken cancellationToken = default)
     {
-        var authenticationResult = await _identityService.RegisterAsync(email, password);
+        var authenticationResult = await _identityService.RegisterUserAsync(email, password);
         if (authenticationResult.IsFailure)
         {
             return Result.Failure<AuthenticationResult>(authenticationResult.Errors);

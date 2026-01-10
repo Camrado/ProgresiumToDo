@@ -49,7 +49,7 @@ internal sealed class IdentityService : IIdentityService
                    throw new ApplicationException("Base url is missing.");
     }
     
-    public async Task<Result<Guid>> RegisterAsync(string email, string password)
+    public async Task<Result<Guid>> RegisterUserAsync(string email, string? password = null)
     {
         var user = new ApplicationUser
         {
@@ -57,28 +57,12 @@ internal sealed class IdentityService : IIdentityService
             Email = email
         };
 
-        var result = await _userManager.CreateAsync(user, password);
-        if (!result.Succeeded)
-        {
-            var errors = result.Errors
-                .Select(e => new Error(e.Code, e.Description))
-                .Where(e => !e.Code.Contains("username", StringComparison.InvariantCultureIgnoreCase))
-                .ToList();
-            return Result.Failure<Guid>(errors);
-        }
-
-        return user.Id;
-    }
-    
-    public async Task<Result<Guid>> CreateUserAsync(string email)
-    {
-        var user = new ApplicationUser
-        {
-            UserName = $"{email}_{Guid.NewGuid()}",
-            Email = email
-        };
+        IdentityResult result;
+        if (password is not null)
+            result = await _userManager.CreateAsync(user, password);
+        else
+            result = await _userManager.CreateAsync(user);
         
-        var result = await _userManager.CreateAsync(user);
         if (!result.Succeeded)
         {
             var errors = result.Errors

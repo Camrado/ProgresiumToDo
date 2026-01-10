@@ -49,7 +49,7 @@ internal sealed class GoogleCallbackOAuthCommandHandler : ICommandHandler<Google
         }
         else
         {
-            var createUserResult = await _identityService.CreateUserAsync(googleIdentityResult.Email);
+            var createUserResult = await _identityService.RegisterUserAsync(googleIdentityResult.Email);
             if (createUserResult.IsFailure)
                 return Result.Failure<GoogleCallbackOAuthCommandResponse>(createUserResult.Errors);
 
