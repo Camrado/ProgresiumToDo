@@ -8,4 +8,7 @@ public interface ISubscriptionRepository
 
     Task<Subscription> GetActiveSubscriptionByUserIdAsync(Guid userId, bool includePlan = false,
         CancellationToken cancellationToken = default);
+
+    Task<List<Subscription>> GetPaidSubscriptionsByUserIdAsync(Guid userId, bool includePlan = false,
+        CancellationToken cancellationToken = default);
 }
