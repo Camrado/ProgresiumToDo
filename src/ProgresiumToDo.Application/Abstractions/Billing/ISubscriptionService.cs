@@ -9,4 +9,6 @@ public interface ISubscriptionService
     
     Task<Result<Subscription>> SubscribeUserToPlanAsync(Guid userId, PlanPricing planPricing, bool isAutoRenew,
         CancellationToken cancellationToken = default);
+
+    Task<Result> CancelUserSubscriptionAsync(Guid userId, CancellationToken cancellationToken = default);
 }

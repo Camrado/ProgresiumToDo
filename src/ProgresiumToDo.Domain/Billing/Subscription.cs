@@ -42,4 +42,9 @@ public sealed class Subscription : BaseEntity
         EndDate = endDate;
         Status = SubscriptionStatus.Cancelled;
     }
+    
+    public void SetPlanPricing(PlanPricing planPricing)
+    {
+        PlanPricing = planPricing;
+    }
 }

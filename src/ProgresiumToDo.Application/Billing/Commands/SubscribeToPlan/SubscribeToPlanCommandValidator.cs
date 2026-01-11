@@ -13,7 +13,8 @@ internal sealed class SubscribeToPlanCommandValidator : AbstractValidator<Subscr
             .WithMessage("PlanPricing ID must not be empty.")
             .MustAsync(async (command, planPricingId, cancellationToken) =>
             {
-                var planPricing = await planPricingRepository.GetByIdAsync(planPricingId, cancellationToken);
+                var planPricing = await planPricingRepository
+                    .GetByIdAsync(planPricingId, includePlan: true, includeRegion: true, cancellationToken);
                 if (planPricing is null)
                     return false;
                 

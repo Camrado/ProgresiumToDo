@@ -42,7 +42,7 @@ internal sealed class SubscriptionService : ISubscriptionService
         bool isAutoRenew, CancellationToken cancellationToken = default)
     {
         var existingSubscription =
-            await _subscriptionRepository.GetActiveSubscriptionByUserIdAsync(userId, cancellationToken);
+            await _subscriptionRepository.GetActiveSubscriptionByUserIdAsync(userId, cancellationToken: cancellationToken);
 
         if (existingSubscription.PlanPricingId == planPricing.Id)
         {
@@ -59,8 +59,43 @@ internal sealed class SubscriptionService : ISubscriptionService
 
         var subscription = Subscription.Create(newStartDate, newEndDate, isAutoRenew, userId, planPricing.Id);
 
+        subscription.SetPlanPricing(planPricing);
+
         _subscriptionRepository.Add(subscription);
 
         return subscription;
+    }
+
+    public async Task<Result> CancelUserSubscriptionAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        var existingSubscription = await _subscriptionRepository
+            .GetActiveSubscriptionByUserIdAsync(userId, includePlan: true, cancellationToken);
+        if (existingSubscription.PlanPricing.Plan.Name == "Free")
+        {
+            return Result.Failure([SubscriptionErrors.NoActiveSubscription]);
+        }
+
+        var freePlan = await _planRepository.GeyByNameWithPricingsIncludedAsync("Free", cancellationToken);
+        if (freePlan is null)
+        {
+            return Result.Failure([PlanErrors.NotFound]);
+        }
+        
+        var freePlanPricing = freePlan.PlanPricings.FirstOrDefault(pp => pp.BillingPeriod == BillingPeriod.Monthly);
+        if (freePlanPricing is null)
+        {
+            return Result.Failure([PlanPricingErrors.NotFound]);
+        }
+        
+        var newStartDate = DateTime.UtcNow;
+        var newEndDate = newStartDate.AddMonths(1);
+        
+        existingSubscription.EndSubscription(newStartDate);
+        
+        var subscription = Subscription.Create(newStartDate, newEndDate, true, userId, freePlanPricing.Id);
+        
+        _subscriptionRepository.Add(subscription);
+
+        return Result.Success();
     }
 }

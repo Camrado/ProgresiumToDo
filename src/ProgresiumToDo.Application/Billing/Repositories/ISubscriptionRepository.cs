@@ -5,9 +5,7 @@ namespace ProgresiumToDo.Application.Billing.Repositories;
 public interface ISubscriptionRepository
 {
     void Add(Subscription subscription);
-    
-    Task<Subscription> GetActiveSubscriptionByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
 
-    Task<Subscription> GetActiveSubscriptionByUserIdWithPlanIncludedAsync(Guid userId,
+    Task<Subscription> GetActiveSubscriptionByUserIdAsync(Guid userId, bool includePlan = false,
         CancellationToken cancellationToken = default);
 }

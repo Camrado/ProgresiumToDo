@@ -39,7 +39,7 @@ internal sealed class GetCurrentUserQueryHandler : IQueryHandler<GetCurrentUserQ
         }
         
         var activeSubscription = await _subscriptionRepository
-            .GetActiveSubscriptionByUserIdWithPlanIncludedAsync(user.Id, cancellationToken);
+            .GetActiveSubscriptionByUserIdAsync(user.Id, includePlan: true, cancellationToken);
         var subscriptionDto = SubscriptionDto.FromDomain(activeSubscription);
 
         var userDto = new CurrentUserDto(

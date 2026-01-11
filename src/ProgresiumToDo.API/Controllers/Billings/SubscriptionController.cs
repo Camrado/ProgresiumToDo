@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using ProgresiumToDo.Application.Billing.Commands.CancelSubscription;
 using ProgresiumToDo.Application.Billing.Commands.SubscribeToPlan;
 
 namespace ProgresiumToDo.API.Controllers.Billings;
@@ -18,6 +19,14 @@ public class SubscriptionController : ApiControllerBase
         CancellationToken cancellationToken)
     {
         var result = await Mediator.Send(subscribeToPlanCommand, cancellationToken);
+        return FromResult(result);
+    }
+
+    [Authorize]
+    [HttpPost("cancel")]
+    public async Task<IActionResult> CancelSubscription(CancellationToken cancellationToken)
+    {
+        var result = await Mediator.Send(new CancelSubscriptionCommand(), cancellationToken);
         return FromResult(result);
     }
 }

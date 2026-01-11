@@ -12,7 +12,7 @@ public abstract class Repository<T> where T : BaseEntity
         DbContext = dbContext;
     }
     
-    public async Task<T?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default) 
+    public virtual async Task<T?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default) 
     {
         return await DbContext.Set<T>().FirstOrDefaultAsync(entity => entity.Id == id, cancellationToken);
     }
