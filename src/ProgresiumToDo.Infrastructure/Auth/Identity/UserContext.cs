@@ -1,8 +1,8 @@
 ﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
-using ProgresiumToDo.Application.Abstractions.Identity;
+using ProgresiumToDo.Application.Abstractions.Auth.Identity;
 
-namespace ProgresiumToDo.Infrastructure.Identity;
+namespace ProgresiumToDo.Infrastructure.Auth.Identity;
 
 internal sealed class UserContext : IUserContext
 {

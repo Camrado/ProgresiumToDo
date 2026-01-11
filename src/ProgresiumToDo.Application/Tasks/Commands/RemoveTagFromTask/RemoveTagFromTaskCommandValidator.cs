@@ -1,5 +1,5 @@
 ﻿using FluentValidation;
-using ProgresiumToDo.Application.Abstractions.Identity;
+using ProgresiumToDo.Application.Abstractions.Auth.Identity;
 using ProgresiumToDo.Application.Tags.Repositories;
 using ProgresiumToDo.Application.Tasks.Repositories;
 

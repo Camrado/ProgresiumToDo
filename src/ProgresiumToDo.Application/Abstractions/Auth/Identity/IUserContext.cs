@@ -1,4 +1,4 @@
-﻿namespace ProgresiumToDo.Application.Abstractions.Identity;
+﻿namespace ProgresiumToDo.Application.Abstractions.Auth.Identity;
 
 public interface IUserContext
 {

@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
-using ProgresiumToDo.Application.Abstractions.Identity;
+using ProgresiumToDo.Application.Abstractions.Auth.Identity;
+using ProgresiumToDo.Application.Abstractions.Auth.OAuth;
 using ProgresiumToDo.Application.Abstractions.Messaging;
-using ProgresiumToDo.Application.Abstractions.OAuth;
 using ProgresiumToDo.Application.Users.Repositories;
 using ProgresiumToDo.Domain.Abstractions;
 using ProgresiumToDo.Domain.Auth;

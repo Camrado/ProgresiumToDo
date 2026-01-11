@@ -1,11 +1,11 @@
-﻿using ProgresiumToDo.Application.Abstractions.Billing;
-using ProgresiumToDo.Application.Abstractions.Identity;
-using ProgresiumToDo.Application.Abstractions.Onboarding;
+﻿using ProgresiumToDo.Application.Abstractions.Auth.Identity;
+using ProgresiumToDo.Application.Abstractions.Auth.Onboarding;
+using ProgresiumToDo.Application.Abstractions.Billing;
 using ProgresiumToDo.Application.Users.Repositories;
 using ProgresiumToDo.Domain.Abstractions;
 using ProgresiumToDo.Domain.Auth;
 
-namespace ProgresiumToDo.Infrastructure.Onboarding;
+namespace ProgresiumToDo.Infrastructure.Auth.Onboarding;
 
 internal sealed class UserOnboardingService : IUserOnboardingService
 {

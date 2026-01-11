@@ -8,7 +8,7 @@ using ProgresiumToDo.Domain.FeatureUsage;
 using ProgresiumToDo.Domain.Projects;
 using ProgresiumToDo.Domain.Tags;
 using ProgresiumToDo.Domain.Tasks;
-using ProgresiumToDo.Infrastructure.Identity;
+using ProgresiumToDo.Infrastructure.Auth.Identity;
 using ProgresiumToDo.Infrastructure.Persistence;
 
 namespace ProgresiumToDo.Infrastructure;

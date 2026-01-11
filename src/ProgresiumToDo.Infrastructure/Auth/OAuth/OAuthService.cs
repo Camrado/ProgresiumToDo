@@ -4,9 +4,9 @@ using System.Text;
 using System.Text.Json;
 using Google.Apis.Auth;
 using Microsoft.AspNetCore.WebUtilities;
-using ProgresiumToDo.Application.Abstractions.OAuth;
+using ProgresiumToDo.Application.Abstractions.Auth.OAuth;
 
-namespace ProgresiumToDo.Infrastructure.OAuth;
+namespace ProgresiumToDo.Infrastructure.Auth.OAuth;
 
 internal sealed class OAuthService : IOAuthService
 {

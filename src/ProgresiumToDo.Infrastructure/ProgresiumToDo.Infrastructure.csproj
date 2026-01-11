@@ -16,4 +16,8 @@
       <ProjectReference Include="..\ProgresiumToDo.Application\ProgresiumToDo.Application.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Auth\" />
+    </ItemGroup>
+
 </Project>

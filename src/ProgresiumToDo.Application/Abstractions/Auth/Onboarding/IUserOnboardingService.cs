@@ -1,7 +1,7 @@
-﻿using ProgresiumToDo.Application.Abstractions.Identity;
+﻿using ProgresiumToDo.Application.Abstractions.Auth.Identity;
 using ProgresiumToDo.Domain.Abstractions;
 
-namespace ProgresiumToDo.Application.Abstractions.Onboarding;
+namespace ProgresiumToDo.Application.Abstractions.Auth.Onboarding;
 
 public interface IUserOnboardingService
 {

@@ -1,5 +1,5 @@
-﻿using ProgresiumToDo.Application.Abstractions.Messaging;
-using ProgresiumToDo.Application.Abstractions.Onboarding;
+﻿using ProgresiumToDo.Application.Abstractions.Auth.Onboarding;
+using ProgresiumToDo.Application.Abstractions.Messaging;
 using ProgresiumToDo.Domain.Abstractions;
 
 namespace ProgresiumToDo.Application.Auth.Commands.RegisterUser;

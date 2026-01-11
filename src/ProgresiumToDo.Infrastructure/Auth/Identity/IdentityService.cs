@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using ProgresiumToDo.Application.Abstractions.Identity;
+using ProgresiumToDo.Application.Abstractions.Auth.Identity;
 using ProgresiumToDo.Application.Auth.Repositories;
 using ProgresiumToDo.Application.Users.Repositories;
 using ProgresiumToDo.Domain.Abstractions;
@@ -13,7 +13,7 @@ using ProgresiumToDo.Domain.Auth;
 using ProgresiumToDo.Domain.Auth.Errors;
 using JwtRegisteredClaimNames = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames;
 
-namespace ProgresiumToDo.Infrastructure.Identity;
+namespace ProgresiumToDo.Infrastructure.Auth.Identity;
 
 internal sealed class IdentityService : IIdentityService
 {

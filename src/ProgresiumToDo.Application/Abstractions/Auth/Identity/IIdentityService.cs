@@ -1,7 +1,7 @@
 ﻿using ProgresiumToDo.Domain.Abstractions;
 using ProgresiumToDo.Domain.Auth;
 
-namespace ProgresiumToDo.Application.Abstractions.Identity;
+namespace ProgresiumToDo.Application.Abstractions.Auth.Identity;
 
 public interface IIdentityService
 {

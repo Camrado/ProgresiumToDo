@@ -1,4 +1,4 @@
-﻿using ProgresiumToDo.Application.Abstractions.Identity;
+﻿using ProgresiumToDo.Application.Abstractions.Auth.Identity;
 using ProgresiumToDo.Application.Abstractions.Messaging;
 using ProgresiumToDo.Application.Projects.Queries.GetProject;
 using ProgresiumToDo.Application.Projects.Repositories;

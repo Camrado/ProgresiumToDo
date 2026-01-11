@@ -1,5 +1,5 @@
 using FluentValidation;
-using ProgresiumToDo.Application.Abstractions.Identity;
+using ProgresiumToDo.Application.Abstractions.Auth.Identity;
 using ProgresiumToDo.Application.Projects.Repositories;
 using ProgresiumToDo.Domain.Tasks;
 using TaskStatus = ProgresiumToDo.Domain.Tasks.TaskStatus;

@@ -1,4 +1,4 @@
-﻿namespace ProgresiumToDo.Application.Abstractions.OAuth;
+﻿namespace ProgresiumToDo.Application.Abstractions.Auth.OAuth;
 
 public interface IOAuthService
 {

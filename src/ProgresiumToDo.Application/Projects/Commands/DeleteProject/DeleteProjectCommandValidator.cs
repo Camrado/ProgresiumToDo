@@ -1,5 +1,5 @@
 using FluentValidation;
-using ProgresiumToDo.Application.Abstractions.Identity;
+using ProgresiumToDo.Application.Abstractions.Auth.Identity;
 using ProgresiumToDo.Application.Projects.Repositories;
 
 namespace ProgresiumToDo.Application.Projects.Commands.DeleteProject;
