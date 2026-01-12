@@ -43,8 +43,11 @@ public sealed class Subscription : BaseEntity
         Status = SubscriptionStatus.Cancelled;
     }
     
-    public void SetPlanPricing(PlanPricing planPricing)
+    public void FillPlanPricing(PlanPricing planPricing)
     {
+        if (planPricing.Id != PlanPricingId)
+            throw new InvalidOperationException("The provided PlanPricing does not match the Subscription's PlanPricingId.");
+        
         PlanPricing = planPricing;
     }
 }

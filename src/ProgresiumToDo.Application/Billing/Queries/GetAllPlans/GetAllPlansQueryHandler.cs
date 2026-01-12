@@ -17,25 +17,7 @@ internal sealed class GetAllPlansQueryHandler : IQueryHandler<GetAllPlansQuery, 
     {
         var plans = await _planRepository.GetAllWithPricingsAndFeaturesIncludedAsync(cancellationToken);
 
-        var plansDto = plans
-            .Select(p => new PlanListItemDto(
-                p.Id,
-                p.Name,
-                p.Description,
-                p.PlanFeatures
-                    .Select(pf => new FeatureListItemDto(
-                        pf.Feature.Name,
-                        pf.DailyLimit,
-                        pf.MonthlyLimit))
-                    .ToList(),
-                p.PlanPricings
-                    .Select(pp => new PricingListItemDto(
-                        pp.Id,
-                        pp.Price,
-                        pp.BillingPeriod.ToString(),
-                        new RegionDto(pp.Region.Code, pp.Region.Currency)))
-                    .ToList()
-            ));
+        var plansDto = plans.Select(PlanListItemDto.FromDomain).ToList();
 
         return new GetAllPlansQueryResponse("Plans retrieved successfully.", plansDto);
     }

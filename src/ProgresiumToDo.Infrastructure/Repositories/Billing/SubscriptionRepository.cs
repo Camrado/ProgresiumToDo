@@ -10,7 +10,7 @@ internal sealed class SubscriptionRepository : Repository<Subscription>, ISubscr
     {
     }
 
-    public async Task<Subscription> GetActiveSubscriptionByUserIdAsync(Guid userId, bool includePlan = false,
+    public async Task<Subscription?> GetActiveSubscriptionByUserIdAsync(Guid userId, bool includePlan = false,
         CancellationToken cancellationToken = default)
     {
         IQueryable<Subscription> query = DbContext.Subscriptions;
@@ -23,7 +23,7 @@ internal sealed class SubscriptionRepository : Repository<Subscription>, ISubscr
         }
         
         return await query
-            .FirstAsync(s => s.UserId == userId && s.Status == SubscriptionStatus.Active, cancellationToken);
+            .SingleOrDefaultAsync(s => s.UserId == userId && s.Status == SubscriptionStatus.Active, cancellationToken);
     }
     
     public async Task<List<Subscription>> GetPaidSubscriptionsByUserIdAsync(Guid userId, bool includePlan = false,
@@ -39,7 +39,7 @@ internal sealed class SubscriptionRepository : Repository<Subscription>, ISubscr
         }
         
         return await query
-            .Where(s => s.UserId == userId && s.PlanPricing.Plan.Name != "Free")
+            .Where(s => s.UserId == userId && s.PlanPricing.Plan.Name != PlanType.Free)
             .OrderByDescending(s => s.StartDate)
             .ToListAsync(cancellationToken);
     }

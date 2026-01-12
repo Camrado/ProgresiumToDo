@@ -24,6 +24,10 @@ internal sealed class SubscriptionConfiguration : IEntityTypeConfiguration<Subsc
             .HasConversion<string>()
             .IsRequired();
 
+        builder.HasIndex(s => s.UserId)
+            .IsUnique()
+            .HasFilter("\"status\" = 'Active'");
+
         builder.HasOne(s => s.User)
             .WithMany(u => u.Subscriptions)
             .HasForeignKey(s => s.UserId)

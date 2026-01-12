@@ -5,7 +5,7 @@ namespace ProgresiumToDo.Domain.Billing;
 
 public sealed class Plan : BaseEntity
 {
-    public string Name { get; private set; }
+    public PlanType Name { get; private set; }
     
     public string? Description { get; private set; }
     
@@ -13,14 +13,9 @@ public sealed class Plan : BaseEntity
     
     public ICollection<PlanFeature> PlanFeatures { get; private set; } = new List<PlanFeature>();
     
-    private Plan(string name, string? description)
+    private Plan(PlanType name, string? description)
     {
         Name = name;
         Description = description;
-    }
-    
-    public static Plan Create(string name, string? description)
-    {
-        return new Plan(name, description);
     }
 }

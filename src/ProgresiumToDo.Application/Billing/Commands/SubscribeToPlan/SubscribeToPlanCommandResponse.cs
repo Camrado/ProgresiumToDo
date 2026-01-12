@@ -25,7 +25,7 @@ public sealed record SubscriptionDto(
             sub.IsAutoRenew,
             new SubscriptionPlanDto(
                 sub.PlanPricing.Plan.Id,
-                sub.PlanPricing.Plan.Name,
+                sub.PlanPricing.Plan.Name.ToString(),
                 sub.PlanPricing.Plan.Description,
                 sub.PlanPricing.Price,
                 sub.PlanPricing.BillingPeriod.ToString(),

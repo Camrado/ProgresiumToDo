@@ -20,7 +20,7 @@ internal sealed class GetSubscriptionsHistoryQueryHandler : IQueryHandler<GetSub
     public async Task<Result<GetSubscriptionsHistoryQueryResponse>> Handle(GetSubscriptionsHistoryQuery request, CancellationToken cancellationToken)
     {
         var subscriptions = await _subscriptionRepository
-            .GetPaidSubscriptionsByUserIdAsync(_userContext.UserId, includePlan: true, cancellationToken);
+            .GetPaidSubscriptionsByUserIdAsync(_userContext.UserId, includePlan: true, cancellationToken: cancellationToken);
 
         var subscriptionDtos = subscriptions
             .Select(SubscriptionDto.FromDomain);
