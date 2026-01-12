@@ -13,6 +13,7 @@ internal sealed class PlanConfiguration : IEntityTypeConfiguration<Plan>
         builder.HasKey(p => p.Id);
 
         builder.Property(p => p.Name)
+            .HasConversion<string>()
             .IsRequired();
 
         builder.HasIndex(p => p.Name)

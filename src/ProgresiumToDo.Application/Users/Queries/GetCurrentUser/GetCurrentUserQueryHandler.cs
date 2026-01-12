@@ -5,6 +5,7 @@ using ProgresiumToDo.Application.Billing.Repositories;
 using ProgresiumToDo.Application.Users.Repositories;
 using ProgresiumToDo.Domain.Abstractions;
 using ProgresiumToDo.Domain.Auth.Errors;
+using ProgresiumToDo.Domain.Billing.Errors;
 
 namespace ProgresiumToDo.Application.Users.Queries.GetCurrentUser;
 
@@ -39,8 +40,7 @@ internal sealed class GetCurrentUserQueryHandler : IQueryHandler<GetCurrentUserQ
         }
         
         var activeSubscription = await _subscriptionRepository
-            .GetActiveSubscriptionByUserIdWithPlanIncludedAsync(user.Id, cancellationToken);
-        var subscriptionDto = SubscriptionDto.FromDomain(activeSubscription);
+            .GetActiveSubscriptionByUserIdAsync(user.Id, includePlan: true, cancellationToken: cancellationToken);
 
         var userDto = new CurrentUserDto(
             user.Id,
@@ -50,7 +50,7 @@ internal sealed class GetCurrentUserQueryHandler : IQueryHandler<GetCurrentUserQ
             isEmailVerified.Value,
             user.CreatedAt,
             user.UpdatedAt,
-            subscriptionDto);
+            activeSubscription is not null ? SubscriptionDto.FromDomain(activeSubscription) : null);
         
         return new GetCurrentUserQueryResponse("User profile retrieved successfully.", userDto);
     }

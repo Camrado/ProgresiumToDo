@@ -10,18 +10,37 @@ internal sealed class SubscriptionRepository : Repository<Subscription>, ISubscr
     {
     }
 
-    public async Task<Subscription> GetActiveSubscriptionByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
-    {
-        return await DbContext.Subscriptions
-            .FirstAsync(s => s.UserId == userId && s.Status == SubscriptionStatus.Active, cancellationToken);
-    }
-
-    public async Task<Subscription> GetActiveSubscriptionByUserIdWithPlanIncludedAsync(Guid userId,
+    public async Task<Subscription?> GetActiveSubscriptionByUserIdAsync(Guid userId, bool includePlan = false,
         CancellationToken cancellationToken = default)
     {
-        return await DbContext.Subscriptions
-            .Include(s => s.PlanPricing).ThenInclude(pp => pp.Plan)
-            .Include(s => s.PlanPricing).ThenInclude(pp => pp.Region)
-            .FirstAsync(s => s.UserId == userId && s.Status == SubscriptionStatus.Active, cancellationToken);
+        IQueryable<Subscription> query = DbContext.Subscriptions;
+
+        if (includePlan)
+        {
+            query = query
+                .Include(s => s.PlanPricing).ThenInclude(pp => pp.Plan)
+                .Include(s => s.PlanPricing).ThenInclude(pp => pp.Region);
+        }
+        
+        return await query
+            .SingleOrDefaultAsync(s => s.UserId == userId && s.Status == SubscriptionStatus.Active, cancellationToken);
+    }
+    
+    public async Task<List<Subscription>> GetPaidSubscriptionsByUserIdAsync(Guid userId, bool includePlan = false,
+        CancellationToken cancellationToken = default)
+    {
+        IQueryable<Subscription> query = DbContext.Subscriptions;
+
+        if (includePlan)
+        {
+            query = query
+                .Include(s => s.PlanPricing).ThenInclude(pp => pp.Plan)
+                .Include(s => s.PlanPricing).ThenInclude(pp => pp.Region);
+        }
+        
+        return await query
+            .Where(s => s.UserId == userId && s.PlanPricing.Plan.Name != PlanType.Free)
+            .OrderByDescending(s => s.StartDate)
+            .ToListAsync(cancellationToken);
     }
 }

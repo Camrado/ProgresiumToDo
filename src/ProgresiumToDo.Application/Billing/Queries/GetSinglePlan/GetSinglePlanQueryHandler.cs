@@ -18,24 +18,7 @@ internal sealed class GetSinglePlanQueryHandler : IQueryHandler<GetSinglePlanQue
     {
         var plan = request.Plan!;
 
-        var planDto = new PlanListItemDto(
-            plan.Id,
-            plan.Name,
-            plan.Description,
-            plan.PlanFeatures
-                .Select(pf => new FeatureListItemDto(
-                    pf.Feature.Name,
-                    pf.DailyLimit,
-                    pf.MonthlyLimit))
-                .ToList(),
-            plan.PlanPricings
-                .Select(pp => new PricingListItemDto(
-                    pp.Id,
-                    pp.Price,
-                    pp.BillingPeriod.ToString(),
-                    new RegionDto(pp.Region.Code, pp.Region.Currency)))
-                .ToList()
-        );
+        var planDto = PlanListItemDto.FromDomain(plan);
         
         return Task.FromResult<Result<GetSinglePlanQueryResponse>>(
             new GetSinglePlanQueryResponse("Plan retrieved successfully.", planDto));

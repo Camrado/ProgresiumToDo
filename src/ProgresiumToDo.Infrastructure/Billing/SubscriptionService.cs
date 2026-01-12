@@ -19,7 +19,7 @@ internal sealed class SubscriptionService : ISubscriptionService
     
     public async Task<Result> SubscribeUserToFreePlanAsync(Guid userId, CancellationToken cancellationToken = default)
     {
-        var freePlan = await _planRepository.GeyByNameWithPricingsIncludedAsync("Free", cancellationToken);
+        var freePlan = await _planRepository.GetByNameWithPricingsIncludedAsync(PlanType.Free, cancellationToken);
         
         if (freePlan is null)
             return Result.Failure([PlanErrors.NotFound]);
@@ -42,7 +42,11 @@ internal sealed class SubscriptionService : ISubscriptionService
         bool isAutoRenew, CancellationToken cancellationToken = default)
     {
         var existingSubscription =
-            await _subscriptionRepository.GetActiveSubscriptionByUserIdAsync(userId, cancellationToken);
+            await _subscriptionRepository.GetActiveSubscriptionByUserIdAsync(userId, cancellationToken: cancellationToken);
+        if (existingSubscription is null)
+        {
+            return Result.Failure<Subscription>([SubscriptionErrors.AlreadyOnFreePlan]);
+        }
 
         if (existingSubscription.PlanPricingId == planPricing.Id)
         {
@@ -59,8 +63,48 @@ internal sealed class SubscriptionService : ISubscriptionService
 
         var subscription = Subscription.Create(newStartDate, newEndDate, isAutoRenew, userId, planPricing.Id);
 
+        subscription.FillPlanPricing(planPricing);
+
         _subscriptionRepository.Add(subscription);
 
         return subscription;
+    }
+
+    public async Task<Result> CancelUserSubscriptionAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        var existingSubscription = await _subscriptionRepository
+            .GetActiveSubscriptionByUserIdAsync(userId, includePlan: true, cancellationToken: cancellationToken);
+        if (existingSubscription is null)
+        {
+            return Result.Failure([SubscriptionErrors.AlreadyOnFreePlan]);
+        }
+
+        if (existingSubscription.PlanPricing.Plan.Name == PlanType.Free)
+        {
+            return Result.Failure([SubscriptionErrors.AlreadyOnFreePlan]);
+        }
+
+        var freePlan = await _planRepository.GetByNameWithPricingsIncludedAsync(PlanType.Free, cancellationToken);
+        if (freePlan is null)
+        {
+            return Result.Failure([PlanErrors.NotFound]);
+        }
+        
+        var freePlanPricing = freePlan.PlanPricings.FirstOrDefault(pp => pp.BillingPeriod == BillingPeriod.Monthly);
+        if (freePlanPricing is null)
+        {
+            return Result.Failure([PlanPricingErrors.NotFound]);
+        }
+        
+        var newStartDate = DateTime.UtcNow;
+        var newEndDate = newStartDate.AddMonths(1);
+        
+        existingSubscription.EndSubscription(newStartDate);
+        
+        var subscription = Subscription.Create(newStartDate, newEndDate, true, userId, freePlanPricing.Id);
+        
+        _subscriptionRepository.Add(subscription);
+
+        return Result.Success();
     }
 }
