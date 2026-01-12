@@ -20,7 +20,8 @@ internal sealed class GetSingleTaskQueryHandler : IQueryHandler<GetSingleTaskQue
             taskItem.EndTime,
             taskItem.ClosedAt,
             taskItem.Status.ToString(),
-            taskItem.Project?.Name ?? string.Empty,
+            taskItem.ProjectId,
+            taskItem.Project?.Name,
             taskItem.Tags.Select(t => t.Name),
             taskItemWithOrder.Subtasks?.Select(subtaskWithOrder => new SubTaskDetailsDto(
                 subtaskWithOrder.SubtaskItem.Id,

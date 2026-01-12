@@ -13,7 +13,8 @@ public sealed record TaskListItemDto(
     string Status,
     IEnumerable<string> Tags,
     IEnumerable<SubTaskListItemDto> SubTasks,
-    string ProjectName,
+    Guid? ProjectId,
+    string? ProjectName,
     DateOnly? DueDate,
     decimal? OrderIndex
     );

@@ -14,7 +14,8 @@ public sealed record TaskDetailsDto(
     TimeOnly? EndTime,
     DateTime? ClosedAt,
     string Status,
-    string ProjectName,
+    Guid? ProjectId,
+    string? ProjectName,
     IEnumerable<string> Tags,
     IEnumerable<SubTaskDetailsDto> SubTasks,
     DateTime CreatedAt);
