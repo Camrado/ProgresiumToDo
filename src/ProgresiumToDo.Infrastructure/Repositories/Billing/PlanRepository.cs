@@ -10,7 +10,7 @@ internal sealed class PlanRepository : Repository<Plan>, IPlanRepository
     {
     }
     
-    public async Task<Plan?> GeyByNameWithPricingsIncludedAsync(PlanType name, CancellationToken cancellationToken = default)
+    public async Task<Plan?> GetByNameWithPricingsIncludedAsync(PlanType name, CancellationToken cancellationToken = default)
     {
         return await DbContext.Plans
             .Include(p => p.PlanPricings)

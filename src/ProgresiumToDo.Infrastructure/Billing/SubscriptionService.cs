@@ -19,7 +19,7 @@ internal sealed class SubscriptionService : ISubscriptionService
     
     public async Task<Result> SubscribeUserToFreePlanAsync(Guid userId, CancellationToken cancellationToken = default)
     {
-        var freePlan = await _planRepository.GeyByNameWithPricingsIncludedAsync(PlanType.Free, cancellationToken);
+        var freePlan = await _planRepository.GetByNameWithPricingsIncludedAsync(PlanType.Free, cancellationToken);
         
         if (freePlan is null)
             return Result.Failure([PlanErrors.NotFound]);
@@ -45,7 +45,7 @@ internal sealed class SubscriptionService : ISubscriptionService
             await _subscriptionRepository.GetActiveSubscriptionByUserIdAsync(userId, cancellationToken: cancellationToken);
         if (existingSubscription is null)
         {
-            return Result.Failure<Subscription>([SubscriptionErrors.NoActiveSubscription]);
+            return Result.Failure<Subscription>([SubscriptionErrors.AlreadyOnFreePlan]);
         }
 
         if (existingSubscription.PlanPricingId == planPricing.Id)
@@ -76,15 +76,15 @@ internal sealed class SubscriptionService : ISubscriptionService
             .GetActiveSubscriptionByUserIdAsync(userId, includePlan: true, cancellationToken: cancellationToken);
         if (existingSubscription is null)
         {
-            return Result.Failure<Subscription>([SubscriptionErrors.NoActiveSubscription]);
+            return Result.Failure([SubscriptionErrors.AlreadyOnFreePlan]);
         }
 
         if (existingSubscription.PlanPricing.Plan.Name == PlanType.Free)
         {
-            return Result.Failure([SubscriptionErrors.NoActiveSubscription]);
+            return Result.Failure([SubscriptionErrors.AlreadyOnFreePlan]);
         }
 
-        var freePlan = await _planRepository.GeyByNameWithPricingsIncludedAsync(PlanType.Free, cancellationToken);
+        var freePlan = await _planRepository.GetByNameWithPricingsIncludedAsync(PlanType.Free, cancellationToken);
         if (freePlan is null)
         {
             return Result.Failure([PlanErrors.NotFound]);

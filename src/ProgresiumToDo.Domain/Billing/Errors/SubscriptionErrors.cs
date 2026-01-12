@@ -8,7 +8,7 @@ public static class SubscriptionErrors
         "Subscription.AlreadySubscribedToThisPlan",
         "The user is already subscribed to this plan.");
     
-    public static Error NoActiveSubscription => new(
-        "Subscription.NoActiveSubscription",
-        "The user does not have an active subscription.");
+    public static Error AlreadyOnFreePlan => new(
+        "Subscription.AlreadyOnFreePlan",
+        "The user is already on the free plan.");
 }

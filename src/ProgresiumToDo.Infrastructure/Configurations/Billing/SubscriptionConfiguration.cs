@@ -26,7 +26,7 @@ internal sealed class SubscriptionConfiguration : IEntityTypeConfiguration<Subsc
 
         builder.HasIndex(s => s.UserId)
             .IsUnique()
-            .HasFilter("\"status\" = 'Active'");
+            .HasFilter($"\"status\" = '{nameof(SubscriptionStatus.Active)}'");
 
         builder.HasOne(s => s.User)
             .WithMany(u => u.Subscriptions)

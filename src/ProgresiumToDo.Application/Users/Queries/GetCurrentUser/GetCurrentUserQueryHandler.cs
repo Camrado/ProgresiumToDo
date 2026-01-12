@@ -43,7 +43,7 @@ internal sealed class GetCurrentUserQueryHandler : IQueryHandler<GetCurrentUserQ
             .GetActiveSubscriptionByUserIdAsync(user.Id, includePlan: true, cancellationToken: cancellationToken);
         if (activeSubscription is null)
         {
-            return Result.Failure<GetCurrentUserQueryResponse>([SubscriptionErrors.NoActiveSubscription]);
+            return Result.Failure<GetCurrentUserQueryResponse>([SubscriptionErrors.AlreadyOnFreePlan]);
         }
         
         var subscriptionDto = SubscriptionDto.FromDomain(activeSubscription);
