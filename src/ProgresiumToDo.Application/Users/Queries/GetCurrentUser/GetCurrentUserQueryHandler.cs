@@ -41,12 +41,6 @@ internal sealed class GetCurrentUserQueryHandler : IQueryHandler<GetCurrentUserQ
         
         var activeSubscription = await _subscriptionRepository
             .GetActiveSubscriptionByUserIdAsync(user.Id, includePlan: true, cancellationToken: cancellationToken);
-        if (activeSubscription is null)
-        {
-            return Result.Failure<GetCurrentUserQueryResponse>([SubscriptionErrors.AlreadyOnFreePlan]);
-        }
-        
-        var subscriptionDto = SubscriptionDto.FromDomain(activeSubscription);
 
         var userDto = new CurrentUserDto(
             user.Id,
@@ -56,7 +50,7 @@ internal sealed class GetCurrentUserQueryHandler : IQueryHandler<GetCurrentUserQ
             isEmailVerified.Value,
             user.CreatedAt,
             user.UpdatedAt,
-            subscriptionDto);
+            activeSubscription is not null ? SubscriptionDto.FromDomain(activeSubscription) : null);
         
         return new GetCurrentUserQueryResponse("User profile retrieved successfully.", userDto);
     }

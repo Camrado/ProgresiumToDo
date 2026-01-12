@@ -14,4 +14,4 @@ public sealed record CurrentUserDto(
     bool IsEmailVerified,
     DateTime CreatedAt,
     DateTime UpdatedAt,
-    SubscriptionDto Subscription);
+    SubscriptionDto? Subscription);
