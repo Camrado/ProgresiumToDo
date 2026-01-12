@@ -20,7 +20,7 @@ internal sealed class UpdateTaskCommandValidator : AbstractValidator<UpdateTaskC
                 
                 return taskItem != null;
             })
-            .WithMessage("TaskItemWithOrder not found.");
+            .WithMessage("TaskItem not found.");
         
         RuleFor(utc => utc)
             .Must(IsValidUpdateCombination)
