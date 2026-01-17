@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ProgresiumToDo.API.ExceptionHandlers;
 
-public class ValidationExceptionHandler : IExceptionHandler
+public sealed class ValidationExceptionHandler : IExceptionHandler
 {
     private readonly IProblemDetailsService _problemDetailsService;
     private readonly ILogger<ValidationExceptionHandler> _logger;
@@ -33,7 +33,7 @@ public class ValidationExceptionHandler : IExceptionHandler
                 g => g.Key,
                 g => g.Select(e => e.ErrorMessage).ToArray());
         
-        _logger.LogError(exception,
+        _logger.LogInformation(exception,
             "A validation exception occured. \n" +
             "Status Code: {StatusCode} \n" +
             "Request Method: {RequestMethod}\n" +

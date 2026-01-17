@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using ProgresiumToDo.Application.Abstractions.Behaviors.Contracts;
 using ProgresiumToDo.Application.Abstractions.Messaging;
 
 namespace ProgresiumToDo.Application.Abstractions.Behaviors;

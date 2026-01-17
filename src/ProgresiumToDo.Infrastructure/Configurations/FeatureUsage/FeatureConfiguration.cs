@@ -13,6 +13,7 @@ internal sealed class FeatureConfiguration : IEntityTypeConfiguration<Feature>
         builder.HasKey(f => f.Id);
 
         builder.Property(f => f.Name)
+            .HasConversion<string>()
             .IsRequired();
 
         builder.HasIndex(f => f.Name)

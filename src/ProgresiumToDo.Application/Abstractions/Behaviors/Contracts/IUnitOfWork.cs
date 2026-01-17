@@ -1,4 +1,4 @@
-﻿namespace ProgresiumToDo.Application.Abstractions.Behaviors;
+﻿namespace ProgresiumToDo.Application.Abstractions.Behaviors.Contracts;
 
 public interface IUnitOfWork
 {

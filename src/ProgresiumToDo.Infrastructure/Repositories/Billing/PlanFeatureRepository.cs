@@ -1,0 +1,21 @@
+﻿using Microsoft.EntityFrameworkCore;
+using ProgresiumToDo.Application.Billing.Repositories;
+using ProgresiumToDo.Domain.FeatureUsage;
+
+namespace ProgresiumToDo.Infrastructure.Repositories.Billing;
+
+internal sealed class PlanFeatureRepository : IPlanFeatureRepository
+{
+    private readonly ApplicationDbContext _dbContext;
+    
+    public PlanFeatureRepository(ApplicationDbContext dbContext)
+    {
+        _dbContext = dbContext;
+    }
+    
+    public async Task<PlanFeature?> GetByFeatureNameAsync(Guid planId, FeatureName featureName, CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.PlanFeatures
+            .FirstOrDefaultAsync(pf => pf.PlanId == planId && pf.Feature.Name == featureName, cancellationToken);
+    }
+}

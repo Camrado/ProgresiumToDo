@@ -5,7 +5,6 @@ using ProgresiumToDo.Application.Billing.Repositories;
 using ProgresiumToDo.Application.Users.Repositories;
 using ProgresiumToDo.Domain.Abstractions;
 using ProgresiumToDo.Domain.Auth.Errors;
-using ProgresiumToDo.Domain.Billing.Errors;
 
 namespace ProgresiumToDo.Application.Users.Queries.GetCurrentUser;
 

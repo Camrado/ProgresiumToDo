@@ -17,6 +17,8 @@ public static class DependencyInjection
             configuration.AddOpenBehavior(typeof(LoggingBehavior<,>));
             
             configuration.AddOpenBehavior(typeof(UnitOfWorkBehavior<,>));
+            
+            configuration.AddOpenBehavior(typeof(EntitlementBehavior<,>));
         });
 
         services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly, includeInternalTypes: true);

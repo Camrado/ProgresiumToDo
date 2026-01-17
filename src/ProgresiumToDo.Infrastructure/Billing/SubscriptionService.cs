@@ -45,7 +45,7 @@ internal sealed class SubscriptionService : ISubscriptionService
             await _subscriptionRepository.GetActiveSubscriptionByUserIdAsync(userId, cancellationToken: cancellationToken);
         if (existingSubscription is null)
         {
-            return Result.Failure<Subscription>([SubscriptionErrors.AlreadyOnFreePlan]);
+            return Result.Failure<Subscription>([SubscriptionErrors.NotFound]);
         }
 
         if (existingSubscription.PlanPricingId == planPricing.Id)
@@ -76,7 +76,7 @@ internal sealed class SubscriptionService : ISubscriptionService
             .GetActiveSubscriptionByUserIdAsync(userId, includePlan: true, cancellationToken: cancellationToken);
         if (existingSubscription is null)
         {
-            return Result.Failure([SubscriptionErrors.AlreadyOnFreePlan]);
+            return Result.Failure([SubscriptionErrors.NotFound]);
         }
 
         if (existingSubscription.PlanPricing.Plan.Name == PlanType.Free)

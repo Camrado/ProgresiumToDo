@@ -19,9 +19,10 @@ public sealed record PlanListItemDto(
             plan.Description,
             plan.PlanFeatures
                 .Select(pf => new FeatureListItemDto(
-                    pf.Feature.Name,
+                    pf.Feature.Name.ToString(),
                     pf.DailyLimit,
-                    pf.MonthlyLimit))
+                    pf.MonthlyLimit,
+                    pf.AbsoluteLimit))
                 .ToList(),
             plan.PlanPricings
                 .Select(pp => new PricingListItemDto(
@@ -37,7 +38,8 @@ public sealed record PlanListItemDto(
 public sealed record FeatureListItemDto(
     string Name,
     int? DailyLimit,
-    int? MonthlyLimit);
+    int? MonthlyLimit,
+    int? AbsoluteLimit);
     
 public sealed record PricingListItemDto(
     Guid Id,
