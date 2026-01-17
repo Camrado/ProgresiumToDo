@@ -11,8 +11,4 @@ public interface IPlanRepository
     Task<Plan?> GetByIdWithPricingsAndFeaturesIncludedAsync(Guid id, CancellationToken cancellationToken = default);
     
     Task<List<Plan>> GetAllWithPricingsAndFeaturesIncludedAsync(CancellationToken cancellationToken = default);
-    
-    Task<Plan?> GetUserPlanWithFeaturesIncludedAsync(Guid userId, CancellationToken cancellationToken = default);
-    
-    void Add(Plan plan);
 }

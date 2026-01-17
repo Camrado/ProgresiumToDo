@@ -40,9 +40,4 @@ internal sealed class PlanRepository : Repository<Plan>, IPlanRepository
             .AsNoTracking()
             .ToListAsync(cancellationToken);
     }
-
-    public Task<Plan?> GetUserPlanWithFeaturesIncludedAsync(Guid userId, CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
-    }
 }
