@@ -23,6 +23,9 @@ internal sealed class PlanFeaturesConfiguration : IEntityTypeConfiguration<PlanF
 
         builder.Property(pf => pf.MonthlyLimit)
             .IsRequired(false);
+        
+        builder.Property(pf => pf.AbsoluteLimit)
+            .IsRequired(false);
 
         builder.HasOne(pf => pf.Plan)
             .WithMany(p => p.PlanFeatures)

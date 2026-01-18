@@ -10,16 +10,24 @@ internal sealed class SubscriptionRepository : Repository<Subscription>, ISubscr
     {
     }
 
-    public async Task<Subscription?> GetActiveSubscriptionByUserIdAsync(Guid userId, bool includePlan = false,
-        CancellationToken cancellationToken = default)
+    public async Task<Subscription?> GetActiveSubscriptionByUserIdAsync(Guid userId, bool includePlanPricing = false, bool includeRegion = false, 
+        bool includePlan = false, CancellationToken cancellationToken = default)
     {
         IQueryable<Subscription> query = DbContext.Subscriptions;
-
+        
         if (includePlan)
         {
+            query = query.Include(s => s.PlanPricing).ThenInclude(pp => pp.Plan);
+        }
+        if (includeRegion)
+        {
+            query = query.Include(s => s.PlanPricing).ThenInclude(pp => pp.Region);
+        }
+        
+        if (includePlanPricing && !includePlan && !includeRegion)
+        {
             query = query
-                .Include(s => s.PlanPricing).ThenInclude(pp => pp.Plan)
-                .Include(s => s.PlanPricing).ThenInclude(pp => pp.Region);
+                .Include(s => s.PlanPricing);
         }
         
         return await query

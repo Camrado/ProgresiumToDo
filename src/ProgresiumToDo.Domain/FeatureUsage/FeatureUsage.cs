@@ -30,4 +30,9 @@ public sealed class FeatureUsage
     {
         return new FeatureUsage(userId, featureId, usageDate, usageCount);
     }
+    
+    public void IncrementUsage(int incrementBy)
+    {
+        UsageCount += incrementBy;
+    }
 }

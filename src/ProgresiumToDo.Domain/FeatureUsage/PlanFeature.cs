@@ -8,9 +8,11 @@ public sealed class PlanFeature
     
     public Guid FeatureId { get; private set; }
     
-    public int? DailyLimit { get; private set; }
+    public int? DailyLimit { get; private set; } // null means unlimited
     
-    public int? MonthlyLimit { get; private set; }
+    public int? MonthlyLimit { get; private set; } // null means unlimited
+    
+    public int? AbsoluteLimit { get; private set; } // null means unlimited
     
     public Plan Plan { get; private set; }
     
@@ -18,16 +20,17 @@ public sealed class PlanFeature
     
     private PlanFeature() {}
     
-    private PlanFeature(Guid planId, Guid featureId, int dailyLimit, int monthlyLimit)
+    private PlanFeature(Guid planId, Guid featureId, int? dailyLimit, int? monthlyLimit, int? absoluteLimit)
     {
         PlanId = planId;
         FeatureId = featureId;
         DailyLimit = dailyLimit;
         MonthlyLimit = monthlyLimit;
+        AbsoluteLimit = absoluteLimit;
     }
     
-    public static PlanFeature Create(Guid planId, Guid featureId, int dailyLimit, int monthlyLimit)
+    public static PlanFeature Create(Guid planId, Guid featureId, int? dailyLimit, int? monthlyLimit, int? absoluteLimit)
     {
-        return new PlanFeature(planId, featureId, dailyLimit, monthlyLimit);
+        return new PlanFeature(planId, featureId, dailyLimit, monthlyLimit, absoluteLimit);
     }
 }

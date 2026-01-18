@@ -1,4 +1,6 @@
-﻿using ProgresiumToDo.Application.Abstractions.Messaging;
+﻿using ProgresiumToDo.Application.Abstractions.Auth.Entitlement;
+using ProgresiumToDo.Application.Abstractions.Messaging;
+using ProgresiumToDo.Domain.FeatureUsage;
 using ProgresiumToDo.Domain.Tasks;
 
 namespace ProgresiumToDo.Application.Tasks.Commands.UpdateTask;
@@ -13,9 +15,17 @@ public sealed record UpdateTaskCommand(
     TimeOnly? EndTime,
     decimal? OrderIndex,
     string? OrderType,
-    Guid? ProjectId) : ICommand<UpdateTaskCommandResponse>
+    Guid? ProjectId) : ICommand<UpdateTaskCommandResponse>, IEntitledRequest
 {
     public Guid TaskId { get; set; }
     
     internal TaskItem? TaskItem { get; set; }
+    
+    public IEnumerable<FeatureName> GetRequiredEntitlements()
+    {
+        if (StartTime.HasValue || EndTime.HasValue)
+        {
+            yield return FeatureName.TaskDuration;
+        }
+    }
 }

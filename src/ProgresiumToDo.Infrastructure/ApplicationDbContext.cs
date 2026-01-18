@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using ProgresiumToDo.Application.Abstractions.Behaviors;
+using ProgresiumToDo.Application.Abstractions.Behaviors.Contracts;
 using ProgresiumToDo.Domain.Auth;
 using ProgresiumToDo.Domain.Billing;
 using ProgresiumToDo.Domain.FeatureUsage;

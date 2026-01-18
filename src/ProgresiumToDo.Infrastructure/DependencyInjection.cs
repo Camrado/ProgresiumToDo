@@ -6,10 +6,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using ProgresiumToDo.Application.Abstractions.Auth.Entitlement;
 using ProgresiumToDo.Application.Abstractions.Auth.Identity;
 using ProgresiumToDo.Application.Abstractions.Auth.OAuth;
 using ProgresiumToDo.Application.Abstractions.Auth.Onboarding;
-using ProgresiumToDo.Application.Abstractions.Behaviors;
+using ProgresiumToDo.Application.Abstractions.Behaviors.Contracts;
 using ProgresiumToDo.Application.Abstractions.Billing;
 using ProgresiumToDo.Application.Abstractions.EmailService;
 using ProgresiumToDo.Application.Abstractions.Tasks;
@@ -19,6 +20,7 @@ using ProgresiumToDo.Application.Projects.Repositories;
 using ProgresiumToDo.Application.Tags.Repositories;
 using ProgresiumToDo.Application.Tasks.Repositories;
 using ProgresiumToDo.Application.Users.Repositories;
+using ProgresiumToDo.Infrastructure.Auth.Entitlement;
 using ProgresiumToDo.Infrastructure.Auth.Identity;
 using ProgresiumToDo.Infrastructure.Auth.OAuth;
 using ProgresiumToDo.Infrastructure.Auth.Onboarding;
@@ -56,6 +58,8 @@ public static class DependencyInjection
         services.AddTransient<ITaskOrderingService, TaskOrderingService>();
         
         services.AddTransient<ITaskStatusPolicy, TaskStatusPolicy>();
+
+        services.AddTransient<IEntitlementService, EntitlementService>();
         
         return services;
     }
@@ -154,5 +158,9 @@ public static class DependencyInjection
         services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
 
         services.AddScoped<IPlanPricingRepository, PlanPricingRepository>();
+        
+        services.AddScoped<IPlanFeatureRepository, PlanFeatureRepository>();
+        
+        services.AddScoped<IFeatureUsageRepository, FeatureUsageRepository>();
     }
 }

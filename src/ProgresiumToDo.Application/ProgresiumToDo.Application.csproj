@@ -11,9 +11,5 @@
     <ItemGroup>
       <ProjectReference Include="..\ProgresiumToDo.Domain\ProgresiumToDo.Domain.csproj" />
     </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Abstractions\Auth\" />
-    </ItemGroup>
     
 </Project>

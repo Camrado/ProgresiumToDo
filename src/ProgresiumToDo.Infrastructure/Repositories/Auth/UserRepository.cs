@@ -10,6 +10,20 @@ public class UserRepository : Repository<User>, IUserRepository
     {
     }
 
+    public async Task AcquireUserLockAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        // Fail fast if someone calls this without a transaction.
+        if (DbContext.Database.CurrentTransaction is null)
+        {
+            throw new InvalidOperationException(
+                "AcquireUserLockAsync requires an active transaction to function correctly.");
+        }
+        
+        await DbContext.Database.ExecuteSqlInterpolatedAsync(
+            $"SELECT 1 FROM users WHERE id = {userId} FOR UPDATE", 
+            cancellationToken);
+    }
+
     public async Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
     {
         return await DbContext.Set<User>().FirstOrDefaultAsync(u => u.Email == email, cancellationToken);

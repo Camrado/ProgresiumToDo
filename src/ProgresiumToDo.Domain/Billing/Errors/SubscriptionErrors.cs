@@ -11,4 +11,8 @@ public static class SubscriptionErrors
     public static Error AlreadyOnFreePlan => new(
         "Subscription.AlreadyOnFreePlan",
         "The user is already on the free plan.");
+    
+    public static Error NotFound => new(
+        "Subscription.NotFound",
+        "The subscription was not found.");
 }
