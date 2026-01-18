@@ -24,7 +24,7 @@ internal sealed class CreateTaskCommandValidator : AbstractValidator<CreateTaskC
                 
                 var project = await projectRepository.GetByIdAndUserIdAsync(projectId.Value, userContext.UserId, cancellationToken);
                 return project != null;
-            }).WithMessage("ProjectDetails not found.");
+            }).WithMessage("Project not found.");
 
         RuleFor(ctc => ctc.Priority)
             .Must(priority => string.IsNullOrEmpty(priority) || Enum.TryParse<Priority>(priority, ignoreCase: true, out _))

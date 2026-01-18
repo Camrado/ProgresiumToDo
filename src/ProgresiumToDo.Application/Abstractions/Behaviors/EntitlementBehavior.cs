@@ -20,7 +20,7 @@ public sealed class EntitlementBehavior<TRequest, TResponse> : IPipelineBehavior
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
         var userId = _userContext.UserId;
-        var requirements = request.GetRequirements();
+        var requirements = request.GetRequiredEntitlements();
         List<Error> entitlementErrors = new();
 
         foreach (var featureName in requirements)

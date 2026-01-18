@@ -4,5 +4,5 @@ namespace ProgresiumToDo.Application.Abstractions.Auth.Entitlement;
 
 public interface IEntitledRequest
 {
-    IEnumerable<FeatureName> GetRequirements();
+    IEnumerable<FeatureName> GetRequiredEntitlements();
 }

@@ -16,6 +16,6 @@ internal sealed class DeleteProjectCommandValidator : AbstractValidator<DeletePr
                 command.Project = project;
                 
                 return project != null;
-            }).WithMessage("ProjectDetails not found.");
+            }).WithMessage("Project not found.");
     }
 }

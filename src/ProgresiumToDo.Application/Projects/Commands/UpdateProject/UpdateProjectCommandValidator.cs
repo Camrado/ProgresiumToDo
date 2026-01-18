@@ -22,7 +22,7 @@ internal sealed class UpdateProjectCommandValidator : AbstractValidator<UpdatePr
                 command.Project = project;
                 
                 return project != null;
-            }).WithMessage("ProjectDetails not found.");
+            }).WithMessage("Project not found.");
         
         RuleFor(upc => upc.Name)
             .MustAsync(async (command, name, cancellationToken) =>

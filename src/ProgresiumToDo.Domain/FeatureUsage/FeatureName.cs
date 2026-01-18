@@ -2,5 +2,6 @@
 
 public enum FeatureName
 {
-    None = 0
+    None = 0,
+    TaskDuration = 1,
 }

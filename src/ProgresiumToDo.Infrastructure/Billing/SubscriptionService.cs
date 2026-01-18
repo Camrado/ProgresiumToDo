@@ -73,7 +73,7 @@ internal sealed class SubscriptionService : ISubscriptionService
     public async Task<Result> CancelUserSubscriptionAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         var existingSubscription = await _subscriptionRepository
-            .GetActiveSubscriptionByUserIdAsync(userId, includePlan: true, cancellationToken: cancellationToken);
+            .GetActiveSubscriptionByUserIdAsync(userId, includePlan: true, includeRegion: true, cancellationToken: cancellationToken);
         if (existingSubscription is null)
         {
             return Result.Failure([SubscriptionErrors.NotFound]);
