@@ -30,8 +30,6 @@ builder.Services.AddMemoryCache();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
-// builder.Services.AddHostedService<FeatureSeeder>();
-
 // var origins = (Environment.GetEnvironmentVariable("CORS_ORIGINS") ??
 //                throw new ApplicationException("CORS origins secret is missing."))
 //     .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
