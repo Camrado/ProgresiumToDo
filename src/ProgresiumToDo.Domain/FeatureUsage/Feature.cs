@@ -17,4 +17,9 @@ public sealed class Feature
         Name = name;
         Description = description;
     }
+    
+    public static Feature Create(FeatureName name, string? description = null)
+    {
+        return new Feature(name, description);
+    }
 }

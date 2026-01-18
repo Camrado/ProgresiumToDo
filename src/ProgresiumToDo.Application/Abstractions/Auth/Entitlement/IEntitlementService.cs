@@ -7,7 +7,6 @@ public interface IEntitlementService
 {
     Task<Result> TryIncrementUsageAsync(Guid userId, FeatureName featureName,
         CancellationToken cancellationToken = default);
-    
-    Task<Result<int?>> GetRemainingUsageAsync(Guid userId, FeatureName featureName,
-        CancellationToken cancellationToken = default);
+
+    Task<Result<UserEntitlementSummary>> GetUserEntitlementsAsync(Guid userId, CancellationToken cancellationToken);
 }

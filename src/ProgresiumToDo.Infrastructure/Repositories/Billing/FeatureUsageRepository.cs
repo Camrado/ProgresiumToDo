@@ -14,18 +14,17 @@ internal sealed class FeatureUsageRepository : IFeatureUsageRepository
         _dbContext = dbContext;
     }
 
-    public async Task<FeatureUsageStats> GetUsedFeatureQuotaAsync(Guid userId, FeatureName featureName, DateOnly currentDate,
-        CancellationToken cancellationToken = default)
+    public async Task<FeatureUsageStats> GetUsedFeatureQuotaAsync(Guid userId, FeatureName featureName, DateOnly today, 
+        DateOnly firstDayOfSubscriptionMonth, CancellationToken cancellationToken = default)
     {
-        var firstDayOfMonth = new DateOnly(currentDate.Year, currentDate.Month, 1);
-        var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
+        var lastDayOfSubscriptionMonth = firstDayOfSubscriptionMonth.AddMonths(1).AddDays(-1);
 
         return await _dbContext.FeatureUsages
             .Where(fu => fu.UserId == userId && fu.Feature.Name == featureName)
             .GroupBy(fu => 1)
             .Select(g => new FeatureUsageStats(
-                g.Where(fu => fu.UsageDate == currentDate).Sum(fu => (int?)fu.UsageCount) ?? 0,
-                g.Where(fu => fu.UsageDate >= firstDayOfMonth && fu.UsageDate <= lastDayOfMonth)
+                g.Where(fu => fu.UsageDate == today).Sum(fu => (int?)fu.UsageCount) ?? 0,
+                g.Where(fu => fu.UsageDate >= firstDayOfSubscriptionMonth && fu.UsageDate <= lastDayOfSubscriptionMonth)
                     .Sum(fu => (int?)fu.UsageCount) ?? 0,
                 g.Sum(fu => (int?)fu.UsageCount) ?? 0))
             .FirstOrDefaultAsync(cancellationToken) ?? new FeatureUsageStats(0, 0, 0);
@@ -34,28 +33,24 @@ internal sealed class FeatureUsageRepository : IFeatureUsageRepository
     public async Task IncrementFeatureUsageAsync(Guid userId, FeatureName featureName, int incrementBy, DateOnly usageDate,
         CancellationToken cancellationToken = default)
     {
-        var result = await _dbContext.Features
+        var featureId = await _dbContext.Features
             .Where(f => f.Name == featureName)
-            .Select(f => new
-            {
-                FeatureId = f.Id,
-                Usage = f.FeatureUsages.FirstOrDefault(fu => fu.UserId == userId && fu.UsageDate == usageDate)
-            })
+            .Select(f => f.Id)
             .FirstOrDefaultAsync(cancellationToken);
 
-        if (result is null)
+        if (featureId == Guid.Empty)
         {
             throw new InvalidOperationException($"Feature '{featureName}' is not configured in the database.");
         }
 
-        if (result.Usage is null)
-        {
-            var featureUsage = FeatureUsage.Create(userId, result.FeatureId, usageDate, incrementBy);
-            _dbContext.FeatureUsages.Add(featureUsage);
-        }
-        else
-        {
-            result.Usage.IncrementUsage(incrementBy);
-        }
+        // This prevents race conditions on the unique constraint (UserId, FeatureId, UsageDate)
+        await _dbContext.Database.ExecuteSqlInterpolatedAsync(
+            $"""
+             INSERT INTO feature_usages (id, user_id, feature_id, usage_date, usage_count)
+             VALUES ({Guid.CreateVersion7()}, {userId}, {featureId}, {usageDate}, {incrementBy})
+             ON CONFLICT (user_id, feature_id, usage_date)
+                 DO UPDATE SET usage_count = feature_usages.usage_count + excluded.usage_count
+             """,
+            cancellationToken);
     }
 }

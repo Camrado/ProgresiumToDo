@@ -5,8 +5,8 @@ namespace ProgresiumToDo.Application.Billing.Repositories;
 
 public interface IFeatureUsageRepository
 {
-    Task<FeatureUsageStats> GetUsedFeatureQuotaAsync(Guid userId, FeatureName featureName, DateOnly currentDate,
-        CancellationToken cancellationToken = default);
+    Task<FeatureUsageStats> GetUsedFeatureQuotaAsync(Guid userId, FeatureName featureName, DateOnly today,
+        DateOnly firstDayOfSubscriptionMonth, CancellationToken cancellationToken = default);
 
     Task IncrementFeatureUsageAsync(Guid userId, FeatureName featureName, int incrementBy, DateOnly usageDate,
         CancellationToken cancellationToken = default);

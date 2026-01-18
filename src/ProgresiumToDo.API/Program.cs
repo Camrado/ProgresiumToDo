@@ -2,6 +2,7 @@ using dotenv.net;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 using ProgresiumToDo.API.Extensions;
+using ProgresiumToDo.API.Seeders;
 using ProgresiumToDo.Application;
 using ProgresiumToDo.Infrastructure;
 
@@ -28,6 +29,8 @@ builder.Services.AddMemoryCache();
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
+
+// builder.Services.AddHostedService<FeatureSeeder>();
 
 // var origins = (Environment.GetEnvironmentVariable("CORS_ORIGINS") ??
 //                throw new ApplicationException("CORS origins secret is missing."))

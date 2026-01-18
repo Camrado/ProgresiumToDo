@@ -10,7 +10,6 @@ using ProgresiumToDo.Application.Abstractions.Auth.Entitlement;
 using ProgresiumToDo.Application.Abstractions.Auth.Identity;
 using ProgresiumToDo.Application.Abstractions.Auth.OAuth;
 using ProgresiumToDo.Application.Abstractions.Auth.Onboarding;
-using ProgresiumToDo.Application.Abstractions.Behaviors;
 using ProgresiumToDo.Application.Abstractions.Behaviors.Contracts;
 using ProgresiumToDo.Application.Abstractions.Billing;
 using ProgresiumToDo.Application.Abstractions.EmailService;
