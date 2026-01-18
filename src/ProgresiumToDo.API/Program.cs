@@ -2,7 +2,6 @@ using dotenv.net;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 using ProgresiumToDo.API.Extensions;
-using ProgresiumToDo.API.Seeders;
 using ProgresiumToDo.Application;
 using ProgresiumToDo.Infrastructure;
 
