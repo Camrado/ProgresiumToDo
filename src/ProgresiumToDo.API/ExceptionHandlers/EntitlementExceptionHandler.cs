@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using ProgresiumToDo.Application.Abstractions.Auth.Entitlement;
 
+namespace ProgresiumToDo.API.ExceptionHandlers;
+
 public sealed class EntitlementExceptionHandler : IExceptionHandler
 {
     private readonly IProblemDetailsService _problemDetailsService;
