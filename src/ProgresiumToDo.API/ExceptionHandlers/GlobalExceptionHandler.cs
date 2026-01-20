@@ -47,6 +47,7 @@ public sealed class GlobalExceptionHandler : IExceptionHandler
             {
                 Type = "https://httpstatuses.com/500",
                 Title = $"{exception.GetType().Name}: An error occurred while processing your request.",
+                Status = StatusCodes.Status500InternalServerError,
                 Detail = _webHostEnvironment.IsProduction()
                     ? "An unexpected error occurred. Please try again later."
                     : exception.Message

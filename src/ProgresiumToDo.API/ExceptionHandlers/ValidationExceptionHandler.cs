@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using System.Text.Json;
+using FluentValidation;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
@@ -30,7 +31,9 @@ public sealed class ValidationExceptionHandler : IExceptionHandler
         var validationErrors = validationException.Errors
             .GroupBy(e => e.PropertyName)
             .ToDictionary(
-                g => g.Key,
+                g => string.IsNullOrWhiteSpace(g.Key) 
+                    ? "general" 
+                    : JsonNamingPolicy.CamelCase.ConvertName(g.Key),
                 g => g.Select(e => e.ErrorMessage).ToArray());
         
         _logger.LogInformation(exception,
@@ -56,6 +59,7 @@ public sealed class ValidationExceptionHandler : IExceptionHandler
                 Type = "https://httpstatuses.com/400",
                 Title = $"{exception.GetType().Name}: Validation failed.",
                 Detail = "One or more validation errors occurred.",
+                Status = StatusCodes.Status400BadRequest,
                 Errors = validationErrors
             }
         });
