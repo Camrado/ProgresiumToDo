@@ -12,18 +12,15 @@ namespace ProgresiumToDo.Application.Tasks.Commands.CreateTask;
 internal sealed class CreateTaskCommandHandler : ICommandHandler<CreateTaskCommand, CreateTaskCommandResponse>
 {
     private readonly ITaskItemRepository _taskItemRepository;
-    private readonly ITagRepository _tagRepository;
     private readonly ITaskOrderingService _taskOrderingService;
     private readonly IUserContext _userContext;
 
     public CreateTaskCommandHandler(
         ITaskItemRepository taskItemRepository,
-        ITagRepository tagRepository,
         ITaskOrderingService taskOrderingService,
         IUserContext userContext)
     {
         _taskItemRepository = taskItemRepository;
-        _tagRepository = tagRepository;
         _taskOrderingService = taskOrderingService;
         _userContext = userContext;
     }
