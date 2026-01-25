@@ -28,6 +28,8 @@ using ProgresiumToDo.Infrastructure.Billing;
 using ProgresiumToDo.Infrastructure.Interceptors;
 using ProgresiumToDo.Infrastructure.Repositories.Auth;
 using ProgresiumToDo.Infrastructure.Repositories.Billing;
+using ProgresiumToDo.Infrastructure.Repositories.Projects;
+using ProgresiumToDo.Infrastructure.Repositories.Tags;
 using ProgresiumToDo.Infrastructure.Repositories.Tasks;
 using ProgresiumToDo.Infrastructure.Tasks;
 

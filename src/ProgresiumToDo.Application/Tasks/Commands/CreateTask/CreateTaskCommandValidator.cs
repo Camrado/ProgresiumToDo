@@ -1,6 +1,7 @@
 using FluentValidation;
 using ProgresiumToDo.Application.Abstractions.Auth.Identity;
 using ProgresiumToDo.Application.Projects.Repositories;
+using ProgresiumToDo.Application.Tags.Repositories;
 using ProgresiumToDo.Domain.Tasks;
 using TaskStatus = ProgresiumToDo.Domain.Tasks.TaskStatus;
 
@@ -8,7 +9,7 @@ namespace ProgresiumToDo.Application.Tasks.Commands.CreateTask;
 
 internal sealed class CreateTaskCommandValidator : AbstractValidator<CreateTaskCommand>
 {
-    public CreateTaskCommandValidator(IProjectRepository projectRepository, IUserContext userContext)
+    public CreateTaskCommandValidator(IProjectRepository projectRepository, ITagRepository tagRepository, IUserContext userContext)
     {
         RuleFor(ctc => ctc.Title)
             .NotEmpty()
@@ -17,6 +18,7 @@ internal sealed class CreateTaskCommandValidator : AbstractValidator<CreateTaskC
             .WithMessage("Title must not exceed 256 characters.");;
 
         RuleFor(ctc => ctc.ProjectId)
+            .Cascade(CascadeMode.Stop)
             .MustAsync(async (command, projectId, cancellationToken) =>
             {
                 if (!projectId.HasValue)
@@ -24,7 +26,23 @@ internal sealed class CreateTaskCommandValidator : AbstractValidator<CreateTaskC
                 
                 var project = await projectRepository.GetByIdAndUserIdAsync(projectId.Value, userContext.UserId, cancellationToken);
                 return project != null;
-            }).WithMessage("Project not found.");
+            }).WithMessage("Project not found.")
+            .DependentRules(() =>
+            {
+                RuleForEach(ctc => ctc.TagIds)
+                    .MustAsync(async (command, tagId, cancellationToken) =>
+                    {
+                        var tag = await tagRepository.GetByIdAndProjectIdAsync(tagId, (Guid)command.ProjectId!, cancellationToken);
+                        
+                        if (tag is not null) 
+                        {
+                            command.Tags.Add(tag);
+                            return true;
+                        }
+                        return false;
+                    })
+                    .WithMessage("Tag {PropertyValue} not found in the specified project.");
+            });
 
         RuleFor(ctc => ctc.Priority)
             .Must(priority => string.IsNullOrEmpty(priority) || Enum.TryParse<Priority>(priority, ignoreCase: true, out _))
