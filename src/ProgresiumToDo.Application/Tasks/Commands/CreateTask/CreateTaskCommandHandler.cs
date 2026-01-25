@@ -37,34 +37,10 @@ internal sealed class CreateTaskCommandHandler : ICommandHandler<CreateTaskComma
             request.DueDate,
             request.StartTime,
             request.EndTime);
-        
-        if (request.TagIds.Count != 0)
-        {
-            if (!request.ProjectId.HasValue)
-            {
-                return Result.Failure<CreateTaskCommandResponse>([TagErrors.ProjectIdRequiredForTags]);
-            }
 
-            var tags = request.Tags;
-            
-            if (tags.Count != request.TagIds.Count)
-            {
-                var foundTagIds = tags.Select(t => t.Id).ToHashSet();
-                var missingTagIds = request.TagIds.Where(id => !foundTagIds.Contains(id)).ToList();
-                return Result.Failure<CreateTaskCommandResponse>([TagErrors.NotFound(missingTagIds)]);
-            }
-            
-            var invalidTags = tags.Where(t => t.ProjectId != request.ProjectId.Value).ToList();
-            if (invalidTags.Count != 0)
-            {
-                var invalidTagIds = invalidTags.Select(t => t.Id).ToList();
-                return Result.Failure<CreateTaskCommandResponse>([TagErrors.NotInProject(invalidTagIds, request.ProjectId.Value)]);
-            }
-            
-            foreach (var tag in tags)
-            {
-                taskItem.AddTag(tag);
-            }
+        foreach (var tag in request.Tags)
+        {
+            taskItem.AddTag(tag);
         }
 
         _taskItemRepository.Add(taskItem);
