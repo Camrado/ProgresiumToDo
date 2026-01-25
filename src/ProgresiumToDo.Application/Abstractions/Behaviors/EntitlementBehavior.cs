@@ -21,7 +21,7 @@ public sealed class EntitlementBehavior<TRequest, TResponse> : IPipelineBehavior
     {
         var userId = _userContext.UserId;
         var requirements = request.GetRequiredEntitlements();
-        List<Error> entitlementErrors = new();
+        List<Error> entitlementErrors = [];
 
         foreach (var featureName in requirements)
         {

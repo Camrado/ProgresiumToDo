@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using ProgresiumToDo.Application.Users.Repositories;
 using ProgresiumToDo.Domain.Auth;
 
@@ -6,8 +7,11 @@ namespace ProgresiumToDo.Infrastructure.Repositories.Auth;
 
 public class UserRepository : Repository<User>, IUserRepository
 {
-    public UserRepository(ApplicationDbContext dbContext) : base(dbContext)
+    private readonly ILogger<UserRepository> _logger;
+    
+    public UserRepository(ApplicationDbContext dbContext, ILogger<UserRepository> logger) : base(dbContext)
     {
+        _logger = logger;
     }
 
     public async Task AcquireUserLockAsync(Guid userId, CancellationToken cancellationToken = default)
@@ -15,6 +19,9 @@ public class UserRepository : Repository<User>, IUserRepository
         // Fail fast if someone calls this without a transaction.
         if (DbContext.Database.CurrentTransaction is null)
         {
+            _logger.LogError(
+                "AcquireUserLockAsync called without an active transaction. UserId: {UserId}",
+                userId);
             throw new InvalidOperationException(
                 "AcquireUserLockAsync requires an active transaction to function correctly.");
         }
