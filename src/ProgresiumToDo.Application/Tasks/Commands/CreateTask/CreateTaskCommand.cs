@@ -16,7 +16,7 @@ public sealed record CreateTaskCommand(
     string? Status,
     List<Guid> TagIds) : ICommand<CreateTaskCommandResponse>, IEntitledRequest
 {
-    internal List<Tag> Tags { get; init; }
+    internal List<Tag> Tags { get; init; } = [];
     
     public IEnumerable<FeatureName> GetRequiredEntitlements()
     {

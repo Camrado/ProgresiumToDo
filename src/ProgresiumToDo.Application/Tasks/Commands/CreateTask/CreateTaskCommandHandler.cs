@@ -47,8 +47,8 @@ internal sealed class CreateTaskCommandHandler : ICommandHandler<CreateTaskComma
             {
                 return Result.Failure<CreateTaskCommandResponse>([TagErrors.ProjectIdRequiredForTags]);
             }
-            
-            var tags = await _tagRepository.GetByIdsAsync(request.TagIds, cancellationToken);
+
+            var tags = request.Tags;
             
             if (tags.Count != request.TagIds.Count)
             {

@@ -34,10 +34,10 @@ internal sealed class TagRepository : Repository<Tag>, ITagRepository
             .FirstOrDefaultAsync(t => t.Id == id && t.ProjectId == projectId, cancellationToken);
     }
     
-    public async Task<List<Tag>> GetByIdsAsync(List<Guid> tagIds, CancellationToken cancellationToken = default)
+    public async Task<List<Tag>> GetBySeveralIdsAndProjectIdAsync(List<Guid> tagIds, Guid projectId, CancellationToken cancellationToken = default)
     {
         return await DbContext.Tags
-            .Where(t => tagIds.Contains(t.Id))
+            .Where(t => tagIds.Contains(t.Id) && t.ProjectId == projectId)
             .ToListAsync(cancellationToken);
     }
 }

@@ -13,6 +13,7 @@ public interface ITagRepository
     Task<List<Tag>> GetByProjectIdAsync(Guid projectId, CancellationToken cancellationToken = default);
 
     Task<Tag?> GetByIdAndProjectIdAsync(Guid id, Guid projectId, CancellationToken cancellationToken = default);
-    
-    Task<List<Tag>> GetByIdsAsync(List<Guid> tagIds, CancellationToken cancellationToken = default);
+
+    Task<List<Tag>> GetBySeveralIdsAndProjectIdAsync(List<Guid> tagIds, Guid projectId,
+        CancellationToken cancellationToken = default);
 }

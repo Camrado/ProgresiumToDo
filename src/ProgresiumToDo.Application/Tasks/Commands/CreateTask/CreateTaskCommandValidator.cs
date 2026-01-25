@@ -29,19 +29,28 @@ internal sealed class CreateTaskCommandValidator : AbstractValidator<CreateTaskC
             }).WithMessage("Project not found.")
             .DependentRules(() =>
             {
-                RuleForEach(ctc => ctc.TagIds)
-                    .MustAsync(async (command, tagId, cancellationToken) =>
+                RuleFor(ctc => ctc.TagIds)
+                    .MustAsync(async (command, tagIds, context, cancellationToken) =>
                     {
-                        var tag = await tagRepository.GetByIdAndProjectIdAsync(tagId, (Guid)command.ProjectId!, cancellationToken);
+                        if (!command.ProjectId.HasValue)
+                            return false;
                         
-                        if (tag is not null) 
+                        var tags = await tagRepository
+                            .GetBySeveralIdsAndProjectIdAsync(tagIds, command.ProjectId.Value, cancellationToken);
+                        
+                        var missingTagIds = tagIds.Except(tags.Select(t => t.Id)).ToList();
+                        if (missingTagIds.Count != 0)
                         {
-                            command.Tags.Add(tag);
-                            return true;
+                            context.MessageFormatter.AppendArgument("MissingTagIds", string.Join(", ", missingTagIds));
+                            return false;
                         }
-                        return false;
+
+                        command.Tags.AddRange(tags);
+                        return true;
                     })
-                    .WithMessage("Tag {PropertyValue} not found in the specified project.");
+                    .WithMessage(command => command.ProjectId.HasValue ? 
+                        "The following tag IDs were not found in the specified project: {MissingTagIds}" : 
+                        "ProjectId is required when specifying TagIds.");
             });
 
         RuleFor(ctc => ctc.Priority)
