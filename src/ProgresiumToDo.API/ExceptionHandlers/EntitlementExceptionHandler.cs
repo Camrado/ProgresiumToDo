@@ -30,7 +30,7 @@ public sealed class EntitlementExceptionHandler : IExceptionHandler
 
         var extensions = new Dictionary<string, object?>
         {
-            { "entitlementErrors", entitlementException.Errors }
+            { "errors", entitlementException.Errors }
         };
 
         _logger.LogWarning(exception,
