@@ -121,7 +121,8 @@ internal sealed class IdentityService : IIdentityService
         var claims = new[]
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-            new Claim(JwtRegisteredClaimNames.Email, user.Email)
+            new Claim(JwtRegisteredClaimNames.Email, user.Email),
+            new Claim(nameof(CustomClaim.EmailVerified), user.IsEmailVerified.ToString())
         };
 
         var jwt = new JwtSecurityToken(
@@ -161,13 +162,13 @@ internal sealed class IdentityService : IIdentityService
 
     public async Task<Result> VerifyEmailAsync(string userId, string token)
     {
-        var user = await _userManager.FindByIdAsync(userId);
-        if (user is null)
+        var appUser = await _userManager.FindByIdAsync(userId);
+        if (appUser is null)
         {
             _logger.LogWarning("Email verification failed. User not found. UserId: {UserId}", userId);
             return Result.Failure<bool>([UserErrors.UserNotFound]);
         }
-        if (user.EmailConfirmed)
+        if (appUser.EmailConfirmed)
         {
             _logger.LogWarning("Email verification failed. Email already verified. UserId: {UserId}", userId);
             return Result.Failure<bool>([UserErrors.EmailAlreadyVerified]);
@@ -176,26 +177,24 @@ internal sealed class IdentityService : IIdentityService
         var decodedTokenBytes = WebEncoders.Base64UrlDecode(token);
         var decodedToken = Encoding.UTF8.GetString(decodedTokenBytes);
 
-        var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
+        var result = await _userManager.ConfirmEmailAsync(appUser, decodedToken);
         if (!result.Succeeded)
         {
             _logger.LogWarning("Email verification failed. UserId: {UserId}", userId);
             return Result.Failure<bool>([UserErrors.EmailVerificationFailed]);
         }
-        
-        _logger.LogInformation("Email verified successfully. UserId: {UserId}", userId);
-        return Result.Success();
-    }
 
-    public async Task<Result<bool>> IsEmailVerifiedAsync(string email)
-    {
-        var user = await _userManager.FindByEmailAsync(email);
+        var user = await _userRepository.GetByEmailAsync(appUser.Email!);
         if (user is null)
         {
+            _logger.LogWarning("Email verification failed. User not found in repository. UserId: {UserId}", userId);
             return Result.Failure<bool>([UserErrors.UserNotFound]);
         }
         
-        return user.EmailConfirmed;
+        user.VerifyEmail();
+        
+        _logger.LogInformation("Email verified successfully. UserId: {UserId}", userId);
+        return Result.Success();
     }
     
     public async Task<Result<string>> GenerateEmailVerificationUrlAsync(string email)

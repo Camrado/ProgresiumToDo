@@ -26,6 +26,9 @@ internal sealed class UserConfiguration : SoftDeleteEntityConfiguration<User>
         builder.Property(u => u.LastName)
             .IsRequired();
 
+        builder.Property(u => u.IsEmailVerified)
+            .HasDefaultValue(false);
+
         builder.HasOne<ApplicationUser>()
             .WithOne()
             .HasForeignKey<User>(u => u.ApplicationUserId)

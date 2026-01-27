@@ -12,15 +12,13 @@ internal sealed class GetCurrentUserQueryHandler : IQueryHandler<GetCurrentUserQ
 {
     private readonly IUserRepository _userRepository;
     private readonly IUserContext _userContext;
-    private readonly IIdentityService _identityService;
     private readonly ISubscriptionRepository _subscriptionRepository;
 
     public GetCurrentUserQueryHandler(IUserRepository userRepository, IUserContext userContext,
-        IIdentityService identityService, ISubscriptionRepository subscriptionRepository)
+        ISubscriptionRepository subscriptionRepository)
     {
         _userRepository = userRepository;
         _userContext = userContext;
-        _identityService = identityService;
         _subscriptionRepository = subscriptionRepository;
     }
 
@@ -32,12 +30,6 @@ internal sealed class GetCurrentUserQueryHandler : IQueryHandler<GetCurrentUserQ
             return Result.Failure<GetCurrentUserQueryResponse>([UserErrors.UserNotFound]);
         }
         
-        var isEmailVerified = await _identityService.IsEmailVerifiedAsync(user.Email);
-        if (isEmailVerified.IsFailure)
-        {
-            return Result.Failure<GetCurrentUserQueryResponse>(isEmailVerified.Errors);
-        }
-        
         var activeSubscription = await _subscriptionRepository.GetActiveSubscriptionByUserIdAsync(
             user.Id, includePlan: true, includeRegion: true, cancellationToken: cancellationToken);
 
@@ -46,7 +38,7 @@ internal sealed class GetCurrentUserQueryHandler : IQueryHandler<GetCurrentUserQ
             user.Email,
             user.FirstName,
             user.LastName,
-            isEmailVerified.Value,
+            user.IsEmailVerified,
             user.CreatedAt,
             user.UpdatedAt,
             activeSubscription is not null ? SubscriptionDto.FromDomain(activeSubscription) : null);

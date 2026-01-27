@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ProgresiumToDo.Application.Billing.Repositories;
-using ProgresiumToDo.Domain.Billing;
 using ProgresiumToDo.Domain.FeatureUsage;
 
 namespace ProgresiumToDo.Infrastructure.Repositories.Billing;

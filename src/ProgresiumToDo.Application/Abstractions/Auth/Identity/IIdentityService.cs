@@ -17,8 +17,6 @@ public interface IIdentityService
 
     Task<Result<string>> GenerateEmailVerificationUrlAsync(string email);
 
-    Task<Result<bool>> IsEmailVerifiedAsync(string email);
-    
     Task<Result> DeleteAccountAsync(string email);
 
     Task<Result> AddGoogleLoginAsync(string email, string googleIdentitySub,

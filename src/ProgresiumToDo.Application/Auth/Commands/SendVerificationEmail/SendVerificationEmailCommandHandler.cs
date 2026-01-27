@@ -23,12 +23,7 @@ internal sealed class SendVerificationEmailCommandHandler :
     public async Task<Result<SendVerificationEmailCommandResponse>> Handle(SendVerificationEmailCommand request,
         CancellationToken cancellationToken)
     {
-        var isEmailVerified = await _identityService.IsEmailVerifiedAsync(_userContext.Email);
-        if (isEmailVerified.IsFailure)
-        {
-            return Result.Failure<SendVerificationEmailCommandResponse>(isEmailVerified.Errors);
-        }
-        if (isEmailVerified.Value)
+        if (_userContext.IsEmailVerified)
         {
             return Result.Failure<SendVerificationEmailCommandResponse>([UserErrors.EmailAlreadyVerified]);
         }
