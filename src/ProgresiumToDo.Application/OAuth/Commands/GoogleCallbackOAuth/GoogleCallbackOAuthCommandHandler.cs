@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using ProgresiumToDo.Application.Abstractions.Auth.Identity;
 using ProgresiumToDo.Application.Abstractions.Auth.OAuth;
+using ProgresiumToDo.Application.Abstractions.Billing;
 using ProgresiumToDo.Application.Abstractions.Messaging;
 using ProgresiumToDo.Application.Users.Repositories;
 using ProgresiumToDo.Domain.Abstractions;
@@ -16,6 +17,7 @@ internal sealed class GoogleCallbackOAuthCommandHandler : ICommandHandler<Google
     private readonly IOAuthService _oAuthService;
     private readonly IUserRepository _userRepository;
     private readonly IIdentityService _identityService;
+    private readonly ISubscriptionService _subscriptionService;
     private readonly ILogger<GoogleCallbackOAuthCommandHandler> _logger;
     
     public GoogleCallbackOAuthCommandHandler(
@@ -23,12 +25,14 @@ internal sealed class GoogleCallbackOAuthCommandHandler : ICommandHandler<Google
         IOAuthService oAuthService,
         IUserRepository userRepository,
         IIdentityService identityService,
+        ISubscriptionService subscriptionService,
         ILogger<GoogleCallbackOAuthCommandHandler> logger)
     {
         _memoryCache = memoryCache;
         _oAuthService = oAuthService;
         _userRepository = userRepository;
         _identityService = identityService;
+        _subscriptionService = subscriptionService;
         _logger = logger;
     }
     
@@ -45,7 +49,7 @@ internal sealed class GoogleCallbackOAuthCommandHandler : ICommandHandler<Google
         var googleIdentityResult =
             await _oAuthService.GetGoogleIdentityAsync(request.Code, verifier, nonce, cancellationToken);
         
-        var user = await _userRepository.GetByEmailAsync(googleIdentityResult.Email, cancellationToken);
+        var user = await _userRepository.GetByEmailAsync(googleIdentityResult.Email, cancellationToken: cancellationToken);
         
         if (user is not null)
         {
@@ -83,6 +87,12 @@ internal sealed class GoogleCallbackOAuthCommandHandler : ICommandHandler<Google
                     "OAuth callback failed. Google login linking failed for new user. UserId: {UserId}",
                     user.Id);
                 return Result.Failure<GoogleCallbackOAuthCommandResponse>(addGoogleLoginResult.Errors);
+            }
+            
+            var subscriptionResult = await _subscriptionService.SubscribeUserToFreePlanAsync(user.Id, cancellationToken);
+            if (subscriptionResult.IsFailure)
+            {
+                return Result.Failure<GoogleCallbackOAuthCommandResponse>(subscriptionResult.Errors);
             }
             
             _logger.LogInformation("OAuth callback successful. New user created and logged in. UserId: {UserId}", user.Id);

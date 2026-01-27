@@ -1,6 +1,7 @@
 ﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using ProgresiumToDo.Application.Abstractions.Auth.Identity;
+using ProgresiumToDo.Domain.Billing;
 
 namespace ProgresiumToDo.Infrastructure.Auth.Identity;
 
@@ -10,6 +11,7 @@ internal sealed class UserContext : IUserContext
     private Guid? _userId;
     private string? _email;
     private bool? _isEmailVerified;
+    private PlanType? _currentPlan;
     
     public UserContext(IHttpContextAccessor httpContextAccessor) {
         _httpContextAccessor = httpContextAccessor;
@@ -59,6 +61,22 @@ internal sealed class UserContext : IUserContext
                 
             _isEmailVerified = claim.Equals("true", StringComparison.OrdinalIgnoreCase);
             return _isEmailVerified.Value;
+        }
+    }
+    
+    public PlanType CurrentPlan
+    {
+        get
+        {
+            if (_currentPlan.HasValue)
+                return _currentPlan.Value;
+                
+            var claim = _httpContextAccessor.HttpContext?.User
+                            .FindFirst(nameof(CustomClaim.CurrentPlanName))?.Value 
+                        ?? throw new ApplicationException("User current plan is unavailable");
+                
+            _currentPlan = Enum.Parse<PlanType>(claim);
+            return _currentPlan.Value;
         }
     }
 }

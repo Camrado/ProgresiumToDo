@@ -2,5 +2,6 @@
 
 public enum CustomClaim
 {
-    EmailVerified
+    EmailVerified,
+    CurrentPlanName
 }

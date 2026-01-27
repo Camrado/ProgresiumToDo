@@ -12,6 +12,7 @@ using ProgresiumToDo.Application.Users.Repositories;
 using ProgresiumToDo.Domain.Abstractions;
 using ProgresiumToDo.Domain.Auth;
 using ProgresiumToDo.Domain.Auth.Errors;
+using ProgresiumToDo.Domain.Billing;
 using JwtRegisteredClaimNames = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames;
 
 namespace ProgresiumToDo.Infrastructure.Auth.Identity;
@@ -99,7 +100,8 @@ internal sealed class IdentityService : IIdentityService
             return Result.Failure<AuthenticationResult>([UserErrors.InvalidCredentials]);
         }
         
-        var user = await _userRepository.GetByEmailAsync(email, cancellationToken);
+        var user = await _userRepository.GetByEmailAsync(email, 
+            includeActiveSubscription: true, cancellationToken: cancellationToken);
         if (user is null)
         {
             _logger.LogWarning("Login failed. User not found in repository. UserId: {UserId}", appUser.Id);
@@ -118,11 +120,14 @@ internal sealed class IdentityService : IIdentityService
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
         var expiration = DateTime.UtcNow.AddSeconds(_jwtLifespan);
 
+        var planName = user.Subscriptions.First(s => s.Status == SubscriptionStatus.Active).PlanName;
+        
         var claims = new[]
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new Claim(JwtRegisteredClaimNames.Email, user.Email),
-            new Claim(nameof(CustomClaim.EmailVerified), user.IsEmailVerified.ToString())
+            new Claim(nameof(CustomClaim.EmailVerified), user.IsEmailVerified.ToString()),
+            new Claim(nameof(CustomClaim.CurrentPlanName), planName.ToString())
         };
 
         var jwt = new JwtSecurityToken(
@@ -148,7 +153,8 @@ internal sealed class IdentityService : IIdentityService
             return Result.Failure<AuthenticationResult>([RefreshTokenErrors.InvalidToken]);
         }
         
-        var user = await _userRepository.GetByIdAsync(oldRefreshToken.UserId, cancellationToken);
+        var user = await _userRepository.GetByIdAsync(oldRefreshToken.UserId, 
+            includeActiveSubscription: true, cancellationToken: cancellationToken);
         if (user is null)
         {
             return Result.Failure<AuthenticationResult>([UserErrors.UserNotFound]);

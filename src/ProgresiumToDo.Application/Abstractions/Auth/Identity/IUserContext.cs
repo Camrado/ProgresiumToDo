@@ -1,4 +1,6 @@
-﻿namespace ProgresiumToDo.Application.Abstractions.Auth.Identity;
+﻿using ProgresiumToDo.Domain.Billing;
+
+namespace ProgresiumToDo.Application.Abstractions.Auth.Identity;
 
 public interface IUserContext
 {
@@ -7,4 +9,6 @@ public interface IUserContext
     string Email { get; }
     
     bool IsEmailVerified { get; }
+    
+    PlanType CurrentPlan { get; }
 }

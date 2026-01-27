@@ -27,7 +27,7 @@ internal sealed class DeleteAccountCommandHandler : ICommandHandler<DeleteAccoun
     {
         
         
-        var user = await _userRepository.GetByIdAsync(_userContext.UserId, cancellationToken);
+        var user = await _userRepository.GetByIdAsync(_userContext.UserId, cancellationToken: cancellationToken);
         if (user is null)
         {
             return Result.Failure<DeleteAccountCommandResponse>([UserErrors.UserNotFound]);
