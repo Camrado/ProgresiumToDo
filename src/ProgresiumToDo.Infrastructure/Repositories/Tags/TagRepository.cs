@@ -2,7 +2,7 @@
 using ProgresiumToDo.Application.Tags.Repositories;
 using ProgresiumToDo.Domain.Tags;
 
-namespace ProgresiumToDo.Infrastructure.Repositories.Tasks;
+namespace ProgresiumToDo.Infrastructure.Repositories.Tags;
 
 internal sealed class TagRepository : Repository<Tag>, ITagRepository
 {
@@ -32,5 +32,12 @@ internal sealed class TagRepository : Repository<Tag>, ITagRepository
     {
         return await DbContext.Tags
             .FirstOrDefaultAsync(t => t.Id == id && t.ProjectId == projectId, cancellationToken);
+    }
+    
+    public async Task<List<Tag>> GetBySeveralIdsAndProjectIdAsync(List<Guid> tagIds, Guid projectId, CancellationToken cancellationToken = default)
+    {
+        return await DbContext.Tags
+            .Where(t => tagIds.Contains(t.Id) && t.ProjectId == projectId)
+            .ToListAsync(cancellationToken);
     }
 }

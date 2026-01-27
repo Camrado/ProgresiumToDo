@@ -2,7 +2,7 @@
 using ProgresiumToDo.Application.Projects.Repositories;
 using ProgresiumToDo.Domain.Projects;
 
-namespace ProgresiumToDo.Infrastructure.Repositories.Tasks;
+namespace ProgresiumToDo.Infrastructure.Repositories.Projects;
 
 internal sealed class ProjectRepository : Repository<Project>, IProjectRepository
 {

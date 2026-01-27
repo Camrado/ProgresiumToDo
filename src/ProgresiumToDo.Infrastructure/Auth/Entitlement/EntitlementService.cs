@@ -1,4 +1,5 @@
-﻿using ProgresiumToDo.Application.Abstractions.Auth.Entitlement;
+﻿using Microsoft.Extensions.Logging;
+using ProgresiumToDo.Application.Abstractions.Auth.Entitlement;
 using ProgresiumToDo.Application.Billing.Repositories;
 using ProgresiumToDo.Application.Users.Repositories;
 using ProgresiumToDo.Domain.Abstractions;
@@ -14,17 +15,20 @@ internal sealed class EntitlementService : IEntitlementService
     private readonly IPlanFeatureRepository _planFeatureRepository;
     private readonly IFeatureUsageRepository _featureUsageRepository;
     private readonly IUserRepository _userRepository;
+    private readonly ILogger<EntitlementService> _logger;
     
     public EntitlementService(
         ISubscriptionRepository subscriptionRepository,
         IPlanFeatureRepository planFeatureRepository,
         IFeatureUsageRepository featureUsageRepository,
-        IUserRepository userRepository)
+        IUserRepository userRepository,
+        ILogger<EntitlementService> logger)
     {
         _subscriptionRepository = subscriptionRepository;
         _planFeatureRepository = planFeatureRepository;
         _featureUsageRepository = featureUsageRepository;
         _userRepository = userRepository;
+        _logger = logger;
     }
     
     public async Task<Result> TryIncrementUsageAsync(Guid userId, FeatureName featureName, CancellationToken cancellationToken = default)
@@ -36,6 +40,10 @@ internal sealed class EntitlementService : IEntitlementService
             .GetActiveSubscriptionByUserIdAsync(userId, includePlanPricing: true, cancellationToken: cancellationToken);
         if (subscription is null)
         {
+            _logger.LogWarning(
+                "Entitlement check failed. No active subscription found. UserId: {UserId}, FeatureName: {FeatureName}",
+                userId,
+                featureName);
             return Result.Failure([SubscriptionErrors.NotFound]);
         }
         
@@ -43,6 +51,11 @@ internal sealed class EntitlementService : IEntitlementService
             .GetByFeatureNameAsync(subscription.PlanPricing.PlanId, featureName, cancellationToken);
         if (planFeature is null)
         {
+            _logger.LogWarning(
+                "Entitlement check failed. Plan feature not found. UserId: {UserId}, PlanId: {PlanId}, FeatureName: {FeatureName}",
+                userId,
+                subscription.PlanPricing.PlanId,
+                featureName);
             return Result.Failure([PlanFeatureErrors.NotFound]);
         }
         
@@ -55,6 +68,15 @@ internal sealed class EntitlementService : IEntitlementService
         
         if (errorList.Any())
         {
+            var limitTypes = string.Join(", ", errorList.Select(e => e.Code));
+            _logger.LogWarning(
+                "Entitlement check failed. Limit exceeded. UserId: {UserId}, FeatureName: {FeatureName}, LimitTypes: {LimitTypes}, DailyUsage: {DailyUsage}, MonthlyUsage: {MonthlyUsage}, AbsoluteUsage: {AbsoluteUsage}",
+                userId,
+                featureName,
+                limitTypes,
+                usageStats.DailyUsage,
+                usageStats.MonthlyUsage,
+                usageStats.AbsoluteUsage);
             return Result.Failure(errorList);
         }
 
@@ -63,6 +85,20 @@ internal sealed class EntitlementService : IEntitlementService
         {
             await _featureUsageRepository.IncrementFeatureUsageAsync(
                 userId, featureName, 1, DateOnly.FromDateTime(DateTime.UtcNow), cancellationToken);
+            
+            _logger.LogInformation(
+                "Feature usage incremented. UserId: {UserId}, FeatureName: {FeatureName}, NewDailyUsage: {NewDailyUsage}, NewMonthlyUsage: {NewMonthlyUsage}",
+                userId,
+                featureName,
+                usageStats.DailyUsage + 1,
+                usageStats.MonthlyUsage + 1);
+        }
+        else
+        {
+            _logger.LogInformation(
+                "Feature access granted (unlimited). UserId: {UserId}, FeatureName: {FeatureName}",
+                userId,
+                featureName);
         }
         return Result.Success();
     }

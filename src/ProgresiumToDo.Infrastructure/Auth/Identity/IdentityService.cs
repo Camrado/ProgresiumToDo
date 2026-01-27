@@ -4,6 +4,7 @@ using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using ProgresiumToDo.Application.Abstractions.Auth.Identity;
 using ProgresiumToDo.Application.Auth.Repositories;
@@ -22,6 +23,7 @@ internal sealed class IdentityService : IIdentityService
     private readonly IConfiguration _configuration;
     private readonly IRefreshTokenRepository _refreshTokenRepository;
     private readonly IUserRepository _userRepository;
+    private readonly ILogger<IdentityService> _logger;
     private readonly string _jwtSecret;
     private readonly int _jwtLifespan;
     private readonly int _refreshTokenLifespan;
@@ -32,13 +34,15 @@ internal sealed class IdentityService : IIdentityService
         SignInManager<ApplicationUser> signInManager,
         IConfiguration configuration,
         IRefreshTokenRepository refreshTokenRepository,
-        IUserRepository userRepository)
+        IUserRepository userRepository,
+        ILogger<IdentityService> logger)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _configuration = configuration;
         _refreshTokenRepository = refreshTokenRepository;
         _userRepository = userRepository;
+        _logger = logger;
         _jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET") ??
                      throw new ApplicationException("Jwt secret is missing.");
         _jwtLifespan = int.Parse(Environment.GetEnvironmentVariable("JWT_TOKEN_LIFETIME_IN_SECONDS") ??
@@ -67,9 +71,15 @@ internal sealed class IdentityService : IIdentityService
                 .Select(e => new Error(e.Code, e.Description))
                 .Where(e => !e.Code.Contains("username", StringComparison.InvariantCultureIgnoreCase))
                 .ToList();
+            
+            _logger.LogWarning(
+                "User registration failed. Errors: {ErrorCodes}",
+                string.Join(", ", errors.Select(e => e.Code)));
+            
             return Result.Failure<Guid>(errors);
         }
 
+        _logger.LogInformation("User registered successfully. UserId: {UserId}", user.Id);
         return user.Id;
     }
 
@@ -78,23 +88,27 @@ internal sealed class IdentityService : IIdentityService
         var appUser = await _userManager.FindByEmailAsync(email);
         if (appUser is null)
         {
+            _logger.LogInformation("Login failed. User not found");
             return Result.Failure<AuthenticationResult>([UserErrors.InvalidCredentials]);
         }
         
         var signInResult = await _signInManager.CheckPasswordSignInAsync(appUser, password, false);
         if (!signInResult.Succeeded)
         {
+            _logger.LogInformation("Login failed. Invalid credentials. UserId: {UserId}", appUser.Id);
             return Result.Failure<AuthenticationResult>([UserErrors.InvalidCredentials]);
         }
         
         var user = await _userRepository.GetByEmailAsync(email, cancellationToken);
         if (user is null)
         {
+            _logger.LogWarning("Login failed. User not found in repository. UserId: {UserId}", appUser.Id);
             return Result.Failure<AuthenticationResult>([UserErrors.UserNotFound]);
         }
         
         var authTokens = GenerateTokens(user);
         
+        _logger.LogInformation("User logged in successfully. UserId: {UserId}", user.Id);
         return authTokens;
     }
     
@@ -150,10 +164,12 @@ internal sealed class IdentityService : IIdentityService
         var user = await _userManager.FindByIdAsync(userId);
         if (user is null)
         {
+            _logger.LogWarning("Email verification failed. User not found. UserId: {UserId}", userId);
             return Result.Failure<bool>([UserErrors.UserNotFound]);
         }
         if (user.EmailConfirmed)
         {
+            _logger.LogWarning("Email verification failed. Email already verified. UserId: {UserId}", userId);
             return Result.Failure<bool>([UserErrors.EmailAlreadyVerified]);
         }
         
@@ -163,9 +179,11 @@ internal sealed class IdentityService : IIdentityService
         var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
         if (!result.Succeeded)
         {
+            _logger.LogWarning("Email verification failed. UserId: {UserId}", userId);
             return Result.Failure<bool>([UserErrors.EmailVerificationFailed]);
         }
         
+        _logger.LogInformation("Email verified successfully. UserId: {UserId}", userId);
         return Result.Success();
     }
 
@@ -203,11 +221,13 @@ internal sealed class IdentityService : IIdentityService
         var user = await _userManager.FindByEmailAsync(email);
         if (user is null)
         {
+            _logger.LogWarning("Account deletion failed. User not found");
             return Result.Failure<bool>([UserErrors.UserNotFound]);
         }
 
         await _userManager.DeleteAsync(user);
         
+        _logger.LogInformation("Account deleted successfully. UserId: {UserId}", user.Id);
         return Result.Success();
     }
     
@@ -216,6 +236,7 @@ internal sealed class IdentityService : IIdentityService
         var user = await _userManager.FindByEmailAsync(email);
         if (user is null)
         {
+            _logger.LogWarning("Google login linking failed. User not found");
             return Result.Failure<bool>([UserErrors.UserNotFound]);
         }
         
@@ -229,7 +250,16 @@ internal sealed class IdentityService : IIdentityService
             var addLoginResult = await _userManager.AddLoginAsync(user, loginInfo);
             
             if (!addLoginResult.Succeeded)
+            {
+                _logger.LogWarning("Google login linking failed. UserId: {UserId}", user.Id);
                 return Result.Failure<Result>([OAuthErrors.CannotLinkGoogleAccount]);
+            }
+            
+            _logger.LogInformation("Google login linked successfully (new link). UserId: {UserId}", user.Id);
+        }
+        else
+        {
+            _logger.LogInformation("Google login already linked. UserId: {UserId}", user.Id);
         }
         
         return Result.Success();

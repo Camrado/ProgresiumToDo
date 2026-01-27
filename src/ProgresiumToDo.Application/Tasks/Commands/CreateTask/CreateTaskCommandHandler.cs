@@ -1,8 +1,10 @@
 using ProgresiumToDo.Application.Abstractions.Auth.Identity;
 using ProgresiumToDo.Application.Abstractions.Messaging;
 using ProgresiumToDo.Application.Abstractions.Tasks;
+using ProgresiumToDo.Application.Tags.Repositories;
 using ProgresiumToDo.Application.Tasks.Repositories;
 using ProgresiumToDo.Domain.Abstractions;
+using ProgresiumToDo.Domain.Tags.Errors;
 using ProgresiumToDo.Domain.Tasks;
 
 namespace ProgresiumToDo.Application.Tasks.Commands.CreateTask;
@@ -13,7 +15,10 @@ internal sealed class CreateTaskCommandHandler : ICommandHandler<CreateTaskComma
     private readonly ITaskOrderingService _taskOrderingService;
     private readonly IUserContext _userContext;
 
-    public CreateTaskCommandHandler(ITaskItemRepository taskItemRepository, ITaskOrderingService taskOrderingService, IUserContext userContext)
+    public CreateTaskCommandHandler(
+        ITaskItemRepository taskItemRepository,
+        ITaskOrderingService taskOrderingService,
+        IUserContext userContext)
     {
         _taskItemRepository = taskItemRepository;
         _taskOrderingService = taskOrderingService;
@@ -32,6 +37,11 @@ internal sealed class CreateTaskCommandHandler : ICommandHandler<CreateTaskComma
             request.DueDate,
             request.StartTime,
             request.EndTime);
+
+        foreach (var tag in request.Tags)
+        {
+            taskItem.AddTag(tag);
+        }
 
         _taskItemRepository.Add(taskItem);
 

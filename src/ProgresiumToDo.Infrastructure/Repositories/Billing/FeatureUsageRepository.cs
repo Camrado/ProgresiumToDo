@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using ProgresiumToDo.Application.Abstractions.Auth.Entitlement;
 using ProgresiumToDo.Application.Billing.Repositories;
 using ProgresiumToDo.Domain.FeatureUsage;
@@ -8,10 +9,12 @@ namespace ProgresiumToDo.Infrastructure.Repositories.Billing;
 internal sealed class FeatureUsageRepository : IFeatureUsageRepository
 {
     private readonly ApplicationDbContext _dbContext;
+    private readonly ILogger<FeatureUsageRepository> _logger;
     
-    public FeatureUsageRepository(ApplicationDbContext dbContext)
+    public FeatureUsageRepository(ApplicationDbContext dbContext, ILogger<FeatureUsageRepository> logger)
     {
         _dbContext = dbContext;
+        _logger = logger;
     }
 
     public async Task<FeatureUsageStats> GetUsedFeatureQuotaAsync(Guid userId, FeatureName featureName, DateOnly today, 
@@ -40,6 +43,10 @@ internal sealed class FeatureUsageRepository : IFeatureUsageRepository
 
         if (featureId == Guid.Empty)
         {
+            _logger.LogCritical(
+                "CRITICAL: Feature not configured in database. FeatureName: {FeatureName}, UserId: {UserId}",
+                featureName,
+                userId);
             throw new InvalidOperationException($"Feature '{featureName}' is not configured in the database.");
         }
 
@@ -52,5 +59,12 @@ internal sealed class FeatureUsageRepository : IFeatureUsageRepository
                  DO UPDATE SET usage_count = feature_usages.usage_count + excluded.usage_count
              """,
             cancellationToken);
+        
+        _logger.LogInformation(
+            "Feature usage upserted successfully. UserId: {UserId}, FeatureName: {FeatureName}, IncrementBy: {IncrementBy}, UsageDate: {UsageDate}",
+            userId,
+            featureName,
+            incrementBy,
+            usageDate);
     }
 }
