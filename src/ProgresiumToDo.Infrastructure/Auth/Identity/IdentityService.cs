@@ -12,7 +12,6 @@ using ProgresiumToDo.Application.Users.Repositories;
 using ProgresiumToDo.Domain.Abstractions;
 using ProgresiumToDo.Domain.Auth;
 using ProgresiumToDo.Domain.Auth.Errors;
-using ProgresiumToDo.Domain.Billing;
 using JwtRegisteredClaimNames = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames;
 
 namespace ProgresiumToDo.Infrastructure.Auth.Identity;
@@ -100,8 +99,7 @@ internal sealed class IdentityService : IIdentityService
             return Result.Failure<AuthenticationResult>([UserErrors.InvalidCredentials]);
         }
         
-        var user = await _userRepository.GetByEmailAsync(email, 
-            includeActiveSubscription: true, cancellationToken: cancellationToken);
+        var user = await _userRepository.GetByEmailAsync(email, cancellationToken);
         if (user is null)
         {
             _logger.LogWarning("Login failed. User not found in repository. UserId: {UserId}", appUser.Id);
@@ -120,14 +118,10 @@ internal sealed class IdentityService : IIdentityService
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
         var expiration = DateTime.UtcNow.AddSeconds(_jwtLifespan);
 
-        var planName = user.Subscriptions.First(s => s.Status == SubscriptionStatus.Active).PlanName;
-        
         var claims = new[]
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-            new Claim(JwtRegisteredClaimNames.Email, user.Email),
-            new Claim(nameof(CustomClaim.EmailVerified), user.IsEmailVerified.ToString()),
-            new Claim(nameof(CustomClaim.CurrentPlanName), planName.ToString())
+            new Claim(JwtRegisteredClaimNames.Email, user.Email)
         };
 
         var jwt = new JwtSecurityToken(
@@ -153,8 +147,7 @@ internal sealed class IdentityService : IIdentityService
             return Result.Failure<AuthenticationResult>([RefreshTokenErrors.InvalidToken]);
         }
         
-        var user = await _userRepository.GetByIdAsync(oldRefreshToken.UserId, 
-            includeActiveSubscription: true, cancellationToken: cancellationToken);
+        var user = await _userRepository.GetByIdAsync(oldRefreshToken.UserId, cancellationToken);
         if (user is null)
         {
             return Result.Failure<AuthenticationResult>([UserErrors.UserNotFound]);
@@ -168,13 +161,13 @@ internal sealed class IdentityService : IIdentityService
 
     public async Task<Result> VerifyEmailAsync(string userId, string token)
     {
-        var appUser = await _userManager.FindByIdAsync(userId);
-        if (appUser is null)
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user is null)
         {
             _logger.LogWarning("Email verification failed. User not found. UserId: {UserId}", userId);
             return Result.Failure<bool>([UserErrors.UserNotFound]);
         }
-        if (appUser.EmailConfirmed)
+        if (user.EmailConfirmed)
         {
             _logger.LogWarning("Email verification failed. Email already verified. UserId: {UserId}", userId);
             return Result.Failure<bool>([UserErrors.EmailAlreadyVerified]);
@@ -183,24 +176,26 @@ internal sealed class IdentityService : IIdentityService
         var decodedTokenBytes = WebEncoders.Base64UrlDecode(token);
         var decodedToken = Encoding.UTF8.GetString(decodedTokenBytes);
 
-        var result = await _userManager.ConfirmEmailAsync(appUser, decodedToken);
+        var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
         if (!result.Succeeded)
         {
             _logger.LogWarning("Email verification failed. UserId: {UserId}", userId);
             return Result.Failure<bool>([UserErrors.EmailVerificationFailed]);
         }
-
-        var user = await _userRepository.GetByEmailAsync(appUser.Email!);
-        if (user is null)
-        {
-            _logger.LogWarning("Email verification failed. User not found in repository. UserId: {UserId}", userId);
-            return Result.Failure<bool>([UserErrors.UserNotFound]);
-        }
-        
-        user.VerifyEmail();
         
         _logger.LogInformation("Email verified successfully. UserId: {UserId}", userId);
         return Result.Success();
+    }
+
+    public async Task<Result<bool>> IsEmailVerifiedAsync(string email)
+    {
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user is null)
+        {
+            return Result.Failure<bool>([UserErrors.UserNotFound]);
+        }
+        
+        return user.EmailConfirmed;
     }
     
     public async Task<Result<string>> GenerateEmailVerificationUrlAsync(string email)

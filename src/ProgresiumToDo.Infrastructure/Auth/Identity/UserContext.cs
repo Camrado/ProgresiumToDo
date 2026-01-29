@@ -10,8 +10,6 @@ internal sealed class UserContext : IUserContext
     private readonly IHttpContextAccessor _httpContextAccessor;
     private Guid? _userId;
     private string? _email;
-    private bool? _isEmailVerified;
-    private PlanType? _currentPlan;
     
     public UserContext(IHttpContextAccessor httpContextAccessor) {
         _httpContextAccessor = httpContextAccessor;
@@ -45,38 +43,6 @@ internal sealed class UserContext : IUserContext
                      ?? throw new ApplicationException("User email is unavailable");
                 
             return _email;
-        }
-    }
-    
-    public bool IsEmailVerified
-    {
-        get
-        {
-            if (_isEmailVerified.HasValue)
-                return _isEmailVerified.Value;
-                
-            var claim = _httpContextAccessor.HttpContext?.User
-                            .FindFirst(nameof(CustomClaim.EmailVerified))?.Value 
-                        ?? throw new ApplicationException("User email verification status is unavailable");
-                
-            _isEmailVerified = claim.Equals("true", StringComparison.OrdinalIgnoreCase);
-            return _isEmailVerified.Value;
-        }
-    }
-    
-    public PlanType CurrentPlan
-    {
-        get
-        {
-            if (_currentPlan.HasValue)
-                return _currentPlan.Value;
-                
-            var claim = _httpContextAccessor.HttpContext?.User
-                            .FindFirst(nameof(CustomClaim.CurrentPlanName))?.Value 
-                        ?? throw new ApplicationException("User current plan is unavailable");
-                
-            _currentPlan = Enum.Parse<PlanType>(claim);
-            return _currentPlan.Value;
         }
     }
 }

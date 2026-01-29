@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Logging;
 using ProgresiumToDo.Application.Users.Repositories;
 using ProgresiumToDo.Domain.Auth;
-using ProgresiumToDo.Domain.Billing;
 
 namespace ProgresiumToDo.Infrastructure.Repositories.Auth;
 
@@ -31,38 +30,19 @@ public class UserRepository : Repository<User>, IUserRepository
             $"SELECT 1 FROM users WHERE id = {userId} FOR UPDATE", 
             cancellationToken);
     }
-    
-    public async Task<User?> GetByIdAsync(Guid id, bool includeActiveSubscription = false, CancellationToken cancellationToken = default)
+
+    public async Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
     {
-        var query = DbContext.Users.AsQueryable();
-
-        if (includeActiveSubscription)
-        {
-            query = query.Include(u => u.Subscriptions.Where(s => s.Status == SubscriptionStatus.Active));
-        }
-        
-        return await query.FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
-    }
-
-    public async Task<User?> GetByEmailAsync(string email, bool includeActiveSubscription = false, CancellationToken cancellationToken = default)
-    {
-        var query = DbContext.Users.AsQueryable();
-
-        if (includeActiveSubscription)
-        {
-            query = query.Include(u => u.Subscriptions.Where(s => s.Status == SubscriptionStatus.Active));
-        }
-        
-        return await query.FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
+        return await DbContext.Set<User>().FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
     }
 
     public async Task<bool> ExistsByEmailAsync(string email, CancellationToken cancellationToken = default)
     {
-        return await DbContext.Users.AnyAsync(u => u.Email == email, cancellationToken);
+        return await DbContext.Set<User>().AnyAsync(u => u.Email == email, cancellationToken);
     }
     
     public void Delete(User user)
     {
-        DbContext.Users.Remove(user);
+        DbContext.Set<User>().Remove(user);
     }
 }

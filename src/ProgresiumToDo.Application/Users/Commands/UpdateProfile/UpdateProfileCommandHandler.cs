@@ -19,7 +19,7 @@ internal sealed class UpdateProfileCommandHandler : ICommandHandler<UpdateProfil
     
     public async Task<Result<UpdateProfileCommandResponse>> Handle(UpdateProfileCommand request, CancellationToken cancellationToken)
     {
-        var user = await _userRepository.GetByIdAsync(_userContext.UserId, cancellationToken: cancellationToken);
+        var user = await _userRepository.GetByIdAsync(_userContext.UserId, cancellationToken);
         if (user is null)
         {
             return Result.Failure<UpdateProfileCommandResponse>([UserErrors.UserNotFound]);

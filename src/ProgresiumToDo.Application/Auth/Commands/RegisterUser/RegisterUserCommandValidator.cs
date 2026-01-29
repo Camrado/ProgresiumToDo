@@ -16,7 +16,7 @@ internal sealed class RegisterUserCommandValidator : AbstractValidator<RegisterU
             .EmailAddress()
             .MustAsync(async (email, cancellationToken) =>
             {
-                var existingUser = await userRepository.GetByEmailAsync(email, cancellationToken: cancellationToken);
+                var existingUser = await userRepository.GetByEmailAsync(email, cancellationToken);
                 return existingUser == null;
             })
             .WithMessage("An account with this email already exists.");

@@ -12,19 +12,21 @@ internal sealed class GetCurrentUserQueryHandler : IQueryHandler<GetCurrentUserQ
 {
     private readonly IUserRepository _userRepository;
     private readonly IUserContext _userContext;
+    private readonly IIdentityService _identityService;
     private readonly ISubscriptionRepository _subscriptionRepository;
 
     public GetCurrentUserQueryHandler(IUserRepository userRepository, IUserContext userContext,
-        ISubscriptionRepository subscriptionRepository)
+        IIdentityService identityService, ISubscriptionRepository subscriptionRepository)
     {
         _userRepository = userRepository;
         _userContext = userContext;
+        _identityService = identityService;
         _subscriptionRepository = subscriptionRepository;
     }
 
     public async Task<Result<GetCurrentUserQueryResponse>> Handle(GetCurrentUserQuery request, CancellationToken cancellationToken)
     {
-        var user = await _userRepository.GetByIdAsync(_userContext.UserId, cancellationToken: cancellationToken);
+        var user = await _userRepository.GetByIdAsync(_userContext.UserId, cancellationToken);
         if (user is null)
         {
             return Result.Failure<GetCurrentUserQueryResponse>([UserErrors.UserNotFound]);
