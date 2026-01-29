@@ -45,7 +45,7 @@ internal sealed class SubscriptionService : ISubscriptionService
         }
 
         var subscription = Subscription.Create(
-            DateTime.UtcNow, DateTime.UtcNow.AddMonths(1), true, userId, freePlanPricing.Id);
+            freePlan.Name, DateTime.UtcNow, DateTime.UtcNow.AddMonths(1), true, userId, freePlanPricing.Id);
 
         _subscriptionRepository.Add(subscription);
         
@@ -89,7 +89,8 @@ internal sealed class SubscriptionService : ISubscriptionService
             ? newStartDate.AddMonths(1)
             : newStartDate.AddYears(1);
 
-        var subscription = Subscription.Create(newStartDate, newEndDate, isAutoRenew, userId, planPricing.Id);
+        var subscription = Subscription.Create(
+            planPricing.Plan.Name, newStartDate, newEndDate, isAutoRenew, userId, planPricing.Id);
 
         subscription.FillPlanPricing(planPricing);
 
@@ -150,7 +151,8 @@ internal sealed class SubscriptionService : ISubscriptionService
         
         existingSubscription.EndSubscription(newStartDate);
         
-        var subscription = Subscription.Create(newStartDate, newEndDate, true, userId, freePlanPricing.Id);
+        var subscription = Subscription.Create(
+            freePlan.Name, newStartDate, newEndDate, true, userId, freePlanPricing.Id);
         
         _subscriptionRepository.Add(subscription);
         

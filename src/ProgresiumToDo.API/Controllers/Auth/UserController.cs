@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using ProgresiumToDo.Application.Users.Commands.DeleteAccount;
 using ProgresiumToDo.Application.Users.Commands.UpdateProfile;
 using ProgresiumToDo.Application.Users.Queries.GetCurrentUser;
-using ProgresiumToDo.Application.Users.Queries.GetEntitlementStatus;
 
 namespace ProgresiumToDo.API.Controllers.Auth;
 
@@ -29,14 +28,6 @@ public class UserController : ApiControllerBase
         CancellationToken cancellationToken)
     {
         var result = await Mediator.Send(updateProfileCommand, cancellationToken);
-        return FromResult(result);
-    }
-    
-    [Authorize]
-    [HttpGet("me/entitlements")]
-    public async Task<IActionResult> GetEntitlementStatus(CancellationToken cancellationToken)
-    {
-        var result = await Mediator.Send(new GetEntitlementStatusQuery(), cancellationToken);
         return FromResult(result);
     }
     

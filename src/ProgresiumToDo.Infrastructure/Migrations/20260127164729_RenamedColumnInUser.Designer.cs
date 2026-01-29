@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ProgresiumToDo.Infrastructure;
@@ -11,9 +12,11 @@ using ProgresiumToDo.Infrastructure;
 namespace ProgresiumToDo.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260127164729_RenamedColumnInUser")]
+    partial class RenamedColumnInUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -450,11 +453,6 @@ namespace ProgresiumToDo.Infrastructure.Migrations
                     b.Property<bool>("IsAutoRenew")
                         .HasColumnType("boolean")
                         .HasColumnName("is_auto_renew");
-
-                    b.Property<string>("PlanName")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("plan_name");
 
                     b.Property<Guid>("PlanPricingId")
                         .HasColumnType("uuid")

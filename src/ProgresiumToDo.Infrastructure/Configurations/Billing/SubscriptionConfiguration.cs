@@ -11,6 +11,10 @@ internal sealed class SubscriptionConfiguration : IEntityTypeConfiguration<Subsc
         builder.ToTable("subscriptions");
 
         builder.HasKey(s => s.Id);
+        
+        builder.Property(s => s.PlanName)
+            .HasConversion<string>()
+            .IsRequired();
 
         builder.Property(s => s.StartDate)
             .IsRequired();

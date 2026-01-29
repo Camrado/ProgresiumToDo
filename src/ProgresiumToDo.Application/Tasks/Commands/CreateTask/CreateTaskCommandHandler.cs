@@ -1,10 +1,8 @@
 using ProgresiumToDo.Application.Abstractions.Auth.Identity;
 using ProgresiumToDo.Application.Abstractions.Messaging;
 using ProgresiumToDo.Application.Abstractions.Tasks;
-using ProgresiumToDo.Application.Tags.Repositories;
 using ProgresiumToDo.Application.Tasks.Repositories;
 using ProgresiumToDo.Domain.Abstractions;
-using ProgresiumToDo.Domain.Tags.Errors;
 using ProgresiumToDo.Domain.Tasks;
 
 namespace ProgresiumToDo.Application.Tasks.Commands.CreateTask;
