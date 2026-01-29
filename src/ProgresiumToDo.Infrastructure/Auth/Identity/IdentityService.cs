@@ -161,13 +161,13 @@ internal sealed class IdentityService : IIdentityService
 
     public async Task<Result> VerifyEmailAsync(string userId, string token)
     {
-        var user = await _userManager.FindByIdAsync(userId);
-        if (user is null)
+        var appUser = await _userManager.FindByIdAsync(userId);
+        if (appUser is null)
         {
             _logger.LogWarning("Email verification failed. User not found. UserId: {UserId}", userId);
             return Result.Failure<bool>([UserErrors.UserNotFound]);
         }
-        if (user.EmailConfirmed)
+        if (appUser.EmailConfirmed)
         {
             _logger.LogWarning("Email verification failed. Email already verified. UserId: {UserId}", userId);
             return Result.Failure<bool>([UserErrors.EmailAlreadyVerified]);
@@ -176,12 +176,20 @@ internal sealed class IdentityService : IIdentityService
         var decodedTokenBytes = WebEncoders.Base64UrlDecode(token);
         var decodedToken = Encoding.UTF8.GetString(decodedTokenBytes);
 
-        var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
+        var result = await _userManager.ConfirmEmailAsync(appUser, decodedToken);
         if (!result.Succeeded)
         {
             _logger.LogWarning("Email verification failed. UserId: {UserId}", userId);
             return Result.Failure<bool>([UserErrors.EmailVerificationFailed]);
         }
+
+        var user = await _userRepository.GetByEmailAsync(appUser.Email!);
+        if (user is null)
+        {
+            return Result.Failure<bool>([UserErrors.UserNotFound]);
+        }
+        
+        user.VerifyEmail();
         
         _logger.LogInformation("Email verified successfully. UserId: {UserId}", userId);
         return Result.Success();
