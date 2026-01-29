@@ -15,4 +15,8 @@ public static class SubscriptionErrors
     public static Error NotFound => new(
         "Subscription.NotFound",
         "The subscription was not found.");
+    
+    public static Error NoActiveSubscription => new(
+        "Subscription.NoActiveSubscription",
+        "The user does not have an active subscription.");
 }

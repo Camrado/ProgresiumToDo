@@ -3,6 +3,7 @@ using ProgresiumToDo.Application.Abstractions.Auth.Entitlement;
 using ProgresiumToDo.Application.Billing.Repositories;
 using ProgresiumToDo.Application.Users.Repositories;
 using ProgresiumToDo.Domain.Abstractions;
+using ProgresiumToDo.Domain.Billing;
 using ProgresiumToDo.Domain.Billing.Errors;
 using ProgresiumToDo.Domain.FeatureUsage;
 using ProgresiumToDo.Domain.FeatureUsage.Errors;
@@ -103,23 +104,15 @@ internal sealed class EntitlementService : IEntitlementService
         return Result.Success();
     }
 
-    public async Task<Result<UserEntitlementSummary>> GetUserEntitlementsAsync(Guid userId,
-        CancellationToken cancellationToken)
+    public async Task<Result<UserEntitlementSummary>> GetUserEntitlementsAsync(Guid userId, 
+        Subscription activeSubscription, CancellationToken cancellationToken)
     {
-        var subscription = await _subscriptionRepository.GetActiveSubscriptionByUserIdAsync(
-            userId, includePlanPricing: true, includePlan: true, cancellationToken: cancellationToken);
-
-        if (subscription is null)
-        {
-            return Result.Failure<UserEntitlementSummary>([SubscriptionErrors.NotFound]);
-        }
-        
         var today = DateOnly.FromDateTime(DateTime.UtcNow);
-        var cycleStartDate = GetFirstDayOfSubscriptionMonth(today, subscription.StartDate);
+        var cycleStartDate = GetFirstDayOfSubscriptionMonth(today, activeSubscription.StartDate);
         var cycleRenewsAt = cycleStartDate.AddMonths(1);
 
         var planFeatures = await _planFeatureRepository
-            .GetByPlanIdAsync(subscription.PlanPricing.PlanId, includeFeature: true, cancellationToken: cancellationToken);
+            .GetByPlanIdAsync(activeSubscription.PlanPricing.PlanId, includeFeature: true, cancellationToken: cancellationToken);
 
         var usageTasks = new Dictionary<Guid, Task<FeatureUsageStats>>();
         foreach (var pf in planFeatures)
@@ -137,9 +130,9 @@ internal sealed class EntitlementService : IEntitlementService
         }
         
         return new UserEntitlementSummary(
-            subscription.Id,
-            subscription.PlanPricing.Plan.Name.ToString(),
-            subscription.PlanPricing.Plan.Description,
+            activeSubscription.Id,
+            activeSubscription.PlanPricing.Plan.Name.ToString(),
+            activeSubscription.PlanPricing.Plan.Description,
             cycleStartDate,
             cycleRenewsAt,
             featureStatuses);

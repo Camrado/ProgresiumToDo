@@ -1,7 +1,6 @@
 ﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using ProgresiumToDo.Application.Abstractions.Auth.Identity;
-using ProgresiumToDo.Domain.Billing;
 
 namespace ProgresiumToDo.Infrastructure.Auth.Identity;
 
