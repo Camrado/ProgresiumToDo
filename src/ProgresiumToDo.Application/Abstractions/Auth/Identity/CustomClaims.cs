@@ -1,6 +1,6 @@
 ﻿namespace ProgresiumToDo.Application.Abstractions.Auth.Identity;
 
-public enum CustomClaims
+public static class CustomClaims
 {
-    email_verified = 0
+    public const string EmailVerified = "email_verified";
 }

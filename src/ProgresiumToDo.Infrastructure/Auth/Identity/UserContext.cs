@@ -54,7 +54,7 @@ internal sealed class UserContext : IUserContext
                 return _isEmailVerified.Value;
                 
             var claim = _httpContextAccessor.HttpContext?.User
-                            .FindFirst(nameof(CustomClaims.email_verified))?.Value 
+                            .FindFirst(CustomClaims.EmailVerified)?.Value 
                         ?? throw new ApplicationException("Email verification status is unavailable");
                 
             _isEmailVerified = bool.Parse(claim);

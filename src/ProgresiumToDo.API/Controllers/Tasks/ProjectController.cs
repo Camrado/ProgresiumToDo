@@ -1,11 +1,11 @@
 ﻿using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProgresiumToDo.Application.Projects.Commands.CreateProject;
 using ProgresiumToDo.Application.Projects.Commands.DeleteProject;
 using ProgresiumToDo.Application.Projects.Commands.UpdateProject;
 using ProgresiumToDo.Application.Projects.Queries.GetAllProjects;
 using ProgresiumToDo.Application.Projects.Queries.GetProject;
+using ProgresiumToDo.Infrastructure.Auth.Authentication;
 
 namespace ProgresiumToDo.API.Controllers.Tasks;
 
@@ -16,7 +16,7 @@ public class ProjectController : ApiControllerBase
     {
     }
 
-    [Authorize]
+    [AuthorizeVerified]
     [HttpPost]
     public async Task<IActionResult> CreateProject([FromBody] CreateProjectCommand createProjectCommand,
         CancellationToken cancellationToken)
@@ -25,7 +25,7 @@ public class ProjectController : ApiControllerBase
         return FromResult(result);
     }
 
-    [Authorize]
+    [AuthorizeVerified]
     [HttpGet("{projectId}")]
     public async Task<IActionResult> GetProjectById([FromRoute] Guid projectId,
         CancellationToken cancellationToken)
@@ -34,7 +34,7 @@ public class ProjectController : ApiControllerBase
         return FromResult(result);
     }
     
-    [Authorize]
+    [AuthorizeVerified]
     [HttpGet]
     public async Task<IActionResult> GetAllProjects(CancellationToken cancellationToken)
     {
@@ -42,7 +42,7 @@ public class ProjectController : ApiControllerBase
         return FromResult(result);
     }
 
-    [Authorize]
+    [AuthorizeVerified]
     [HttpPatch("{projectId}")]
     public async Task<IActionResult> UpdateProject([FromRoute] Guid projectId,
         [FromBody] UpdateProjectCommand updateProjectCommand,
@@ -53,7 +53,7 @@ public class ProjectController : ApiControllerBase
         return FromResult(result);
     }
 
-    [Authorize]
+    [AuthorizeVerified]
     [HttpDelete("{projectId}")]
     public async Task<IActionResult> DeleteProject([FromRoute] Guid projectId,
         CancellationToken cancellationToken)

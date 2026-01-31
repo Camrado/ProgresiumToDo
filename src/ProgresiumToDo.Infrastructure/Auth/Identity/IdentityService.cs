@@ -126,7 +126,7 @@ internal sealed class IdentityService : IIdentityService
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new Claim(JwtRegisteredClaimNames.Email, user.Email),
-            new Claim(nameof(CustomClaims.email_verified), user.IsEmailVerified.ToString())
+            new Claim(CustomClaims.EmailVerified, user.IsEmailVerified.ToString())
         };
 
         var jwt = new JwtSecurityToken(
