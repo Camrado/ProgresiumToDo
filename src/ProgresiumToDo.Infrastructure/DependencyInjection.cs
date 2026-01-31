@@ -1,6 +1,7 @@
 ﻿using System.Net.Http.Headers;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -21,6 +22,7 @@ using ProgresiumToDo.Application.Projects.Repositories;
 using ProgresiumToDo.Application.Tags.Repositories;
 using ProgresiumToDo.Application.Tasks.Repositories;
 using ProgresiumToDo.Application.Users.Repositories;
+using ProgresiumToDo.Infrastructure.Auth.Authentication;
 using ProgresiumToDo.Infrastructure.Auth.Entitlement;
 using ProgresiumToDo.Infrastructure.Auth.Identity;
 using ProgresiumToDo.Infrastructure.Auth.OAuth;
@@ -140,7 +142,16 @@ public static class DependencyInjection
     }
     
     private static void AddAuthorization(IServiceCollection services) {
-        services.AddAuthorization();
+        services.AddAuthorization(options =>
+        {
+            options.AddPolicy(AuthorizationPolicies.EmailVerified, policy =>
+            {
+                policy.RequireAuthenticatedUser();
+                policy.RequireClaim(CustomClaims.EmailVerified, true.ToString());
+            });
+        });
+        
+        services.AddSingleton<IAuthorizationMiddlewareResultHandler, CustomAuthorizationMiddlewareResultHandler>();
     }
     
     private static void AddRepositories(IServiceCollection services)

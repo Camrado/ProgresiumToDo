@@ -1,11 +1,11 @@
 ﻿using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProgresiumToDo.Application.Tags.Commands.CreateTag;
 using ProgresiumToDo.Application.Tags.Commands.DeleteTag;
 using ProgresiumToDo.Application.Tags.Commands.UpdateTag;
 using ProgresiumToDo.Application.Tags.Queries.GetAllTagsForProject;
 using ProgresiumToDo.Application.Tags.Queries.GetSingleTag;
+using ProgresiumToDo.Infrastructure.Auth.Authentication;
 
 namespace ProgresiumToDo.API.Controllers.Tasks;
 
@@ -16,7 +16,7 @@ public class TagController : ApiControllerBase
     {
     }
 
-    [Authorize]
+    [AuthorizeVerified]
     [HttpPost]
     public async Task<IActionResult> CreateTag([FromRoute] Guid projectId, [FromBody] CreateTagCommand createTagCommand,
         CancellationToken cancellationToken)
@@ -26,7 +26,7 @@ public class TagController : ApiControllerBase
         return FromResult(result);
     }
     
-    [Authorize]
+    [AuthorizeVerified]
     [HttpGet]
     public async Task<IActionResult> GetAllTagsForProject([FromRoute] Guid projectId, CancellationToken cancellationToken)
     {
@@ -35,7 +35,7 @@ public class TagController : ApiControllerBase
         return FromResult(result);
     }
 
-    [Authorize]
+    [AuthorizeVerified]
     [HttpGet("{tagId:guid}")]
     public async Task<IActionResult> GetTagById([FromRoute] Guid projectId,
         [FromRoute] GetSingleTagQuery getSingleTagQuery, CancellationToken cancellationToken)
@@ -45,7 +45,7 @@ public class TagController : ApiControllerBase
         return FromResult(result);
     }
     
-    [Authorize]
+    [AuthorizeVerified]
     [HttpPatch("{tagId:guid}")]
     public async Task<IActionResult> UpdateTag([FromRoute] Guid projectId, [FromRoute] Guid tagId,
         [FromBody] UpdateTagCommand updateTagCommand, CancellationToken cancellationToken)
@@ -56,7 +56,7 @@ public class TagController : ApiControllerBase
         return FromResult(result);
     }
 
-    [Authorize]
+    [AuthorizeVerified]
     [HttpDelete("{tagId:guid}")]
     public async Task<IActionResult> DeleteTag([FromRoute] Guid projectId,
         [FromRoute] DeleteTagCommand deleteTagCommand, CancellationToken cancellationToken)

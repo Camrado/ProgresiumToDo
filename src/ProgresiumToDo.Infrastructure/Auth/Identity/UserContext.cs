@@ -9,6 +9,7 @@ internal sealed class UserContext : IUserContext
     private readonly IHttpContextAccessor _httpContextAccessor;
     private Guid? _userId;
     private string? _email;
+    private bool? _isEmailVerified;
     
     public UserContext(IHttpContextAccessor httpContextAccessor) {
         _httpContextAccessor = httpContextAccessor;
@@ -42,6 +43,22 @@ internal sealed class UserContext : IUserContext
                      ?? throw new ApplicationException("User email is unavailable");
                 
             return _email;
+        }
+    }
+    
+    public bool IsEmailVerified
+    {
+        get
+        {
+            if (_isEmailVerified.HasValue)
+                return _isEmailVerified.Value;
+                
+            var claim = _httpContextAccessor.HttpContext?.User
+                            .FindFirst(CustomClaims.EmailVerified)?.Value 
+                        ?? throw new ApplicationException("Email verification status is unavailable");
+                
+            _isEmailVerified = bool.Parse(claim);
+            return _isEmailVerified.Value;
         }
     }
 }

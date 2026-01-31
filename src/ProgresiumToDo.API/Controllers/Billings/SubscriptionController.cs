@@ -1,9 +1,9 @@
 ﻿using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProgresiumToDo.Application.Billing.Commands.CancelSubscription;
 using ProgresiumToDo.Application.Billing.Commands.SubscribeToPlan;
 using ProgresiumToDo.Application.Billing.Queries.GetSubscriptionsHistory;
+using ProgresiumToDo.Infrastructure.Auth.Authentication;
 
 namespace ProgresiumToDo.API.Controllers.Billings;
 
@@ -14,7 +14,7 @@ public class SubscriptionController : ApiControllerBase
     {
     }
     
-    [Authorize]
+    [AuthorizeVerified]
     [HttpPost("subscribe")]
     public async Task<IActionResult> SubscribeToPlan([FromBody] SubscribeToPlanCommand subscribeToPlanCommand,
         CancellationToken cancellationToken)
@@ -23,7 +23,7 @@ public class SubscriptionController : ApiControllerBase
         return FromResult(result);
     }
 
-    [Authorize]
+    [AuthorizeVerified]
     [HttpPost("cancel")]
     public async Task<IActionResult> CancelSubscription(CancellationToken cancellationToken)
     {
@@ -31,7 +31,7 @@ public class SubscriptionController : ApiControllerBase
         return FromResult(result);
     }
 
-    [Authorize]
+    [AuthorizeVerified]
     [HttpGet("history")]
     public async Task<IActionResult> GetSubscriptionsHistory(CancellationToken cancellationToken)
     {

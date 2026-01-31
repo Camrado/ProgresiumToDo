@@ -1,5 +1,4 @@
 ﻿using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProgresiumToDo.Application.Tasks.Commands.AddTagToTask;
 using ProgresiumToDo.Application.Tasks.Commands.CreateSubtask;
@@ -10,6 +9,7 @@ using ProgresiumToDo.Application.Tasks.Commands.UpdateSubtask;
 using ProgresiumToDo.Application.Tasks.Commands.UpdateTask;
 using ProgresiumToDo.Application.Tasks.Queries.GetSingleTask;
 using ProgresiumToDo.Application.Tasks.Queries.GetTasks;
+using ProgresiumToDo.Infrastructure.Auth.Authentication;
 
 namespace ProgresiumToDo.API.Controllers.Tasks;
 
@@ -20,7 +20,7 @@ public class TaskController : ApiControllerBase
     {
     }
 
-    [Authorize]
+    [AuthorizeVerified]
     [HttpPost]
     public async Task<IActionResult> CreateTask([FromBody] CreateTaskCommand createTaskCommand,
         CancellationToken cancellationToken)
@@ -29,7 +29,7 @@ public class TaskController : ApiControllerBase
         return FromResult(result);
     }
     
-    [Authorize]
+    [AuthorizeVerified]
     [HttpGet]
     public async Task<IActionResult> GetTasks([FromQuery] GetTasksQuery getTasksQuery, 
         CancellationToken cancellationToken)
@@ -38,7 +38,7 @@ public class TaskController : ApiControllerBase
         return FromResult(result);
     }
 
-    [Authorize]
+    [AuthorizeVerified]
     [HttpGet("{taskId:guid}")]
     public async Task<IActionResult> GetSingleTask([FromRoute] Guid taskId, CancellationToken cancellationToken)
     {
@@ -46,7 +46,7 @@ public class TaskController : ApiControllerBase
         return FromResult(result);
     }
 
-    [Authorize]
+    [AuthorizeVerified]
     [HttpDelete("{taskId:guid}")]
     public async Task<IActionResult> DeleteTask([FromRoute] Guid taskId, CancellationToken cancellationToken)
     {
@@ -54,7 +54,7 @@ public class TaskController : ApiControllerBase
         return FromResult(result);
     }
 
-    [Authorize]
+    [AuthorizeVerified]
     [HttpPatch("{taskId:guid}")]
     public async Task<IActionResult> UpdateTask([FromRoute] Guid taskId,
         [FromBody] UpdateTaskCommand updateTaskCommand, CancellationToken cancellationToken)
@@ -64,7 +64,7 @@ public class TaskController : ApiControllerBase
         return FromResult(result);
     }
     
-    [Authorize]
+    [AuthorizeVerified]
     [HttpPost("{taskId:guid}/subtasks")]
     public async Task<IActionResult> CreateSubTask([FromRoute] Guid taskId,
         [FromBody] CreateSubtaskCommand createTaskCommand, CancellationToken cancellationToken)
@@ -74,7 +74,7 @@ public class TaskController : ApiControllerBase
         return FromResult(result);
     }
     
-    [Authorize]
+    [AuthorizeVerified]
     [HttpPatch("{parentTaskId:guid}/subtasks/{subtaskId:guid}")]
     public async Task<IActionResult> UpdateSubTask([FromRoute] Guid parentTaskId, [FromRoute] Guid subtaskId,
         [FromBody] UpdateSubtaskCommand updateSubtaskCommand, CancellationToken cancellationToken)
@@ -85,7 +85,7 @@ public class TaskController : ApiControllerBase
         return FromResult(result);
     }
     
-    [Authorize]
+    [AuthorizeVerified]
     [HttpPost("{taskId:guid}/tags/{tagId:guid}")]
     public async Task<IActionResult> AddTagToTask([FromRoute] Guid taskId,
         [FromRoute] AddTagToTaskCommand addTagToTaskCommand, CancellationToken cancellationToken)
@@ -95,7 +95,7 @@ public class TaskController : ApiControllerBase
         return FromResult(result);
     }
     
-    [Authorize]
+    [AuthorizeVerified]
     [HttpDelete("{taskId:guid}/tags/{tagId:guid}")]
     public async Task<IActionResult> RemoveTagFromTask([FromRoute] Guid taskId,
         [FromRoute] RemoveTagFromTaskCommand removeTagFromTaskCommand, CancellationToken cancellationToken)

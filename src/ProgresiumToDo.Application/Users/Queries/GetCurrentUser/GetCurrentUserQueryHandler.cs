@@ -1,14 +1,11 @@
 ﻿using ProgresiumToDo.Application.Abstractions.Auth.Entitlement;
 using ProgresiumToDo.Application.Abstractions.Auth.Identity;
 using ProgresiumToDo.Application.Abstractions.Messaging;
-using ProgresiumToDo.Application.Billing.Queries.GetAllPlans;
 using ProgresiumToDo.Application.Billing.Repositories;
 using ProgresiumToDo.Application.Users.Repositories;
 using ProgresiumToDo.Domain.Abstractions;
 using ProgresiumToDo.Domain.Auth.Errors;
-using ProgresiumToDo.Domain.Billing;
 using ProgresiumToDo.Domain.Billing.Errors;
-using ProgresiumToDo.Domain.FeatureUsage;
 
 namespace ProgresiumToDo.Application.Users.Queries.GetCurrentUser;
 
