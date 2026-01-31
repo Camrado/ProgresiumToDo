@@ -227,7 +227,7 @@ internal sealed class IdentityService : IIdentityService
         var code = Random.Shared.Next(100000, 999999).ToString();
         
         user.EmailVerificationCode = code;
-        user.EmailVerificationCodeExpiresOn = DateTime.UtcNow.AddMinutes(15);
+        user.EmailVerificationCodeExpiresOn = DateTime.UtcNow.AddMinutes(_mailtrapSettings.VerificationCodeLifespanInMinutes);
         
         await _userManager.UpdateAsync(user);
 

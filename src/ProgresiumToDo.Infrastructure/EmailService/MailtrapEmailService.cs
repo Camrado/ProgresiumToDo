@@ -92,7 +92,7 @@ internal sealed class MailtrapEmailService : IEmailService
                             </tr>
                         </table>
 
-                        <p style=""margin: 20px 0 0 0; font-size: 14px; color: #6b7280; line-height: 1.5;"">This code will expire in 15 minutes. If you did not request this code, you can safely ignore this email.</p>
+                        <p style=""margin: 20px 0 0 0; font-size: 14px; color: #6b7280; line-height: 1.5;"">This code will expire in {_mailtrapSettings.VerificationCodeLifespanInMinutes} minutes. If you did not request this code, you can safely ignore this email.</p>
                     </td>
                 </tr>
                 <tr>
