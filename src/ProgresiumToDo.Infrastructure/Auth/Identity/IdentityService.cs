@@ -159,31 +159,39 @@ internal sealed class IdentityService : IIdentityService
         return authTokens;
     }
 
-    public async Task<Result> VerifyEmailAsync(string userId, string token)
+    public async Task<Result> VerifyEmailAsync(string email, string code)
     {
-        var appUser = await _userManager.FindByIdAsync(userId);
+        var appUser = await _userManager.FindByEmailAsync(email);
         if (appUser is null)
         {
-            _logger.LogWarning("Email verification failed. User not found. UserId: {UserId}", userId);
+            _logger.LogWarning("Email verification failed. User not found. Email: {Email}", email);
             return Result.Failure<bool>([UserErrors.UserNotFound]);
         }
         if (appUser.EmailConfirmed)
         {
-            _logger.LogWarning("Email verification failed. Email already verified. UserId: {UserId}", userId);
+            _logger.LogWarning("Email verification failed. Email already verified. Email: {Email}", email);
             return Result.Failure<bool>([UserErrors.EmailAlreadyVerified]);
         }
-        
-        var decodedTokenBytes = WebEncoders.Base64UrlDecode(token);
-        var decodedToken = Encoding.UTF8.GetString(decodedTokenBytes);
 
-        var result = await _userManager.ConfirmEmailAsync(appUser, decodedToken);
-        if (!result.Succeeded)
+        if (appUser.EmailVerificationCode != code)
         {
-            _logger.LogWarning("Email verification failed. UserId: {UserId}", userId);
+            return Result.Failure([UserErrors.InvalidEmailVerificationCode]);
+        }
+        if (appUser.EmailVerificationCodeExpiresOn < DateTime.UtcNow)
+        {
+            return Result.Failure([UserErrors.EmailVerificationCodeExpired]);
+        }
+        
+        appUser.EmailConfirmed = true;
+        appUser.EmailVerificationCode = null;
+        appUser.EmailVerificationCodeExpiresOn = null;
+        var updateResult = await _userManager.UpdateAsync(appUser);
+        if (!updateResult.Succeeded)
+        {
             return Result.Failure<bool>([UserErrors.EmailVerificationFailed]);
         }
 
-        var user = await _userRepository.GetByEmailAsync(appUser.Email!);
+        var user = await _userRepository.GetByEmailAsync(email);
         if (user is null)
         {
             return Result.Failure<bool>([UserErrors.UserNotFound]);
@@ -191,22 +199,11 @@ internal sealed class IdentityService : IIdentityService
         
         user.VerifyEmail();
         
-        _logger.LogInformation("Email verified successfully. UserId: {UserId}", userId);
+        _logger.LogInformation("Email verified successfully. Email: {Email}", email);
         return Result.Success();
     }
-
-    public async Task<Result<bool>> IsEmailVerifiedAsync(string email)
-    {
-        var user = await _userManager.FindByEmailAsync(email);
-        if (user is null)
-        {
-            return Result.Failure<bool>([UserErrors.UserNotFound]);
-        }
-        
-        return user.EmailConfirmed;
-    }
     
-    public async Task<Result<string>> GenerateEmailVerificationUrlAsync(string email)
+    public async Task<Result<string>> GenerateEmailVerificationCodeAsync(string email)
     {
         var user = await _userManager.FindByEmailAsync(email);
         if (user is null)
@@ -214,14 +211,14 @@ internal sealed class IdentityService : IIdentityService
             return Result.Failure<string>([UserErrors.UserNotFound]);
         }
 
-        var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        var code = Random.Shared.Next(100000, 999999).ToString();
         
-        var tokenBytes = Encoding.UTF8.GetBytes(token);
-        var encodedToken = WebEncoders.Base64UrlEncode(tokenBytes);
+        user.EmailVerificationCode = code;
+        user.EmailVerificationCodeExpiresOn = DateTime.UtcNow.AddMinutes(15);
         
-        var verificationUrl = $"{_baseUrl}/api/progresium-todo/v1/auth/verify-email?userId={user.Id}&verificationToken={encodedToken}";
-        
-        return verificationUrl;
+        await _userManager.UpdateAsync(user);
+
+        return code;
     }
 
     public async Task<Result> DeleteAccountAsync(string email)

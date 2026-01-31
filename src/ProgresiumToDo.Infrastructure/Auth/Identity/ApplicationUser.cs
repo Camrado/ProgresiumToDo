@@ -4,4 +4,6 @@ namespace ProgresiumToDo.Infrastructure.Auth.Identity;
 
 public class ApplicationUser : IdentityUser<Guid>
 {
+    public string? EmailVerificationCode { get; set; }
+    public DateTime? EmailVerificationCodeExpiresOn { get; set; }
 }

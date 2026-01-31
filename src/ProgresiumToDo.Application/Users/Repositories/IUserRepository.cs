@@ -10,6 +10,8 @@ public interface IUserRepository {
     Task<bool> ExistsByEmailAsync(string email, CancellationToken cancellationToken = default);
 
     Task AcquireUserLockAsync(Guid userId, CancellationToken cancellationToken = default);
+
+    Task<bool> IsEmailVerifiedAsync(Guid userId, CancellationToken cancellationToken = default);
     
     void Add(User user);
 

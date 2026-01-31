@@ -6,6 +6,8 @@ internal sealed class VerifyEmailCommandValidator : AbstractValidator<VerifyEmai
 {
     public VerifyEmailCommandValidator()
     {
-        RuleFor(ve => ve.VerificationToken).NotEmpty();
+        RuleFor(ve => ve.VerificationCode)
+            .NotEmpty()
+            .Length(6);
     }
 }

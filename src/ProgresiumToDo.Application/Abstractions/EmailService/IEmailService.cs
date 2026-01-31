@@ -5,4 +5,6 @@ namespace ProgresiumToDo.Application.Abstractions.EmailService;
 public interface IEmailService
 {
     Task<Result> SendEmailAsync(string to, string subject, string body, CancellationToken cancellationToken = default);
+    
+    Task<Result> SendConfirmationEmailAsync(string to, string verificationCode, CancellationToken cancellationToken = default);
 }

@@ -19,4 +19,12 @@ public static class UserErrors
     public static Error EmailAlreadyVerified => new(
         "User.EmailAlreadyVerified",
         "The email address has already been verified.");
+    
+    public static Error InvalidEmailVerificationCode => new(
+        "User.InvalidEmailVerificationCode",
+        "The provided email verification code is invalid.");
+    
+    public static Error EmailVerificationCodeExpired => new(
+        "User.EmailVerificationCodeExpired",
+        "The email verification code has expired.");
 }

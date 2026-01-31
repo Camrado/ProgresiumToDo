@@ -1,6 +1,7 @@
 ﻿using ProgresiumToDo.Application.Abstractions.Auth.Identity;
 using ProgresiumToDo.Application.Abstractions.EmailService;
 using ProgresiumToDo.Application.Abstractions.Messaging;
+using ProgresiumToDo.Application.Users.Repositories;
 using ProgresiumToDo.Domain.Abstractions;
 using ProgresiumToDo.Domain.Auth.Errors;
 
@@ -12,41 +13,39 @@ internal sealed class SendVerificationEmailCommandHandler :
     private readonly IIdentityService _identityService;
     private readonly IUserContext _userContext;
     private readonly IEmailService _emailService;
-    
-    public SendVerificationEmailCommandHandler(IIdentityService identityService, IUserContext userContext, IEmailService emailService)
+    private readonly IUserRepository _userRepository;
+
+    public SendVerificationEmailCommandHandler(IIdentityService identityService, IUserContext userContext,
+        IEmailService emailService, IUserRepository userRepository)
     {
         _identityService = identityService;
         _userContext = userContext;
         _emailService = emailService;
+        _userRepository = userRepository;
     }
-    
+
     public async Task<Result<SendVerificationEmailCommandResponse>> Handle(SendVerificationEmailCommand request,
         CancellationToken cancellationToken)
     {
-        var isEmailVerified = await _identityService.IsEmailVerifiedAsync(_userContext.Email);
-        if (isEmailVerified.IsFailure)
-        {
-            return Result.Failure<SendVerificationEmailCommandResponse>(isEmailVerified.Errors);
-        }
-        if (isEmailVerified.Value)
+        var isEmailVerified = await _userRepository.IsEmailVerifiedAsync(_userContext.UserId, cancellationToken);
+        if (isEmailVerified)
         {
             return Result.Failure<SendVerificationEmailCommandResponse>([UserErrors.EmailAlreadyVerified]);
         }
 
-        var verificationUrl = await _identityService.GenerateEmailVerificationUrlAsync(_userContext.Email);
-        if (verificationUrl.IsFailure)
+        var verificationCode = await _identityService.GenerateEmailVerificationCodeAsync(_userContext.Email);
+        if (verificationCode.IsFailure)
         {
-            return Result.Failure<SendVerificationEmailCommandResponse>(verificationUrl.Errors);
+            return Result.Failure<SendVerificationEmailCommandResponse>(verificationCode.Errors);
         }
         
-        var result = await _emailService.SendEmailAsync(_userContext.Email, "Email Verification",
-            $"Please verify your email: {verificationUrl.Value}", cancellationToken);
+        var result = await _emailService.SendConfirmationEmailAsync(
+            _userContext.Email, verificationCode.Value, cancellationToken);
         if (result.IsFailure)
         {
             return Result.Failure<SendVerificationEmailCommandResponse>(result.Errors);
         }
 
-        return new SendVerificationEmailCommandResponse("Verification email sent successfully.",
-            verificationUrl.Value); // TODO: Remove VerificationUrl from response after implementing email service
+        return new SendVerificationEmailCommandResponse("Verification email sent successfully.");
     }
 }
