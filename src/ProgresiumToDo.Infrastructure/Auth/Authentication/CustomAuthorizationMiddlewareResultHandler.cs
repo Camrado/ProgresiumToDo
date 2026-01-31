@@ -35,6 +35,7 @@ internal sealed class CustomAuthorizationMiddlewareResultHandler : IAuthorizatio
             };
             
             await context.Response.WriteAsJsonAsync(problemDetails);
+            return;
         }
     }
 }
