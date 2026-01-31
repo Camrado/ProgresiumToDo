@@ -2,9 +2,9 @@
 using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using ProgresiumToDo.Application.Abstractions.Auth.Identity;
 using ProgresiumToDo.Application.Auth.Repositories;
@@ -12,6 +12,7 @@ using ProgresiumToDo.Application.Users.Repositories;
 using ProgresiumToDo.Domain.Abstractions;
 using ProgresiumToDo.Domain.Auth;
 using ProgresiumToDo.Domain.Auth.Errors;
+using ProgresiumToDo.Infrastructure.EmailService;
 using JwtRegisteredClaimNames = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames;
 
 namespace ProgresiumToDo.Infrastructure.Auth.Identity;
@@ -28,6 +29,7 @@ internal sealed class IdentityService : IIdentityService
     private readonly int _jwtLifespan;
     private readonly int _refreshTokenLifespan;
     private readonly string _baseUrl;
+    private readonly MailtrapSettings _mailtrapSettings;
     
     public IdentityService(
         UserManager<ApplicationUser> userManager,
@@ -35,7 +37,8 @@ internal sealed class IdentityService : IIdentityService
         IConfiguration configuration,
         IRefreshTokenRepository refreshTokenRepository,
         IUserRepository userRepository,
-        ILogger<IdentityService> logger)
+        ILogger<IdentityService> logger,
+        IOptions<MailtrapSettings> mailtrapOptions)
     {
         _userManager = userManager;
         _signInManager = signInManager;
@@ -43,6 +46,7 @@ internal sealed class IdentityService : IIdentityService
         _refreshTokenRepository = refreshTokenRepository;
         _userRepository = userRepository;
         _logger = logger;
+        _mailtrapSettings = mailtrapOptions.Value;
         _jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET") ??
                      throw new ApplicationException("Jwt secret is missing.");
         _jwtLifespan = int.Parse(Environment.GetEnvironmentVariable("JWT_TOKEN_LIFETIME_IN_SECONDS") ??
@@ -173,13 +177,13 @@ internal sealed class IdentityService : IIdentityService
             return Result.Failure<bool>([UserErrors.EmailAlreadyVerified]);
         }
 
-        if (appUser.EmailVerificationCode != code)
-        {
-            return Result.Failure([UserErrors.InvalidEmailVerificationCode]);
-        }
         if (appUser.EmailVerificationCodeExpiresOn < DateTime.UtcNow)
         {
             return Result.Failure([UserErrors.EmailVerificationCodeExpired]);
+        }
+        if (appUser.EmailVerificationCode is null || appUser.EmailVerificationCode != code)
+        {
+            return Result.Failure([UserErrors.InvalidEmailVerificationCode]);
         }
         
         appUser.EmailConfirmed = true;
@@ -210,6 +214,15 @@ internal sealed class IdentityService : IIdentityService
         {
             return Result.Failure<string>([UserErrors.UserNotFound]);
         }
+        
+        var cooldown = TimeSpan.FromSeconds(_mailtrapSettings.EmailCooldownInSeconds);
+        if (user.LastVerificationEmailSentTime.HasValue && 
+            DateTime.UtcNow < user.LastVerificationEmailSentTime.Value.Add(cooldown))
+        {
+            var remainingSeconds = (user.LastVerificationEmailSentTime.Value.Add(cooldown) - DateTime.UtcNow).Seconds;
+        
+            return Result.Failure<string>([UserErrors.EmailCooldown(remainingSeconds)]);
+        }
 
         var code = Random.Shared.Next(100000, 999999).ToString();
         
@@ -219,6 +232,22 @@ internal sealed class IdentityService : IIdentityService
         await _userManager.UpdateAsync(user);
 
         return code;
+    }
+
+    public async Task<Result> MarkVerificationEmailAsSentAsync(string email)
+    {
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user is null)
+        {
+            _logger.LogWarning("Marking verification email as sent failed. User not found. Email: {Email}", email);
+            return Result.Failure([UserErrors.UserNotFound]);
+        }
+
+        user.LastVerificationEmailSentTime = DateTime.UtcNow;
+        
+        await _userManager.UpdateAsync(user);
+
+        return Result.Success();
     }
 
     public async Task<Result> DeleteAccountAsync(string email)

@@ -27,4 +27,8 @@ public static class UserErrors
     public static Error EmailVerificationCodeExpired => new(
         "User.EmailVerificationCodeExpired",
         "The email verification code has expired.");
+
+    public static Error EmailCooldown(int remainingSeconds) => new(
+        "User.EmailCooldown",
+        $"Please wait {remainingSeconds} seconds before requesting a new code.");
 }

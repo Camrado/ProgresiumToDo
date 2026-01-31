@@ -1,4 +1,5 @@
 ﻿using System.Net.Http.Json;
+using System.Text.Encodings.Web;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using ProgresiumToDo.Application.Abstractions.EmailService;
@@ -12,10 +13,10 @@ internal sealed class MailtrapEmailService : IEmailService
     private readonly MailtrapSettings _mailtrapSettings;
     private readonly ILogger<MailtrapEmailService> _logger;
     
-    public MailtrapEmailService(HttpClient httpClient, IOptions<MailtrapSettings> options, ILogger<MailtrapEmailService> logger)
+    public MailtrapEmailService(HttpClient httpClient, IOptions<MailtrapSettings> mailtrapOptions, ILogger<MailtrapEmailService> logger)
     {
         _httpClient = httpClient;
-        _mailtrapSettings = options.Value;
+        _mailtrapSettings = mailtrapOptions.Value;
         _logger = logger;
     }
     
@@ -46,7 +47,7 @@ internal sealed class MailtrapEmailService : IEmailService
             }
             
             var errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
-            _logger.LogError("Mailtrap Error: {ResponseStatusCode} - {ErrorContent}", response.StatusCode, errorContent);
+            _logger.LogError("Mailtrap Error: {ResponseStatusCode}", response.StatusCode);
             
             return Result.Failure([EmailErrors.EmailSendFailed]);
         }
@@ -67,6 +68,8 @@ internal sealed class MailtrapEmailService : IEmailService
 
     private string BuildConfirmationEmailBody(string code)
     {
+        code = HtmlEncoder.Default.Encode(code);
+        
         return $@"
         <div style=""background-color: #f9fafb; padding: 50px 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #111827;"">
             <table align=""center"" border=""0"" cellpadding=""0"" cellspacing=""0"" width=""600"" style=""background-color: #ffffff; border-radius: 8px; border: 1px solid #e5e7eb; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);"">

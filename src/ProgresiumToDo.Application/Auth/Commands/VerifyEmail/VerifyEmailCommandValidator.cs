@@ -8,6 +8,7 @@ internal sealed class VerifyEmailCommandValidator : AbstractValidator<VerifyEmai
     {
         RuleFor(ve => ve.VerificationCode)
             .NotEmpty()
-            .Length(6);
+            .Length(6)
+            .Matches("^[0-9]{6}$");
     }
 }

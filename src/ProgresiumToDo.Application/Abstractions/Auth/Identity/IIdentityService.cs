@@ -16,6 +16,8 @@ public interface IIdentityService
     Task<Result> VerifyEmailAsync(string email, string code);
 
     Task<Result<string>> GenerateEmailVerificationCodeAsync(string email);
+
+    Task<Result> MarkVerificationEmailAsSentAsync(string email);
     
     Task<Result> DeleteAccountAsync(string email);
 
