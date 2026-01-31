@@ -45,4 +45,13 @@ public class UserRepository : Repository<User>, IUserRepository
     {
         DbContext.Set<User>().Remove(user);
     }
+    
+    public async Task<bool> IsEmailVerifiedAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        return await DbContext.Users
+            .AsNoTracking()
+            .Where(u => u.Id == userId)
+            .Select(u => u.IsEmailVerified)
+            .FirstOrDefaultAsync(cancellationToken);
+    }
 }

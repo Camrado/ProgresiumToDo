@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ProgresiumToDo.Infrastructure;
@@ -11,9 +12,11 @@ using ProgresiumToDo.Infrastructure;
 namespace ProgresiumToDo.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260131092948_AddedEmailVerificationFieldsToAspNetUsers")]
+    partial class AddedEmailVerificationFieldsToAspNetUsers
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -870,10 +873,6 @@ namespace ProgresiumToDo.Infrastructure.Migrations
                     b.Property<DateTime?>("EmailVerificationCodeExpiresOn")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("email_verification_code_expires_on");
-
-                    b.Property<DateTime?>("LastVerificationEmailSentTime")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("last_verification_email_sent_time");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("boolean")

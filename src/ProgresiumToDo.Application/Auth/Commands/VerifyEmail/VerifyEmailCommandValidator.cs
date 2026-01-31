@@ -6,6 +6,9 @@ internal sealed class VerifyEmailCommandValidator : AbstractValidator<VerifyEmai
 {
     public VerifyEmailCommandValidator()
     {
-        RuleFor(ve => ve.VerificationToken).NotEmpty();
+        RuleFor(ve => ve.VerificationCode)
+            .NotEmpty()
+            .Length(6)
+            .Matches("^[0-9]{6}$");
     }
 }

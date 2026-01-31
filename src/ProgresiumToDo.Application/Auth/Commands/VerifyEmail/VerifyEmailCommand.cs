@@ -2,4 +2,4 @@
 
 namespace ProgresiumToDo.Application.Auth.Commands.VerifyEmail;
 
-public sealed record VerifyEmailCommand(string UserId, string VerificationToken) : ICommand<VerifyEmailCommandResponse>;
+public sealed record VerifyEmailCommand(string VerificationCode) : ICommand<VerifyEmailCommandResponse>;

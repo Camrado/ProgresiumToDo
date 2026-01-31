@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Net.Http.Headers;
+using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -25,6 +26,7 @@ using ProgresiumToDo.Infrastructure.Auth.Identity;
 using ProgresiumToDo.Infrastructure.Auth.OAuth;
 using ProgresiumToDo.Infrastructure.Auth.Onboarding;
 using ProgresiumToDo.Infrastructure.Billing;
+using ProgresiumToDo.Infrastructure.EmailService;
 using ProgresiumToDo.Infrastructure.Interceptors;
 using ProgresiumToDo.Infrastructure.Repositories.Auth;
 using ProgresiumToDo.Infrastructure.Repositories.Billing;
@@ -50,13 +52,13 @@ public static class DependencyInjection
         AddAuthorization(services);
 
         AddRepositories(services);
+
+        AddEmailService(services, configuration);
         
         services.AddTransient<IUserOnboardingService, UserOnboardingService>();
         
         services.AddTransient<ISubscriptionService, SubscriptionService>();
         
-        services.AddTransient<IEmailService, EmailService.EmailService>();
-
         services.AddTransient<ITaskOrderingService, TaskOrderingService>();
         
         services.AddTransient<ITaskStatusPolicy, TaskStatusPolicy>();
@@ -164,5 +166,22 @@ public static class DependencyInjection
         services.AddScoped<IPlanFeatureRepository, PlanFeatureRepository>();
         
         services.AddScoped<IFeatureUsageRepository, FeatureUsageRepository>();
+    }
+    
+    private static void AddEmailService(IServiceCollection services, IConfiguration configuration)
+    {
+        services.Configure<MailtrapSettings>(configuration.GetSection("Mailtrap"));
+        
+        var settings = configuration.GetSection("Mailtrap").Get<MailtrapSettings>() ??
+                       throw new InvalidOperationException("Mailtrap settings are not configured properly.");
+        var apiToken = Environment.GetEnvironmentVariable("MAILTRAP_API_KEY") ?? 
+                        throw new InvalidOperationException("Mailtrap API token is not set in environment variables.");
+        
+        services.AddHttpClient<IEmailService, MailtrapEmailService>(client =>
+        {
+            client.BaseAddress = new Uri(settings.ApiUrl);
+            
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiToken);
+        });
     }
 }
