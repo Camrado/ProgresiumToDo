@@ -86,7 +86,7 @@ internal sealed class OAuthService : IOAuthService
             ["code_verifier"] = verifier
         };
         
-        var httpClient = _httpClientFactory.CreateClient();
+        using var httpClient = _httpClientFactory.CreateClient();
 
         _logger.LogInformation("Initiating Google OAuth token exchange");
         var stopwatch = Stopwatch.StartNew();
