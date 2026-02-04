@@ -91,11 +91,6 @@ internal sealed class MailtrapEmailService : IEmailService
                         </td>
                     </tr>
                     <tr>
-                        <td align=""center"" style=""padding: 0;"">
-                            <p style=""margin: 0; font-size: 13px; color: #9ca3af; font-style: italic;"">Click the code above to copy it automatically</p>
-                        </td>
-                    </tr>
-                    <tr>
                         <td align=""center"" style=""padding: 10px 0 0 0;"">
                             <div id=""toast"" style=""display: inline-block; background-color: #10b981; color: white; padding: 12px 20px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); opacity: 0; transition: opacity 0.3s ease-in-out; font-size: 13px; font-weight: 500;"">
                                 ✓ Code copied to clipboard!
