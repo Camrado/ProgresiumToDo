@@ -13,7 +13,7 @@ public interface IIdentityService
     
     Task<Result<AuthenticationResult>> RefreshTokensAsync(string oldRefreshTokenValue, CancellationToken cancellationToken = default);
     
-    Task<Result> VerifyEmailAsync(string email, string code);
+    Task<Result> VerifyEmailAsync(User user, string code);
 
     Task<Result<string>> GenerateEmailVerificationCodeAsync(string email);
 
@@ -23,4 +23,6 @@ public interface IIdentityService
 
     Task<Result> AddGoogleLoginAsync(string email, string googleIdentitySub,
         CancellationToken cancellationToken = default);
+    
+    Task<Result> UpdateEmailAsync(string currentEmail, string newEmail);
 }

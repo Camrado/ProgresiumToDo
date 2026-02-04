@@ -52,6 +52,12 @@ public sealed class User : BaseEntity
         }
     }
     
+    public void UpdateEmail(string email)
+    {
+        Email = email;
+        IsEmailVerified = false;
+    }
+    
     public void VerifyEmail()
     {
         IsEmailVerified = true;

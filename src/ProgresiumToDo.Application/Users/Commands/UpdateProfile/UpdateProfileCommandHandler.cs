@@ -10,11 +10,13 @@ internal sealed class UpdateProfileCommandHandler : ICommandHandler<UpdateProfil
 {
     private readonly IUserRepository _userRepository;
     private readonly IUserContext _userContext;
+    private readonly IIdentityService _identityService;
     
-    public UpdateProfileCommandHandler(IUserRepository userRepository, IUserContext userContext)
+    public UpdateProfileCommandHandler(IUserRepository userRepository, IUserContext userContext, IIdentityService identityService)
     {
         _userRepository = userRepository;
         _userContext = userContext;
+        _identityService = identityService;
     }
     
     public async Task<Result<UpdateProfileCommandResponse>> Handle(UpdateProfileCommand request, CancellationToken cancellationToken)
@@ -26,6 +28,17 @@ internal sealed class UpdateProfileCommandHandler : ICommandHandler<UpdateProfil
         }
         
         user.Update(request.FirstName, request.LastName);
+
+        if (request.Email is not null)
+        {
+            var updateEmailResult = await _identityService.UpdateEmailAsync(user.Email, request.Email);
+            if (updateEmailResult.IsFailure)
+            {
+                return Result.Failure<UpdateProfileCommandResponse>(updateEmailResult.Errors);
+            }
+            
+            user.UpdateEmail(request.Email);
+        }
 
         var updatedUserDto = new UserProfileUpdatedDto(
             user.Id,

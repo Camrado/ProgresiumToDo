@@ -164,17 +164,17 @@ internal sealed class IdentityService : IIdentityService
         return authTokens;
     }
 
-    public async Task<Result> VerifyEmailAsync(string email, string code)
+    public async Task<Result> VerifyEmailAsync(User user, string code)
     {
-        var appUser = await _userManager.FindByEmailAsync(email);
+        var appUser = await _userManager.FindByEmailAsync(user.Email);
         if (appUser is null)
         {
-            _logger.LogWarning("Email verification failed. User not found. Email: {Email}", email);
+            _logger.LogWarning("Email verification failed. User not found. Email: {Email}", user.Email);
             return Result.Failure<bool>([UserErrors.UserNotFound]);
         }
         if (appUser.EmailConfirmed)
         {
-            _logger.LogWarning("Email verification failed. Email already verified. Email: {Email}", email);
+            _logger.LogWarning("Email verification failed. Email already verified. Email: {Email}", user.Email);
             return Result.Failure<bool>([UserErrors.EmailAlreadyVerified]);
         }
 
@@ -195,16 +195,10 @@ internal sealed class IdentityService : IIdentityService
         {
             return Result.Failure<bool>([UserErrors.EmailVerificationFailed]);
         }
-
-        var user = await _userRepository.GetByEmailAsync(email);
-        if (user is null)
-        {
-            return Result.Failure<bool>([UserErrors.UserNotFound]);
-        }
         
         user.VerifyEmail();
         
-        _logger.LogInformation("Email verified successfully. Email: {Email}", email);
+        _logger.LogInformation("Email verified successfully. Email: {Email}", user.Email);
         return Result.Success();
     }
     
@@ -297,6 +291,25 @@ internal sealed class IdentityService : IIdentityService
             _logger.LogInformation("Google login already linked. UserId: {UserId}", user.Id);
         }
         
+        return Result.Success();
+    }
+
+    public async Task<Result> UpdateEmailAsync(string currentEmail, string newEmail)
+    {
+        var user = await _userManager.FindByEmailAsync(currentEmail);
+        if (user is null)
+        {
+            _logger.LogWarning("Email update failed. User not found. CurrentEmail: {CurrentEmail}", currentEmail);
+            return Result.Failure([UserErrors.UserNotFound]);
+        }
+
+        user.Email = newEmail;
+        user.UserName = $"{newEmail}_{Guid.NewGuid()}";
+        user.EmailConfirmed = false;
+
+        await _userManager.UpdateAsync(user);
+
+        _logger.LogInformation("Email updated successfully. UserId: {UserId}", user.Id);
         return Result.Success();
     }
 }

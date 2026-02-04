@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using ProgresiumToDo.Application.Abstractions.Behaviors.Contracts;
 using ProgresiumToDo.Application.Abstractions.Messaging;
+using ProgresiumToDo.Domain.Abstractions;
 
 namespace ProgresiumToDo.Application.Abstractions.Behaviors;
 
@@ -31,6 +32,16 @@ public sealed class UnitOfWorkBehavior<TRequest, TResponse> : IPipelineBehavior<
         try
         {
             var response = await next(cancellationToken);
+            
+            if (IsFailureResult(response))
+            {
+                _logger.LogWarning(
+                    "Transaction rollback initiated due to failure result. Request: {RequestName}",
+                    requestName);
+                
+                await transaction.RollbackAsync(cancellationToken);
+                return response;
+            }
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);
             await transaction.CommitAsync(cancellationToken);
@@ -51,5 +62,10 @@ public sealed class UnitOfWorkBehavior<TRequest, TResponse> : IPipelineBehavior<
             await transaction.RollbackAsync(cancellationToken);
             throw;
         }
+    }
+    
+    private static bool IsFailureResult(TResponse response)
+    {
+        return response is Result { IsFailure: true };
     }
 }
