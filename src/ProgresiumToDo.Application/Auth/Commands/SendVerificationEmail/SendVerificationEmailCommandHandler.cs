@@ -39,7 +39,7 @@ internal sealed class SendVerificationEmailCommandHandler :
             return Result.Failure<SendVerificationEmailCommandResponse>(verificationCode.Errors);
         }
         
-        var result = await _emailService.SendConfirmationEmailAsync(
+        var result = await _emailService.SendVerificationEmailAsync(
             _userContext.Email, verificationCode.Value, cancellationToken);
         if (result.IsFailure)
         {

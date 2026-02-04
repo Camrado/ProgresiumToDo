@@ -58,9 +58,9 @@ internal sealed class MailtrapEmailService : IEmailService
         }
     }
     
-    public async Task<Result> SendConfirmationEmailAsync(string to, string verificationCode, CancellationToken cancellationToken = default)
+    public async Task<Result> SendVerificationEmailAsync(string to, string verificationCode, CancellationToken cancellationToken = default)
     {
-        var subject = "Email Confirmation - Progresium.ToDo";
+        var subject = "Email Verification - Progresium ToDo";
         var body = BuildConfirmationEmailBody(verificationCode);
         
         return await SendEmailAsync(to, subject, body, cancellationToken);
@@ -69,39 +69,63 @@ internal sealed class MailtrapEmailService : IEmailService
     private string BuildConfirmationEmailBody(string code)
     {
         code = HtmlEncoder.Default.Encode(code);
-        
-        return $@"
-        <div style=""background-color: #f9fafb; padding: 50px 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #111827;"">
-            <table align=""center"" border=""0"" cellpadding=""0"" cellspacing=""0"" width=""600"" style=""background-color: #ffffff; border-radius: 8px; border: 1px solid #e5e7eb; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);"">
-                <tr>
-                    <td style=""padding: 40px 40px 20px 40px; text-align: center;"">
-                        <h1 style=""margin: 0; color: #2563eb; font-size: 28px; font-weight: 700; letter-spacing: -0.025em;"">Progresium</h1>
-                        <p style=""margin: 10px 0 0 0; color: #6b7280; font-size: 16px;"">Verify your email address</p>
-                    </td>
-                </tr>
-                <tr>
-                    <td style=""padding: 20px 40px 40px 40px;"">
-                        <p style=""margin: 0 0 20px 0; font-size: 16px; line-height: 1.5;"">Hello,</p>
-                        <p style=""margin: 0 0 25px 0; font-size: 16px; line-height: 1.5;"">Welcome to <strong>Progresium</strong>. To complete your account setup, please enter the following verification code in the app:</p>
-                        
-                        <table border=""0"" cellpadding=""0"" cellspacing=""0"" width=""100%"">
-                            <tr>
-                                <td align=""center"" style=""padding: 20px 0;"">
-                                    <span style=""display: inline-block; background-color: #eff6ff; color: #1e40af; padding: 16px 36px; border-radius: 8px; font-size: 32px; font-weight: 700; letter-spacing: 6px; border: 1px dashed #bfdbfe;"">{code}</span>
-                                </td>
-                            </tr>
-                        </table>
 
-                        <p style=""margin: 20px 0 0 0; font-size: 14px; color: #6b7280; line-height: 1.5;"">This code will expire in {_mailtrapSettings.VerificationCodeLifespanInMinutes} minutes. If you did not request this code, you can safely ignore this email.</p>
-                    </td>
-                </tr>
-                <tr>
-                    <td style=""padding: 30px 40px; background-color: #f3f4f6; text-align: center; font-size: 12px; color: #9ca3af;"">
-                        <p style=""margin: 0;"">&copy; 2026 Progresium. All rights reserved.</p>
-                        <p style=""margin: 5px 0 0 0;"">You received this email because you signed up for Progresium.</p>
-                    </td>
-                </tr>
-            </table>
-        </div>";
+        return $@"
+<div style=""background-color: #f9fafb; padding: 50px 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #111827;"">
+    <table align=""center"" border=""0"" cellpadding=""0"" cellspacing=""0"" width=""600"" style=""background-color: #ffffff; border-radius: 8px; border: 1px solid #e5e7eb; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);"">
+        <tr>
+            <td style=""padding: 40px 40px 20px 40px; text-align: center;"">
+                <h1 style=""margin: 0; color: #2563eb; font-size: 28px; font-weight: 700; letter-spacing: -0.025em;"">Progresium</h1>
+                <p style=""margin: 10px 0 0 0; color: #6b7280; font-size: 16px;"">Verify your email address</p>
+            </td>
+        </tr>
+        <tr>
+            <td style=""padding: 20px 40px 40px 40px;"">
+                <p style=""margin: 0 0 20px 0; font-size: 16px; line-height: 1.5;"">Hello,</p>
+                <p style=""margin: 0 0 25px 0; font-size: 16px; line-height: 1.5;"">Welcome to <strong>Progresium</strong>. To complete your account setup, please enter the following verification code in the app:</p>
+                
+                <table border=""0"" cellpadding=""0"" cellspacing=""0"" width=""100%"">
+                    <tr>
+                        <td align=""center"" style=""padding: 20px 0;"">
+                            <span onclick=""copyCode('{code}');"" style=""display: inline-block; background-color: #eff6ff; color: #1e40af; padding: 16px 36px; border-radius: 8px; font-size: 32px; font-weight: 700; letter-spacing: 6px; border: 1px dashed #bfdbfe; cursor: pointer;"">{code}</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align=""center"" style=""padding: 0;"">
+                            <p style=""margin: 0; font-size: 13px; color: #9ca3af; font-style: italic;"">Click the code above to copy it automatically</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align=""center"" style=""padding: 10px 0 0 0;"">
+                            <div id=""toast"" style=""display: inline-block; background-color: #10b981; color: white; padding: 12px 20px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); opacity: 0; transition: opacity 0.3s ease-in-out; font-size: 13px; font-weight: 500;"">
+                                ✓ Code copied to clipboard!
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+
+                <p style=""margin: 20px 0 0 0; font-size: 14px; color: #6b7280; line-height: 1.5;"">This code will expire in {_mailtrapSettings.VerificationCodeLifespanInMinutes} minutes. If you did not request this code, you can safely ignore this email.</p>
+            </td>
+        </tr>
+        <tr>
+            <td style=""padding: 30px 40px; background-color: #f3f4f6; text-align: center; font-size: 12px; color: #9ca3af;"">
+                <p style=""margin: 0;"">&copy; 2026 Progresium. All rights reserved.</p>
+                <p style=""margin: 5px 0 0 0;"">You received this email because you signed up for Progresium.</p>
+            </td>
+        </tr>
+    </table>
+    
+    <script>
+        function copyCode(code) {{
+            navigator.clipboard.writeText(code).then(function() {{
+                var toast = document.getElementById('toast');
+                toast.style.opacity = '1';
+                setTimeout(function() {{
+                    toast.style.opacity = '0';
+                }}, 3000);
+            }});
+        }}
+    </script>
+</div>";
     }
 }
