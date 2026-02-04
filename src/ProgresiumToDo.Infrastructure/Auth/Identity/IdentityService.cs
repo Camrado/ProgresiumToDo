@@ -190,6 +190,7 @@ internal sealed class IdentityService : IIdentityService
         appUser.EmailConfirmed = true;
         appUser.EmailVerificationCode = null;
         appUser.EmailVerificationCodeExpiresOn = null;
+        appUser.LastVerificationEmailSentTime = null;
         var updateResult = await _userManager.UpdateAsync(appUser);
         if (!updateResult.Succeeded)
         {
@@ -306,6 +307,9 @@ internal sealed class IdentityService : IIdentityService
         user.Email = newEmail;
         user.UserName = $"{newEmail}_{Guid.NewGuid()}";
         user.EmailConfirmed = false;
+        user.LastVerificationEmailSentTime = null;
+        user.EmailVerificationCode = null;
+        user.EmailVerificationCodeExpiresOn = null;
 
         await _userManager.UpdateAsync(user);
 
