@@ -22,30 +22,33 @@ public static class ExceptionHandlingExtensions
         {
             options.InvalidModelStateResponseFactory = context =>
             {
-                var parameters = context.ActionDescriptor.Parameters
-                    .Select(p => p.Name)
-                    .ToHashSet();
+                var hasJsonFormatError = context.ModelState.Values.Any(v => 
+                    v.Errors.Any(e => 
+                        e.Exception is JsonException || 
+                        e.ErrorMessage.Contains("The JSON value could not be converted") ||
+                        e.ErrorMessage.Contains("The input does not contain any JSON tokens")));
 
-                var stateErrors = context.ModelState
-                    .Where(e => e.Value?.Errors.Count > 0)
-                    .ToList();
+                Dictionary<string, string[]> errors;
+ 
+                if (hasJsonFormatError)
+                {
+                    errors = new Dictionary<string, string[]>
+                    {
+                        { "general", ["The provided JSON body is of invalid format."] }
+                    };
+                }
+                else
+                {
+                    errors = context.ModelState
+                        .Where(e => e.Value?.Errors.Count > 0)
+                        .ToDictionary(
+                            kvp => string.IsNullOrWhiteSpace(kvp.Key) 
+                                ? "general" 
+                                : JsonNamingPolicy.CamelCase.ConvertName(kvp.Key),
+                            kvp => kvp.Value!.Errors.Select(e => e.ErrorMessage).ToArray()
+                        );
+                }
                 
-                var errors = stateErrors
-                    .Where(e => stateErrors.Count == 1 || !parameters.Contains(e.Key))
-                    .ToDictionary(
-                        _ => "general",
-                        kvp => kvp.Value!.Errors.Select(e => 
-                        {
-                            if (e.Exception is JsonException || 
-                                e.ErrorMessage.Contains("The JSON value could not be converted"))
-                            {
-                                return "The provided JSON body is of invalid format.";
-                            }
-                            
-                            return e.ErrorMessage;
-                        }).ToArray()
-                    );
-
                 var problemDetails = new ValidationProblemDetails
                 {
                     Type = "https://httpstatuses.com/400",
