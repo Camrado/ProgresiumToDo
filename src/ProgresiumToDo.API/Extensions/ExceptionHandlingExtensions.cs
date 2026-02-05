@@ -17,7 +17,6 @@ public static class ExceptionHandlingExtensions
             };
         });
         
-        // Customize the automatic 400 responses for model validation errors
         services.Configure<ApiBehaviorOptions>(options =>
         {
             options.InvalidModelStateResponseFactory = context =>
@@ -32,6 +31,7 @@ public static class ExceptionHandlingExtensions
  
                 if (hasJsonFormatError)
                 {
+                    // If there is a JSON format error, return a general error message
                     errors = new Dictionary<string, string[]>
                     {
                         { "general", ["The provided JSON body is of invalid format."] }
@@ -39,6 +39,7 @@ public static class ExceptionHandlingExtensions
                 }
                 else
                 {
+                    // Otherwise, return the standard validation errors
                     errors = context.ModelState
                         .Where(e => e.Value?.Errors.Count > 0)
                         .ToDictionary(
