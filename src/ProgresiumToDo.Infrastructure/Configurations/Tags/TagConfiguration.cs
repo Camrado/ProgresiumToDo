@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using ProgresiumToDo.Domain.Tags;
 
-namespace ProgresiumToDo.Infrastructure.Configurations.Tasks;
+namespace ProgresiumToDo.Infrastructure.Configurations.Tags;
 
 internal sealed class TagConfiguration : SoftDeleteEntityConfiguration<Tag>
 {

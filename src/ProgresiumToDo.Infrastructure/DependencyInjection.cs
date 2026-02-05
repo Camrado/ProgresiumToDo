@@ -22,6 +22,7 @@ using ProgresiumToDo.Application.Projects.Repositories;
 using ProgresiumToDo.Application.Tags.Repositories;
 using ProgresiumToDo.Application.Tasks.Repositories;
 using ProgresiumToDo.Application.Users.Repositories;
+using ProgresiumToDo.Application.Waitlist.Commands.Repositories;
 using ProgresiumToDo.Infrastructure.Auth.Authentication;
 using ProgresiumToDo.Infrastructure.Auth.Entitlement;
 using ProgresiumToDo.Infrastructure.Auth.Identity;
@@ -35,6 +36,7 @@ using ProgresiumToDo.Infrastructure.Repositories.Billing;
 using ProgresiumToDo.Infrastructure.Repositories.Projects;
 using ProgresiumToDo.Infrastructure.Repositories.Tags;
 using ProgresiumToDo.Infrastructure.Repositories.Tasks;
+using ProgresiumToDo.Infrastructure.Repositories.Waitlist;
 using ProgresiumToDo.Infrastructure.Tasks;
 
 namespace ProgresiumToDo.Infrastructure;
@@ -177,6 +179,8 @@ public static class DependencyInjection
         services.AddScoped<IPlanFeatureRepository, PlanFeatureRepository>();
         
         services.AddScoped<IFeatureUsageRepository, FeatureUsageRepository>();
+
+        services.AddScoped<IWaitlistEntryRepository, WaitlistEntryRepository>();
     }
     
     private static void AddEmailService(IServiceCollection services, IConfiguration configuration)

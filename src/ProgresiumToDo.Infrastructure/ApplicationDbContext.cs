@@ -8,6 +8,7 @@ using ProgresiumToDo.Domain.FeatureUsage;
 using ProgresiumToDo.Domain.Projects;
 using ProgresiumToDo.Domain.Tags;
 using ProgresiumToDo.Domain.Tasks;
+using ProgresiumToDo.Domain.Waitlist;
 using ProgresiumToDo.Infrastructure.Auth.Identity;
 using ProgresiumToDo.Infrastructure.Persistence;
 
@@ -33,6 +34,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
     public DbSet<TaskItem> TaskItems { get; set; }
     public DbSet<TaskOrder> TaskOrders { get; set; }
     public DbSet<TaskAttachment> TaskAttachments { get; set; }
+    public DbSet<WaitlistEntry> WaitlistEntries { get; set; }
 
     public async Task<IApplicationTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default)
     {
