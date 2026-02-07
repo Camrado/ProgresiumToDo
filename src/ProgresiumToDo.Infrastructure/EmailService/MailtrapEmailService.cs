@@ -1,5 +1,7 @@
-﻿using System.Net.Http.Json;
+﻿using System.Net;
+using System.Net.Http.Json;
 using System.Text.Encodings.Web;
+using System.Text.RegularExpressions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using ProgresiumToDo.Application.Abstractions.EmailService;
@@ -19,8 +21,9 @@ internal sealed class MailtrapEmailService : IEmailService
         _mailtrapSettings = mailtrapOptions.Value;
         _logger = logger;
     }
-    
-    public async Task<Result> SendEmailAsync(string to, string subject, string body, CancellationToken cancellationToken = default)
+
+    public async Task<Result> SendEmailAsync(List<string> tos, string subject, string body, string category, bool isHtml,
+        CancellationToken cancellationToken = default)
     {
         try
         {
@@ -28,16 +31,14 @@ internal sealed class MailtrapEmailService : IEmailService
             {
                 from = new
                 {
-                    email = _mailtrapSettings.SenderEmail,
+                    email = _mailtrapSettings.NoReplyEmail,
                     name = _mailtrapSettings.SenderName
                 },
-                to = new[]
-                {
-                    new { email = to }
-                },
+                to = tos.Select(emailAddress => new { email = emailAddress }).ToArray(),
                 subject = subject,
-                html = body,
-                category = "Email Verification"
+                category = category,
+                html = isHtml ? body : null,
+                text = isHtml ? null : body
             };
 
             var response = await _httpClient.PostAsJsonAsync("send", emailRequest, cancellationToken);
@@ -45,10 +46,10 @@ internal sealed class MailtrapEmailService : IEmailService
             {
                 return Result.Success();
             }
-            
+
             var errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
             _logger.LogError("Mailtrap Error: {ResponseStatusCode}", response.StatusCode);
-            
+
             return Result.Failure([EmailErrors.EmailSendFailed]);
         }
         catch (Exception ex)
@@ -57,13 +58,40 @@ internal sealed class MailtrapEmailService : IEmailService
             return Result.Failure([EmailErrors.EmailSendFailed]);
         }
     }
-    
+
     public async Task<Result> SendVerificationEmailAsync(string to, string verificationCode, CancellationToken cancellationToken = default)
     {
         var subject = "Email Verification - Progresium ToDo";
         var body = BuildConfirmationEmailBody(verificationCode);
         
-        return await SendEmailAsync(to, subject, body, cancellationToken);
+        return await SendEmailAsync([to], subject, body, "Email Verification", true, cancellationToken);
+    }
+
+    public async Task<Result> SendContactUsEmailAsync(string from, string name, string subject, string message,
+        CancellationToken cancellationToken = default)
+    {
+        var safeFrom = Sanitize(from);
+        var safeName = Sanitize(name);
+        var safeSubject = Sanitize(subject);
+        var safeMessage = Sanitize(message);
+        if (string.IsNullOrWhiteSpace(safeFrom) || string.IsNullOrWhiteSpace(safeName) || string.IsNullOrWhiteSpace(safeSubject) || string.IsNullOrWhiteSpace(safeMessage))
+        {
+            return Result.Failure([new Error("Contact.InvalidInput", "Name, email, subject and message cannot be empty or contain only HTML.")]);
+        }
+        
+        return await SendEmailAsync(
+            [_mailtrapSettings.ContactUsEmail], 
+            $"(Contact Us) - {safeSubject}",
+            $@"
+From: 
+{safeName} <{safeFrom}>
+
+Message:
+{safeMessage}
+            ", 
+            "Contact Us", 
+            false, 
+            cancellationToken);
     }
 
     private string BuildConfirmationEmailBody(string code)
@@ -122,5 +150,16 @@ internal sealed class MailtrapEmailService : IEmailService
         }}
     </script>
 </div>";
+    }
+    
+    private static string Sanitize(string input)
+    {
+        if (string.IsNullOrWhiteSpace(input)) return string.Empty;
+
+        var noHtml = Regex.Replace(input, "<.*?>", string.Empty);
+
+        var decoded = WebUtility.HtmlDecode(noHtml);
+
+        return decoded.Trim();
     }
 }

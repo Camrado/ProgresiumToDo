@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using ProgresiumToDo.Domain.Projects;
 
-namespace ProgresiumToDo.Infrastructure.Configurations.Tasks;
+namespace ProgresiumToDo.Infrastructure.Configurations.Projects;
 
 internal sealed class ProjectConfiguration : SoftDeleteEntityConfiguration<Project>
 {

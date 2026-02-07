@@ -29,6 +29,8 @@ builder.Services.AddMemoryCache();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
+builder.Services.AddContactUsRateLimiting();
+
 // var origins = (Environment.GetEnvironmentVariable("CORS_ORIGINS") ??
 //                throw new ApplicationException("CORS origins secret is missing."))
 //     .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
@@ -82,5 +84,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.UseRateLimiter();
 
 app.Run();
