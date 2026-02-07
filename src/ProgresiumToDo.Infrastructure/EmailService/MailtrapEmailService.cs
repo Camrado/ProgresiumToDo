@@ -31,7 +31,7 @@ internal sealed class MailtrapEmailService : IEmailService
             {
                 from = new
                 {
-                    email = _mailtrapSettings.SenderEmail,
+                    email = _mailtrapSettings.NoReplyEmail,
                     name = _mailtrapSettings.SenderName
                 },
                 to = tos.Select(emailAddress => new { email = emailAddress }).ToArray(),
@@ -80,10 +80,12 @@ internal sealed class MailtrapEmailService : IEmailService
         }
         
         return await SendEmailAsync(
-            [], 
-            $"Contact Us Message: {safeSubject}",
+            [_mailtrapSettings.ContactUsEmail], 
+            $"(Contact Us) - {safeSubject}",
             $@"
-From: {safeName} <{safeFrom}>
+From: 
+{safeName} <{safeFrom}>
+
 Message:
 {safeMessage}
             ", 
