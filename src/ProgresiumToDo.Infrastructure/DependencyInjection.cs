@@ -22,7 +22,7 @@ using ProgresiumToDo.Application.Projects.Repositories;
 using ProgresiumToDo.Application.Tags.Repositories;
 using ProgresiumToDo.Application.Tasks.Repositories;
 using ProgresiumToDo.Application.Users.Repositories;
-using ProgresiumToDo.Application.Waitlist.Commands.Repositories;
+using ProgresiumToDo.Application.Waitlist.Repositories;
 using ProgresiumToDo.Infrastructure.Auth.Authentication;
 using ProgresiumToDo.Infrastructure.Auth.Entitlement;
 using ProgresiumToDo.Infrastructure.Auth.Identity;

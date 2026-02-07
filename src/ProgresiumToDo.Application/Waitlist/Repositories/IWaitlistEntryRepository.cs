@@ -1,6 +1,6 @@
 ﻿using ProgresiumToDo.Domain.Waitlist;
 
-namespace ProgresiumToDo.Application.Waitlist.Commands.Repositories;
+namespace ProgresiumToDo.Application.Waitlist.Repositories;
 
 public interface IWaitlistEntryRepository
 {

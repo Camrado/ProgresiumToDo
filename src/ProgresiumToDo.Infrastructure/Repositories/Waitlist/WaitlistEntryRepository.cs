@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using ProgresiumToDo.Application.Waitlist.Commands.Repositories;
+using ProgresiumToDo.Application.Waitlist.Repositories;
 using ProgresiumToDo.Domain.Waitlist;
 
 namespace ProgresiumToDo.Infrastructure.Repositories.Waitlist;

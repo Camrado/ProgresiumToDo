@@ -1,5 +1,5 @@
 ﻿using ProgresiumToDo.Application.Abstractions.Messaging;
-using ProgresiumToDo.Application.Waitlist.Commands.Repositories;
+using ProgresiumToDo.Application.Waitlist.Repositories;
 using ProgresiumToDo.Domain.Abstractions;
 using ProgresiumToDo.Domain.Waitlist;
 
