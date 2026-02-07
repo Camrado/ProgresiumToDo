@@ -22,8 +22,7 @@ internal sealed class MailtrapEmailService : IEmailService
         _logger = logger;
     }
 
-    public async Task<Result> SendEmailAsync(List<string> tos, string subject, string body, string category, bool isHtml,
-        CancellationToken cancellationToken = default)
+    public async Task<Result> SendEmailAsync(MailDto mail, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -34,11 +33,11 @@ internal sealed class MailtrapEmailService : IEmailService
                     email = _mailtrapSettings.NoReplyEmail,
                     name = _mailtrapSettings.SenderName
                 },
-                to = tos.Select(emailAddress => new { email = emailAddress }).ToArray(),
-                subject = subject,
-                category = category,
-                html = isHtml ? body : null,
-                text = isHtml ? null : body
+                to = mail.Tos.Select(emailAddress => new { email = emailAddress }).ToArray(),
+                subject = mail.Subject,
+                category = mail.Category,
+                html = mail.Html,
+                text = mail.Text
             };
 
             var response = await _httpClient.PostAsJsonAsync("send", emailRequest, cancellationToken);
@@ -47,7 +46,6 @@ internal sealed class MailtrapEmailService : IEmailService
                 return Result.Success();
             }
 
-            var errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
             _logger.LogError("Mailtrap Error: {ResponseStatusCode}", response.StatusCode);
 
             return Result.Failure([EmailErrors.EmailSendFailed]);
@@ -61,95 +59,143 @@ internal sealed class MailtrapEmailService : IEmailService
 
     public async Task<Result> SendVerificationEmailAsync(string to, string verificationCode, CancellationToken cancellationToken = default)
     {
-        var subject = "Email Verification - Progresium ToDo";
-        var body = BuildConfirmationEmailBody(verificationCode);
+        var htmlBody = BuildConfirmationEmailHtmlBody(verificationCode);
+
+        var mail = new MailDto(
+            [to],
+            $"Email Verification: {verificationCode}",
+            "Email Verification",
+            htmlBody,
+            null);
         
-        return await SendEmailAsync([to], subject, body, "Email Verification", true, cancellationToken);
+        return await SendEmailAsync(mail, cancellationToken);
     }
 
-    public async Task<Result> SendContactUsEmailAsync(string from, string name, string subject, string message,
-        CancellationToken cancellationToken = default)
+    public async Task<Result> SendContactUsEmailAsync(ContactUsFormDto form, CancellationToken cancellationToken = default)
     {
-        var safeFrom = Sanitize(from);
-        var safeName = Sanitize(name);
-        var safeSubject = Sanitize(subject);
-        var safeMessage = Sanitize(message);
+        var safeFrom = Sanitize(form.From);
+        var safeName = Sanitize(form.Name);
+        var safeSubject = Sanitize(form.Subject);
+        var safeMessage = Sanitize(form.Message);
         if (string.IsNullOrWhiteSpace(safeFrom) || string.IsNullOrWhiteSpace(safeName) || string.IsNullOrWhiteSpace(safeSubject) || string.IsNullOrWhiteSpace(safeMessage))
         {
             return Result.Failure([new Error("Contact.InvalidInput", "Name, email, subject and message cannot be empty or contain only HTML.")]);
         }
-        
-        return await SendEmailAsync(
-            [_mailtrapSettings.ContactUsEmail], 
+
+        var mail = new MailDto(
+            [_mailtrapSettings.ContactUsEmail],
             $"(Contact Us) - {safeSubject}",
+            "Contact Us",
+            null,
             $@"
 From: 
 {safeName} <{safeFrom}>
 
 Message:
 {safeMessage}
-            ", 
-            "Contact Us", 
-            false, 
-            cancellationToken);
+            "
+        );
+        
+        return await SendEmailAsync(mail, cancellationToken);
     }
 
-    private string BuildConfirmationEmailBody(string code)
+    private string BuildConfirmationEmailHtmlBody(string code)
     {
-        code = HtmlEncoder.Default.Encode(code);
+        const string BackgroundColor = "#f0f0f4";
+        const string CardColor = "#ffffff";
+        const string TextPrimary = "#15141A";
+        const string TextSecondary = "#5B5B66";
+        const string BrandColor = "#0060DF";
 
         return $@"
-<div style=""background-color: #f9fafb; padding: 50px 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #111827;"">
-    <table align=""center"" border=""0"" cellpadding=""0"" cellspacing=""0"" width=""600"" style=""background-color: #ffffff; border-radius: 8px; border: 1px solid #e5e7eb; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);"">
+<!DOCTYPE html>
+<html lang=""en"">
+<head>
+    <meta charset=""UTF-8"">
+    <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"">
+    <title>Verify Email</title>
+    <style>
+        /* Reset & Basics */
+        body, table, td, a {{ -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }}
+        table, td {{ mso-table-lspace: 0pt; mso-table-rspace: 0pt; }}
+        img {{ -ms-interpolation-mode: bicubic; }}
+        
+        /* Typography */
+        body {{
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            width: 100% !important;
+            line-height: 1.5;
+            color: {TextPrimary};
+        }}
+        
+        /* Mobile Responsive */
+        @media screen and (max-width: 600px) {{
+            .email-container {{ width: 100% !important; }}
+            .content-padding {{ padding: 20px !important; }}
+            .code-block {{ font-size: 28px !important; letter-spacing: 4px !important; padding: 15px !important; }}
+        }}
+    </style>
+</head>
+<body style=""margin: 0; padding: 0; background-color: {BackgroundColor};"">
+    <table border=""0"" cellpadding=""0"" cellspacing=""0"" width=""100%"" style=""background-color: {BackgroundColor};"">
         <tr>
-            <td style=""padding: 40px 40px 20px 40px; text-align: center;"">
-                <h1 style=""margin: 0; color: #2563eb; font-size: 28px; font-weight: 700; letter-spacing: -0.025em;"">Progresium</h1>
-                <p style=""margin: 10px 0 0 0; color: #6b7280; font-size: 16px;"">Verify your email address</p>
-            </td>
-        </tr>
-        <tr>
-            <td style=""padding: 20px 40px 40px 40px;"">
-                <p style=""margin: 0 0 20px 0; font-size: 16px; line-height: 1.5;"">Hello,</p>
-                <p style=""margin: 0 0 25px 0; font-size: 16px; line-height: 1.5;"">Welcome to <strong>Progresium</strong>. To complete your account setup, please enter the following verification code in the app:</p>
+            <td align=""center"" style=""padding: 40px 10px;"">
+                
+                <table class=""email-container"" border=""0"" cellpadding=""0"" cellspacing=""0"" width=""480"" style=""background-color: {CardColor}; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow: hidden;"">
+                    
+                    <tr>
+                        <td align=""center"" style=""padding: 30px 0 0 0;"">
+                            <h2 style=""margin: 0; font-size: 24px; font-weight: 800; color: {BrandColor}; letter-spacing: -0.5px;"">Progresium</h2>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td class=""content-padding"" style=""padding: 30px 40px;"">
+                            
+                            <h1 style=""margin: 0 0 20px 0; font-size: 20px; font-weight: 700; color: {TextPrimary}; text-align: center;"">Confirm your email address</h1>
+                            
+                            <p style=""margin: 0 0 24px 0; font-size: 15px; line-height: 24px; color: {TextSecondary}; text-align: center;"">
+                                Thanks for signing up for Progresium! Use the verification code below to complete your account setup.
+                            </p>
+
+                            <div style=""background-color: #f0f0f4; border-radius: 6px; padding: 20px; text-align: center; margin-bottom: 24px;"">
+                                <span class=""code-block"" style=""font-family: 'Segoe UI'; font-size: 32px; font-weight: 700; color: {TextPrimary}; letter-spacing: 6px;"">
+                                    {code}
+                                </span>
+                            </div>
+
+                            <p style=""margin: 0; font-size: 13px; color: {TextSecondary}; text-align: center;"">
+                                This code will expire in {_mailtrapSettings.VerificationCodeLifespanInMinutes} minutes.
+                            </p>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td style=""background-color: #f9f9fb; padding: 20px; text-align: center; border-top: 1px solid #eeeeee;"">
+                            <p style=""margin: 0; font-size: 12px; color: #999999;"">
+                                If you didn't request this code, you can safely ignore this email.
+                            </p>
+                        </td>
+                    </tr>
+
+                </table>
                 
                 <table border=""0"" cellpadding=""0"" cellspacing=""0"" width=""100%"">
                     <tr>
-                        <td align=""center"" style=""padding: 20px 0;"">
-                            <span onclick=""copyCode('{code}');"" style=""display: inline-block; background-color: #eff6ff; color: #1e40af; padding: 16px 36px; border-radius: 8px; font-size: 32px; font-weight: 700; letter-spacing: 6px; border: 1px dashed #bfdbfe; cursor: pointer;"">{code}</span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td align=""center"" style=""padding: 10px 0 0 0;"">
-                            <div id=""toast"" style=""display: inline-block; background-color: #10b981; color: white; padding: 12px 20px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); opacity: 0; transition: opacity 0.3s ease-in-out; font-size: 13px; font-weight: 500;"">
-                                ✓ Code copied to clipboard!
-                            </div>
+                        <td align=""center"" style=""padding-top: 20px; color: #999999; font-size: 12px;"">
+                            <p style=""margin: 0;"">&copy; {DateTime.Now.Year} Progresium. All rights reserved.</p> 
                         </td>
                     </tr>
                 </table>
 
-                <p style=""margin: 20px 0 0 0; font-size: 14px; color: #6b7280; line-height: 1.5;"">This code will expire in {_mailtrapSettings.VerificationCodeLifespanInMinutes} minutes. If you did not request this code, you can safely ignore this email.</p>
-            </td>
-        </tr>
-        <tr>
-            <td style=""padding: 30px 40px; background-color: #f3f4f6; text-align: center; font-size: 12px; color: #9ca3af;"">
-                <p style=""margin: 0;"">&copy; 2026 Progresium. All rights reserved.</p>
-                <p style=""margin: 5px 0 0 0;"">You received this email because you signed up for Progresium.</p>
             </td>
         </tr>
     </table>
-    
-    <script>
-        function copyCode(code) {{
-            navigator.clipboard.writeText(code).then(function() {{
-                var toast = document.getElementById('toast');
-                toast.style.opacity = '1';
-                setTimeout(function() {{
-                    toast.style.opacity = '0';
-                }}, 3000);
-            }});
-        }}
-    </script>
-</div>";
+
+</body>
+</html>";
     }
     
     private static string Sanitize(string input)

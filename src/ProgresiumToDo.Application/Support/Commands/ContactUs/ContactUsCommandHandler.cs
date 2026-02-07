@@ -15,8 +15,8 @@ internal sealed class ContactUsCommandHandler : ICommandHandler<ContactUsCommand
     
     public async Task<Result<ContactUsCommandResponse>> Handle(ContactUsCommand request, CancellationToken cancellationToken)
     {
-        var result = await _emailService.SendContactUsEmailAsync(request.Email, request.Name, request.Subject,
-            request.Message, cancellationToken);
+        var contactUsForm = new ContactUsFormDto(request.Email, request.Name, request.Subject, request.Message);
+        var result = await _emailService.SendContactUsEmailAsync(contactUsForm, cancellationToken);
         if (result.IsFailure)
         {
             return Result.Failure<ContactUsCommandResponse>(result.Errors);
