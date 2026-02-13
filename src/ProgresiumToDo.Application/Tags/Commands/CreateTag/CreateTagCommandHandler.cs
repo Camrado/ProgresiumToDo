@@ -16,11 +16,11 @@ internal sealed class CreateTagCommandHandler : ICommandHandler<CreateTagCommand
     
     public Task<Result<CreateTagCommandResponse>> Handle(CreateTagCommand request, CancellationToken cancellationToken)
     {
-        var tag = Tag.Create(request.Name, request.Color);
+        var tag = Tag.Create(request.Name);
         
         _tagRepository.Add(tag);
         
-        var tagDto = new CreatedTagDto(tag.Id, tag.Name, tag.Color, tag.CreatedAt);
+        var tagDto = new CreatedTagDto(tag.Id, tag.Name, tag.CreatedAt);
         
         return Task.FromResult<Result<CreateTagCommandResponse>>(
             new CreateTagCommandResponse("Tag created successfully.", tagDto));

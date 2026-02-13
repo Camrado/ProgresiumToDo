@@ -7,27 +7,21 @@ public sealed class Tag : BaseEntity
 {
     public string Name { get; private set; }
     
-    public string Color { get; private set; }
-    
     public ICollection<TaskItem> TaskItems { get; private set; } = new List<TaskItem>();
     
-    private Tag(string name, string color)
+    private Tag(string name)
     {
         Name = name;
-        Color = color;
     }
     
-    public static Tag Create(string name, string color)
+    public static Tag Create(string name)
     {
-        return new Tag(name, color);
+        return new Tag(name);
     }
     
-    public void Update(string? name, string? color)
+    public void Update(string? name)
     {
         if (name is not null)
             Name = name;
-
-        if (color is not null)
-            Color = color;
     }
 }

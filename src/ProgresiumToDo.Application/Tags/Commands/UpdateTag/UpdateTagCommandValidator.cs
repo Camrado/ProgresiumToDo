@@ -33,9 +33,5 @@ internal sealed class UpdateTagCommandValidator : AbstractValidator<UpdateTagCom
                 return existingTag is null;
             })
             .WithMessage("A tag with the same name already exists.");
-        
-        RuleFor(utc => utc.Color)
-            .Matches("^#[0-9A-Fa-f]{6}$")
-            .WithMessage("Color must be a valid hex value like #000000");
     }
 }

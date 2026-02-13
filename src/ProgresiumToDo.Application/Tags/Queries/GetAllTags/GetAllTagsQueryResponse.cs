@@ -7,6 +7,5 @@ public sealed record GetAllTagsQueryResponse(
 public sealed record TagListItemDto(
     Guid Id,
     string Name,
-    string Color,
     DateTime CreatedAt,
     DateTime UpdatedAt);
