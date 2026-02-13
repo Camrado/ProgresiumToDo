@@ -1,32 +1,20 @@
 ﻿using FluentValidation;
-using ProgresiumToDo.Application.Abstractions.Auth.Identity;
-using ProgresiumToDo.Application.Projects.Repositories;
 using ProgresiumToDo.Application.Tags.Repositories;
 
 namespace ProgresiumToDo.Application.Tags.Commands.CreateTag;
 
 internal sealed class CreateTagCommandValidator : AbstractValidator<CreateTagCommand>
 {
-    public CreateTagCommandValidator(ITagRepository tagRepository, IProjectRepository projectRepository, IUserContext userContext)
+    public CreateTagCommandValidator(ITagRepository tagRepository)
     {
         RuleFor(ctc => ctc)
             .MustAsync(async (command, cancellationToken) =>
             {
-                var existingTag = await tagRepository.GetByProjectIdAndNameAsync(command.ProjectId, command.Name, cancellationToken);
+                var existingTag = await tagRepository.GetByNameAsync(command.Name, cancellationToken);
                 return existingTag is null;
             })
-            .WithMessage("A tag with the same name already exists in the specified project.");
+            .WithMessage("A tag with the same name already exists.");
         
-        RuleFor(ctc => ctc.ProjectId)
-            .NotEmpty()
-            .WithMessage("ProjectId is required.")
-            .MustAsync(async (command, projectId, cancellationToken) =>
-            {
-                var project = await projectRepository.GetByIdAndUserIdAsync(projectId, userContext.UserId, cancellationToken);
-                return project is not null;
-            })
-            .WithMessage("Project does not exist.");
-
         RuleFor(ctc => ctc.Name)
             .NotEmpty()
             .WithMessage("Tag name is required.")

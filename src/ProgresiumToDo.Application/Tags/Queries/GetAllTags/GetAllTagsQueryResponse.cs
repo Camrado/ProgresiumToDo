@@ -1,6 +1,6 @@
-﻿namespace ProgresiumToDo.Application.Tags.Queries.GetAllTagsForProject;
+﻿namespace ProgresiumToDo.Application.Tags.Queries.GetAllTags;
 
-public sealed record GetAllTagsForProjectQueryResponse(
+public sealed record GetAllTagsQueryResponse(
     string Message,
     IEnumerable<TagListItemDto> Tags);
     
