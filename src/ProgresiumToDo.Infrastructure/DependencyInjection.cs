@@ -15,6 +15,7 @@ using ProgresiumToDo.Application.Abstractions.Auth.Onboarding;
 using ProgresiumToDo.Application.Abstractions.Behaviors.Contracts;
 using ProgresiumToDo.Application.Abstractions.Billing;
 using ProgresiumToDo.Application.Abstractions.EmailService;
+using ProgresiumToDo.Application.Abstractions.Tags;
 using ProgresiumToDo.Application.Abstractions.Tasks;
 using ProgresiumToDo.Application.Auth.Repositories;
 using ProgresiumToDo.Application.Billing.Repositories;
@@ -23,13 +24,6 @@ using ProgresiumToDo.Application.Tags.Repositories;
 using ProgresiumToDo.Application.Tasks.Repositories;
 using ProgresiumToDo.Application.Users.Repositories;
 using ProgresiumToDo.Application.Waitlist.Repositories;
-using ProgresiumToDo.Infrastructure.Auth.Authentication;
-using ProgresiumToDo.Infrastructure.Auth.Entitlement;
-using ProgresiumToDo.Infrastructure.Auth.Identity;
-using ProgresiumToDo.Infrastructure.Auth.OAuth;
-using ProgresiumToDo.Infrastructure.Auth.Onboarding;
-using ProgresiumToDo.Infrastructure.Billing;
-using ProgresiumToDo.Infrastructure.EmailService;
 using ProgresiumToDo.Infrastructure.Interceptors;
 using ProgresiumToDo.Infrastructure.Repositories.Auth;
 using ProgresiumToDo.Infrastructure.Repositories.Billing;
@@ -37,7 +31,15 @@ using ProgresiumToDo.Infrastructure.Repositories.Projects;
 using ProgresiumToDo.Infrastructure.Repositories.Tags;
 using ProgresiumToDo.Infrastructure.Repositories.Tasks;
 using ProgresiumToDo.Infrastructure.Repositories.Waitlist;
-using ProgresiumToDo.Infrastructure.Tasks;
+using ProgresiumToDo.Infrastructure.Services.Auth.Authentication;
+using ProgresiumToDo.Infrastructure.Services.Auth.Entitlement;
+using ProgresiumToDo.Infrastructure.Services.Auth.Identity;
+using ProgresiumToDo.Infrastructure.Services.Auth.OAuth;
+using ProgresiumToDo.Infrastructure.Services.Auth.Onboarding;
+using ProgresiumToDo.Infrastructure.Services.Billing;
+using ProgresiumToDo.Infrastructure.Services.Email;
+using ProgresiumToDo.Infrastructure.Services.Tags;
+using ProgresiumToDo.Infrastructure.Services.Tasks;
 
 namespace ProgresiumToDo.Infrastructure;
 
@@ -68,6 +70,8 @@ public static class DependencyInjection
         services.AddTransient<ITaskStatusPolicy, TaskStatusPolicy>();
 
         services.AddTransient<IEntitlementService, EntitlementService>();
+
+        services.AddTransient<ITagService, TagService>();
         
         return services;
     }

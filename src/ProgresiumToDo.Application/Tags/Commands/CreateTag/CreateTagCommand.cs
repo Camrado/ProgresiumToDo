@@ -3,8 +3,4 @@
 namespace ProgresiumToDo.Application.Tags.Commands.CreateTag;
 
 public sealed record CreateTagCommand(
-    string Name,
-    string Color) : ICommand<CreateTagCommandResponse>
-{
-    public Guid ProjectId { get; set; }
-}
+    string Name) : ICommand<CreateTagCommandResponse>;

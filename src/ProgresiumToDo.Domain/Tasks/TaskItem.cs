@@ -206,7 +206,7 @@ public sealed class TaskItem : BaseEntity
         }
     }
     
-    public void AddTag(Tag tag)
+    public void AddTagIfNotExists(Tag tag)
     {
         if (!Tags.Contains(tag))
         {
@@ -214,11 +214,16 @@ public sealed class TaskItem : BaseEntity
         }
     }
     
-    public void RemoveTag(Tag tag)
+    public void RemoveTagIfExists(Tag tag)
     {
         if (Tags.Contains(tag))
         {
             Tags.Remove(tag);
         }
+    }
+    
+    public void SetTags(List<Tag> tags)
+    {
+        Tags = tags;
     }
 }

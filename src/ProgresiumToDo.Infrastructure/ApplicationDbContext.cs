@@ -9,8 +9,8 @@ using ProgresiumToDo.Domain.Projects;
 using ProgresiumToDo.Domain.Tags;
 using ProgresiumToDo.Domain.Tasks;
 using ProgresiumToDo.Domain.Waitlist;
-using ProgresiumToDo.Infrastructure.Auth.Identity;
 using ProgresiumToDo.Infrastructure.Persistence;
+using ProgresiumToDo.Infrastructure.Services.Auth.Identity;
 
 namespace ProgresiumToDo.Infrastructure;
 

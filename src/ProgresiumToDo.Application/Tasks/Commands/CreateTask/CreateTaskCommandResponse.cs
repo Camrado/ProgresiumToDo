@@ -13,5 +13,6 @@ public sealed record CreatedTaskDto(
     DateOnly? DueDate,
     TimeOnly? StartTime,
     TimeOnly? EndTime,
-    string Status,
+    string Status, 
+    IEnumerable<string> Tags,
     DateTime CreatedAt);

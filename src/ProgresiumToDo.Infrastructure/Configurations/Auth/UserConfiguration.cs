@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using ProgresiumToDo.Domain.Auth;
-using ProgresiumToDo.Infrastructure.Auth.Identity;
+using ProgresiumToDo.Infrastructure.Services.Auth.Identity;
 
 namespace ProgresiumToDo.Infrastructure.Configurations.Auth;
 

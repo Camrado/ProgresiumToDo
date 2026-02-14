@@ -2,6 +2,7 @@
 using ProgresiumToDo.Application.Abstractions.Tasks;
 using ProgresiumToDo.Domain.Abstractions;
 using ProgresiumToDo.Domain.Tasks;
+using ProgresiumToDo.Application.Abstractions.Tags;
 using TaskStatus = ProgresiumToDo.Domain.Tasks.TaskStatus;
 
 namespace ProgresiumToDo.Application.Tasks.Commands.UpdateTask;
@@ -10,11 +11,16 @@ internal sealed class UpdateTaskCommandHandler : ICommandHandler<UpdateTaskComma
 {
     private readonly ITaskStatusPolicy _taskStatusPolicy;
     private readonly ITaskOrderingService _taskOrderingService;
+    private readonly ITagService _tagService;
     
-    public UpdateTaskCommandHandler(ITaskStatusPolicy taskStatusPolicy, ITaskOrderingService taskOrderingService)
+    public UpdateTaskCommandHandler(
+        ITaskStatusPolicy taskStatusPolicy, 
+        ITaskOrderingService taskOrderingService,
+        ITagService tagService)
     {
         _taskStatusPolicy = taskStatusPolicy;
         _taskOrderingService = taskOrderingService;
+        _tagService = tagService;
     }
     
     public async Task<Result<UpdateTaskCommandResponse>> Handle(UpdateTaskCommand request, CancellationToken cancellationToken)
@@ -23,6 +29,12 @@ internal sealed class UpdateTaskCommandHandler : ICommandHandler<UpdateTaskComma
         
         request.TaskItem!.Update(request.Title, request.Description, request.Status, request.Priority,
             request.DueDate, request.StartTime, request.EndTime, request.ProjectId);
+        
+        if (request.Tags is not null)
+        {
+            var tags = await _tagService.GetOrCreateTagsAsync(request.Tags, cancellationToken);
+            request.TaskItem.SetTags(tags);
+        }
         
         var hasStatusChanged = Enum.TryParse<TaskStatus>(request.Status, ignoreCase: true, out var newStatus);
         

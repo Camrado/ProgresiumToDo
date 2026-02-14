@@ -8,12 +8,11 @@ public interface ITagRepository
     
     void Delete(Tag tag);
     
-    Task<Tag?> GetByProjectIdAndNameAsync(Guid projectId, string name, CancellationToken cancellationToken = default);
+    Task<Tag?> GetByNameAsync(string name, CancellationToken cancellationToken = default);
 
-    Task<List<Tag>> GetByProjectIdAsync(Guid projectId, CancellationToken cancellationToken = default);
+    Task<List<Tag>> GetAllAsync(CancellationToken cancellationToken = default);
 
-    Task<Tag?> GetByIdAndProjectIdAsync(Guid id, Guid projectId, CancellationToken cancellationToken = default);
+    Task<Tag?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
 
-    Task<List<Tag>> GetBySeveralIdsAndProjectIdAsync(List<Guid> tagIds, Guid projectId,
-        CancellationToken cancellationToken = default);
+    Task<List<Tag>> GetByNamesAsync(List<string> names, CancellationToken cancellationToken = default);
 }

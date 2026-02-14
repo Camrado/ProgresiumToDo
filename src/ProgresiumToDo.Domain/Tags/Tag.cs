@@ -1,5 +1,4 @@
 ﻿using ProgresiumToDo.Domain.Abstractions;
-using ProgresiumToDo.Domain.Projects;
 using ProgresiumToDo.Domain.Tasks;
 
 namespace ProgresiumToDo.Domain.Tags;
@@ -8,32 +7,21 @@ public sealed class Tag : BaseEntity
 {
     public string Name { get; private set; }
     
-    public string Color { get; private set; }
-    
-    public Guid ProjectId { get; private set; }
-    
-    public Project Project { get; private set; }
-    
     public ICollection<TaskItem> TaskItems { get; private set; } = new List<TaskItem>();
     
-    private Tag(string name, string color, Guid projectId)
+    private Tag(string name)
     {
         Name = name;
-        Color = color;
-        ProjectId = projectId;
     }
     
-    public static Tag Create(string name, string color, Guid projectId)
+    public static Tag Create(string name)
     {
-        return new Tag(name, color, projectId);
+        return new Tag(name);
     }
     
-    public void Update(string? name, string? color)
+    public void Update(string? name)
     {
         if (name is not null)
             Name = name;
-
-        if (color is not null)
-            Color = color;
     }
 }

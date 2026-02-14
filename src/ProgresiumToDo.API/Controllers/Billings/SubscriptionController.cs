@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using ProgresiumToDo.Application.Billing.Commands.CancelSubscription;
 using ProgresiumToDo.Application.Billing.Commands.SubscribeToPlan;
 using ProgresiumToDo.Application.Billing.Queries.GetSubscriptionsHistory;
-using ProgresiumToDo.Infrastructure.Auth.Authentication;
+using ProgresiumToDo.Infrastructure.Services.Auth.Authentication;
 
 namespace ProgresiumToDo.API.Controllers.Billings;
 

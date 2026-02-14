@@ -9,7 +9,7 @@ internal sealed class UpdateTagCommandHandler : ICommandHandler<UpdateTagCommand
     {
         var tag = request.Tag!;
         
-        tag.Update(request.Name, request.Color);
+        tag.Update(request.Name);
 
         return Task.FromResult<Result<UpdateTagCommandResponse>>(
             new UpdateTagCommandResponse("Tag updated successfully."));

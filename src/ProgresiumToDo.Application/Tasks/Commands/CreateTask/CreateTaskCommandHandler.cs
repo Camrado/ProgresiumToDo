@@ -1,5 +1,6 @@
 using ProgresiumToDo.Application.Abstractions.Auth.Identity;
 using ProgresiumToDo.Application.Abstractions.Messaging;
+using ProgresiumToDo.Application.Abstractions.Tags;
 using ProgresiumToDo.Application.Abstractions.Tasks;
 using ProgresiumToDo.Application.Tasks.Repositories;
 using ProgresiumToDo.Domain.Abstractions;
@@ -12,15 +13,18 @@ internal sealed class CreateTaskCommandHandler : ICommandHandler<CreateTaskComma
     private readonly ITaskItemRepository _taskItemRepository;
     private readonly ITaskOrderingService _taskOrderingService;
     private readonly IUserContext _userContext;
+    private readonly ITagService _tagService;
 
     public CreateTaskCommandHandler(
         ITaskItemRepository taskItemRepository,
         ITaskOrderingService taskOrderingService,
-        IUserContext userContext)
+        IUserContext userContext,
+        ITagService tagService)
     {
         _taskItemRepository = taskItemRepository;
         _taskOrderingService = taskOrderingService;
         _userContext = userContext;
+        _tagService = tagService;
     }
 
     public async Task<Result<CreateTaskCommandResponse>> Handle(CreateTaskCommand request, CancellationToken cancellationToken)
@@ -36,9 +40,10 @@ internal sealed class CreateTaskCommandHandler : ICommandHandler<CreateTaskComma
             request.StartTime,
             request.EndTime);
 
-        foreach (var tag in request.Tags)
+        if (request.Tags is not null && request.Tags.Count != 0)
         {
-            taskItem.AddTag(tag);
+            var tags = await _tagService.GetOrCreateTagsAsync(request.Tags, cancellationToken);
+            taskItem.SetTags(tags);
         }
 
         _taskItemRepository.Add(taskItem);
@@ -60,6 +65,7 @@ internal sealed class CreateTaskCommandHandler : ICommandHandler<CreateTaskComma
             taskItem.StartTime,
             taskItem.EndTime,
             taskItem.Status.ToString(),
+            taskItem.Tags.Select(t => t.Name).ToList(),
             taskItem.CreatedAt);
 
         return new CreateTaskCommandResponse("CreatedTask created successfully.", taskResponse);

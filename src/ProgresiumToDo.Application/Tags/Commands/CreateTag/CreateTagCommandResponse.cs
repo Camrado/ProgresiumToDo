@@ -7,6 +7,4 @@ public sealed record CreateTagCommandResponse(
 public sealed record CreatedTagDto(
     Guid Id,
     string Name,
-    string Color,
-    Guid ProjectId,
     DateTime CreatedAt);

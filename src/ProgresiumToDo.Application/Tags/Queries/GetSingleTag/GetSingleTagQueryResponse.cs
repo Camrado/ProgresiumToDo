@@ -7,8 +7,5 @@ public sealed record GetSingleTagQueryResponse(
 public sealed record TagDto(
     Guid Id,
     string Name,
-    string Color,
-    Guid ProjectId,
-    string ProjectName,
     DateTime CreatedAt,
     DateTime UpdatedAt);
