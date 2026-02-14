@@ -7,7 +7,7 @@ using ProgresiumToDo.Application.Tasks.Commands.UpdateSubtask;
 using ProgresiumToDo.Application.Tasks.Commands.UpdateTask;
 using ProgresiumToDo.Application.Tasks.Queries.GetSingleTask;
 using ProgresiumToDo.Application.Tasks.Queries.GetTasks;
-using ProgresiumToDo.Infrastructure.Auth.Authentication;
+using ProgresiumToDo.Infrastructure.Services.Auth.Authentication;
 
 namespace ProgresiumToDo.API.Controllers.Tasks;
 

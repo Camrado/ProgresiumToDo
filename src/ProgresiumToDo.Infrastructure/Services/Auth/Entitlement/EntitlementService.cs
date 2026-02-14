@@ -8,7 +8,7 @@ using ProgresiumToDo.Domain.Billing.Errors;
 using ProgresiumToDo.Domain.FeatureUsage;
 using ProgresiumToDo.Domain.FeatureUsage.Errors;
 
-namespace ProgresiumToDo.Infrastructure.Auth.Entitlement;
+namespace ProgresiumToDo.Infrastructure.Services.Auth.Entitlement;
 
 internal sealed class EntitlementService : IEntitlementService
 {

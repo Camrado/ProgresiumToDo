@@ -3,7 +3,7 @@ using ProgresiumToDo.Application.Tasks.Repositories;
 using ProgresiumToDo.Domain.Tasks;
 using TaskStatus = ProgresiumToDo.Domain.Tasks.TaskStatus;
 
-namespace ProgresiumToDo.Infrastructure.Tasks;
+namespace ProgresiumToDo.Infrastructure.Services.Tasks;
 
 internal sealed class TaskOrderingService : ITaskOrderingService
 {

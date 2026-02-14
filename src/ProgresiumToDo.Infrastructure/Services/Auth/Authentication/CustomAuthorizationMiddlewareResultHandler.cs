@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ProgresiumToDo.Application.Abstractions.Auth.Identity;
 
-namespace ProgresiumToDo.Infrastructure.Auth.Authentication;
+namespace ProgresiumToDo.Infrastructure.Services.Auth.Authentication;
 
 internal sealed class CustomAuthorizationMiddlewareResultHandler : IAuthorizationMiddlewareResultHandler
 {

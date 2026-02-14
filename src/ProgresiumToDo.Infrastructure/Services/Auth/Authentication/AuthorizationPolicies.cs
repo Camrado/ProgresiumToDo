@@ -1,4 +1,4 @@
-﻿namespace ProgresiumToDo.Infrastructure.Auth.Authentication;
+﻿namespace ProgresiumToDo.Infrastructure.Services.Auth.Authentication;
 
 public static class AuthorizationPolicies
 {

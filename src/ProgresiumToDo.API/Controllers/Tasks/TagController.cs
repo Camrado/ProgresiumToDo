@@ -5,7 +5,7 @@ using ProgresiumToDo.Application.Tags.Commands.DeleteTag;
 using ProgresiumToDo.Application.Tags.Commands.UpdateTag;
 using ProgresiumToDo.Application.Tags.Queries.GetAllTags;
 using ProgresiumToDo.Application.Tags.Queries.GetSingleTag;
-using ProgresiumToDo.Infrastructure.Auth.Authentication;
+using ProgresiumToDo.Infrastructure.Services.Auth.Authentication;
 
 namespace ProgresiumToDo.API.Controllers.Tasks;
 

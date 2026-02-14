@@ -5,7 +5,7 @@ using ProgresiumToDo.Domain.Abstractions;
 using ProgresiumToDo.Domain.Billing;
 using ProgresiumToDo.Domain.Billing.Errors;
 
-namespace ProgresiumToDo.Infrastructure.Billing;
+namespace ProgresiumToDo.Infrastructure.Services.Billing;
 
 internal sealed class SubscriptionService : ISubscriptionService
 {

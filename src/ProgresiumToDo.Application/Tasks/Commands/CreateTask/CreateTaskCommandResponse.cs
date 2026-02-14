@@ -14,4 +14,5 @@ public sealed record CreatedTaskDto(
     TimeOnly? StartTime,
     TimeOnly? EndTime,
     string Status,
+    List<string> Tags,
     DateTime CreatedAt);

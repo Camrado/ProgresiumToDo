@@ -1,13 +1,12 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
-using System.Text.Encodings.Web;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using ProgresiumToDo.Application.Abstractions.EmailService;
 using ProgresiumToDo.Domain.Abstractions;
 
-namespace ProgresiumToDo.Infrastructure.EmailService;
+namespace ProgresiumToDo.Infrastructure.Services.Email;
 
 internal sealed class MailtrapEmailService : IEmailService
 {

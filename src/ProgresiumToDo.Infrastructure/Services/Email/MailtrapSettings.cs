@@ -1,4 +1,4 @@
-﻿namespace ProgresiumToDo.Infrastructure.EmailService;
+﻿namespace ProgresiumToDo.Infrastructure.Services.Email;
 
 public sealed class MailtrapSettings
 {

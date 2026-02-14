@@ -12,10 +12,10 @@ using ProgresiumToDo.Application.Users.Repositories;
 using ProgresiumToDo.Domain.Abstractions;
 using ProgresiumToDo.Domain.Auth;
 using ProgresiumToDo.Domain.Auth.Errors;
-using ProgresiumToDo.Infrastructure.EmailService;
+using ProgresiumToDo.Infrastructure.Services.Email;
 using JwtRegisteredClaimNames = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames;
 
-namespace ProgresiumToDo.Infrastructure.Auth.Identity;
+namespace ProgresiumToDo.Infrastructure.Services.Auth.Identity;
 
 internal sealed class IdentityService : IIdentityService
 {

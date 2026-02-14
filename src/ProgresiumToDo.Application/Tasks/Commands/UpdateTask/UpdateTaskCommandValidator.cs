@@ -15,7 +15,13 @@ internal sealed class UpdateTaskCommandValidator : AbstractValidator<UpdateTaskC
             .NotNull()
             .MustAsync(async (command, taskId, cancellationToken) =>
             {
-                var taskItem = await taskItemRepository.GetByIdAsync(taskId,  userContext.UserId, cancellationToken);
+                TaskItem? taskItem;
+
+                if (command.Tags is not null)
+                    taskItem = await taskItemRepository.GetByIdWithTagsIncludedAsync(taskId, userContext.UserId, cancellationToken);
+                else
+                    taskItem = await taskItemRepository.GetByIdAsync(taskId, userContext.UserId, cancellationToken);
+                
                 command.TaskItem = taskItem;
                 
                 return taskItem != null;
@@ -83,6 +89,15 @@ internal sealed class UpdateTaskCommandValidator : AbstractValidator<UpdateTaskC
                         return true;
                     }).WithMessage("EndTime must be later than StartTime.");
             });
+
+            When(utc => utc.Tags is not null, () =>
+            {
+                RuleForEach(utc => utc.Tags)
+                    .NotEmpty()
+                    .WithMessage("Tag name cannot be empty.")
+                    .MaximumLength(255)
+                    .WithMessage("Tag name must not exceed 255 characters.");
+            });
         });
     }
     private static bool IsValidUpdateCombination(UpdateTaskCommand command)
@@ -103,7 +118,9 @@ internal sealed class UpdateTaskCommandValidator : AbstractValidator<UpdateTaskC
                 command.DueDate is null &&
                 command.StartTime is null &&
                 command.EndTime is null &&
+                command.EndTime is null &&
                 command.ProjectId is null &&
+                command.Tags is null &&
                 command.OrderIndex is null &&
                 string.IsNullOrEmpty(command.OrderType);
         }
@@ -117,7 +134,9 @@ internal sealed class UpdateTaskCommandValidator : AbstractValidator<UpdateTaskC
                 command.DueDate is null &&
                 command.StartTime is null &&
                 command.EndTime is null &&
+                command.EndTime is null &&
                 command.ProjectId is null &&
+                command.Tags is null &&
                 string.IsNullOrEmpty(command.Status);
         }
 
@@ -147,6 +166,7 @@ internal sealed class UpdateTaskCommandValidator : AbstractValidator<UpdateTaskC
                command.DueDate is not null ||
                command.StartTime is not null ||
                command.EndTime is not null ||
-               command.ProjectId is not null;
+               command.ProjectId is not null ||
+               command.Tags is not null;
     }
 }

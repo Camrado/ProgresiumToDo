@@ -1,7 +1,7 @@
 ﻿using ProgresiumToDo.Application.Abstractions.Tasks;
 using TaskStatus = ProgresiumToDo.Domain.Tasks.TaskStatus;
 
-namespace ProgresiumToDo.Infrastructure.Tasks;
+namespace ProgresiumToDo.Infrastructure.Services.Tasks;
 
 internal sealed class TaskStatusPolicy : ITaskStatusPolicy
 {

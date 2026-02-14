@@ -15,7 +15,8 @@ public sealed record UpdateTaskCommand(
     TimeOnly? EndTime,
     decimal? OrderIndex,
     string? OrderType,
-    Guid? ProjectId) : ICommand<UpdateTaskCommandResponse>, IEntitledRequest
+    Guid? ProjectId,
+    List<string>? Tags) : ICommand<UpdateTaskCommandResponse>, IEntitledRequest
 {
     public Guid TaskId { get; set; }
     

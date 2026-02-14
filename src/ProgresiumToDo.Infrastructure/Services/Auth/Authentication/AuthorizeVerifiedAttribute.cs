@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 
-namespace ProgresiumToDo.Infrastructure.Auth.Authentication;
+namespace ProgresiumToDo.Infrastructure.Services.Auth.Authentication;
 
 public class AuthorizeVerifiedAttribute : AuthorizeAttribute
 {

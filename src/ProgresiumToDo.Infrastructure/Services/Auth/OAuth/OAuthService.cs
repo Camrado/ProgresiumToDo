@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using ProgresiumToDo.Application.Abstractions.Auth.OAuth;
 
-namespace ProgresiumToDo.Infrastructure.Auth.OAuth;
+namespace ProgresiumToDo.Infrastructure.Services.Auth.OAuth;
 
 internal sealed class OAuthService : IOAuthService
 {

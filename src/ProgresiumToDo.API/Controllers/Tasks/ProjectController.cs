@@ -5,7 +5,7 @@ using ProgresiumToDo.Application.Projects.Commands.DeleteProject;
 using ProgresiumToDo.Application.Projects.Commands.UpdateProject;
 using ProgresiumToDo.Application.Projects.Queries.GetAllProjects;
 using ProgresiumToDo.Application.Projects.Queries.GetProject;
-using ProgresiumToDo.Infrastructure.Auth.Authentication;
+using ProgresiumToDo.Infrastructure.Services.Auth.Authentication;
 
 namespace ProgresiumToDo.API.Controllers.Tasks;
 

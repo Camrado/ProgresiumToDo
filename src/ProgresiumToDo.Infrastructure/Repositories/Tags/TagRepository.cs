@@ -27,10 +27,11 @@ internal sealed class TagRepository : Repository<Tag>, ITagRepository
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<Tag?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<List<Tag>> GetByNamesAsync(List<string> names, CancellationToken cancellationToken = default)
     {
         return await DbContext.Tags
-            .FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
+            .Where(t => names.Contains(t.Name))
+            .ToListAsync(cancellationToken);
     }
     
     public async Task<List<Tag>> GetBySeveralIdsAsync(List<Guid> tagIds, CancellationToken cancellationToken = default)

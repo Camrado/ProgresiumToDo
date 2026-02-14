@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using ProgresiumToDo.Application.Abstractions.Auth.Identity;
 
-namespace ProgresiumToDo.Infrastructure.Auth.Identity;
+namespace ProgresiumToDo.Infrastructure.Services.Auth.Identity;
 
 internal sealed class UserContext : IUserContext
 {
