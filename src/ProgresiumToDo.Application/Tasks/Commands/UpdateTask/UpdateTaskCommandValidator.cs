@@ -118,7 +118,6 @@ internal sealed class UpdateTaskCommandValidator : AbstractValidator<UpdateTaskC
                 command.DueDate is null &&
                 command.StartTime is null &&
                 command.EndTime is null &&
-                command.EndTime is null &&
                 command.ProjectId is null &&
                 command.Tags is null &&
                 command.OrderIndex is null &&
@@ -133,7 +132,6 @@ internal sealed class UpdateTaskCommandValidator : AbstractValidator<UpdateTaskC
                 command.Priority is null &&
                 command.DueDate is null &&
                 command.StartTime is null &&
-                command.EndTime is null &&
                 command.EndTime is null &&
                 command.ProjectId is null &&
                 command.Tags is null &&
