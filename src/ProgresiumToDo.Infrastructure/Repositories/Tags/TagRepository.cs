@@ -33,11 +33,4 @@ internal sealed class TagRepository : Repository<Tag>, ITagRepository
             .Where(t => names.Contains(t.Name))
             .ToListAsync(cancellationToken);
     }
-    
-    public async Task<List<Tag>> GetBySeveralIdsAsync(List<Guid> tagIds, CancellationToken cancellationToken = default)
-    {
-        return await DbContext.Tags
-            .Where(t => tagIds.Contains(t.Id))
-            .ToListAsync(cancellationToken);
-    }
 }
