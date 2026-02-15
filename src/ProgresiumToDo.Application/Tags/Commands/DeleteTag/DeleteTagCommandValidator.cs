@@ -1,11 +1,12 @@
 ﻿using FluentValidation;
+using ProgresiumToDo.Application.Abstractions.Auth.Identity;
 using ProgresiumToDo.Application.Tags.Repositories;
 
 namespace ProgresiumToDo.Application.Tags.Commands.DeleteTag;
 
 internal sealed class DeleteTagCommandValidator : AbstractValidator<DeleteTagCommand>
 {
-    public DeleteTagCommandValidator(ITagRepository tagRepository)
+    public DeleteTagCommandValidator(ITagRepository tagRepository, IUserContext userContext)
     {   
         RuleFor(dtc => dtc.TagId)
             .Cascade(CascadeMode.Stop)
@@ -13,7 +14,7 @@ internal sealed class DeleteTagCommandValidator : AbstractValidator<DeleteTagCom
             .WithMessage("TagId must not be empty.")
             .MustAsync(async (command, tagId, cancellationToken) =>
             {
-                var tag = await tagRepository.GetByIdAsync(tagId, cancellationToken);
+                var tag = await tagRepository.GetByIdAndUserIdAsync(tagId, userContext.UserId, cancellationToken);
                 command.Tag = tag;
                 
                 return tag is not null;

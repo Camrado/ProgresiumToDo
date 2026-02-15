@@ -1,11 +1,12 @@
 ﻿using FluentValidation;
+using ProgresiumToDo.Application.Abstractions.Auth.Identity;
 using ProgresiumToDo.Application.Tags.Repositories;
 
 namespace ProgresiumToDo.Application.Tags.Commands.UpdateTag;
 
 internal sealed class UpdateTagCommandValidator : AbstractValidator<UpdateTagCommand>
 {
-    public UpdateTagCommandValidator(ITagRepository tagRepository)
+    public UpdateTagCommandValidator(ITagRepository tagRepository, IUserContext userContext)
     {
         ClassLevelCascadeMode = CascadeMode.Stop;
         
@@ -14,7 +15,7 @@ internal sealed class UpdateTagCommandValidator : AbstractValidator<UpdateTagCom
             .WithMessage("TagId must not be empty.")
             .MustAsync(async (command, tagId, cancellationToken) =>
             {
-                var tag = await tagRepository.GetByIdAsync(tagId, cancellationToken);
+                var tag = await tagRepository.GetByIdAndUserIdAsync(tagId, userContext.UserId, cancellationToken);
                 command.Tag = tag;
                 
                 return tag is not null;
@@ -29,7 +30,7 @@ internal sealed class UpdateTagCommandValidator : AbstractValidator<UpdateTagCom
                 if (name == command.Tag?.Name)
                     return true;
 
-                var existingTag = await tagRepository.GetByNameAsync(name, cancellationToken);
+                var existingTag = await tagRepository.GetByNameAsync(name, userContext.UserId, cancellationToken);
                 return existingTag is null;
             })
             .WithMessage("A tag with the same name already exists.");

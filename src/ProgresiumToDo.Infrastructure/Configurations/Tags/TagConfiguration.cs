@@ -19,6 +19,15 @@ internal sealed class TagConfiguration : SoftDeleteEntityConfiguration<Tag>
             .IsUnique()
             .HasFilter("\"deleted_at\" IS NULL");
         
+        builder.Property(t => t.UserId)
+            .IsRequired();
+        
+        builder
+            .HasOne(t => t.User)
+            .WithMany(u => u.Tags)
+            .HasForeignKey(t => t.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+        
         builder
             .HasMany(t => t.TaskItems)
             .WithMany(tk => tk.Tags)

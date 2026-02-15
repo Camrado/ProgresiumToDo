@@ -1,6 +1,7 @@
 ﻿using ProgresiumToDo.Domain.Abstractions;
 using ProgresiumToDo.Domain.Billing;
 using ProgresiumToDo.Domain.Projects;
+using ProgresiumToDo.Domain.Tags;
 using ProgresiumToDo.Domain.Tasks;
 
 namespace ProgresiumToDo.Domain.Auth;
@@ -23,6 +24,8 @@ public sealed class User : BaseEntity
     public ICollection<Project> Projects { get; private set; } = new List<Project>();
     
     public ICollection<TaskItem> TaskItems { get; private set; } = new List<TaskItem>();
+    
+    public ICollection<Tag> Tags { get; private set; } = new List<Tag>();
 
     private User() {}
     
