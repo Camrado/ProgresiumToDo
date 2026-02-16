@@ -18,9 +18,7 @@ public class RefreshTokenRepository : IRefreshTokenRepository
         IQueryable<RefreshToken> query = _dbContext.RefreshTokens;
 
         if (!trackChanges)
-        {
             query = query.AsNoTracking();
-        }
         
         return await query
             .FirstOrDefaultAsync(rt => rt.Token == token, cancellationToken);
@@ -31,9 +29,7 @@ public class RefreshTokenRepository : IRefreshTokenRepository
         IQueryable<RefreshToken> query = _dbContext.RefreshTokens;
 
         if (!trackChanges)
-        {
             query = query.AsNoTracking();
-        }
         
         return await query.Where(rt => rt.UserId == userId).ToListAsync(cancellationToken);
     }
