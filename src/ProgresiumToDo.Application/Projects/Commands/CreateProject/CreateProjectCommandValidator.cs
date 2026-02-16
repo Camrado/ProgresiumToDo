@@ -18,7 +18,7 @@ internal sealed class CreateProjectCommandValidator : AbstractValidator<CreatePr
             .NotEmpty()
             .MustAsync(async (name, cancellationToken) =>
             {
-                var existingProject = await _projectRepository.GetByNameAndUserIdAsync(name, _userContext.UserId, cancellationToken);
+                var existingProject = await _projectRepository.GetByNameAndUserIdAsync(name, _userContext.UserId, cancellationToken: cancellationToken);
                 return existingProject == null;
             }).WithMessage("A project with this name already exists.");
     }

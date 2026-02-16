@@ -49,7 +49,7 @@ internal sealed class EntitlementService : IEntitlementService
         }
         
         var planFeature = await _planFeatureRepository
-            .GetByFeatureNameAsync(subscription.PlanPricing.PlanId, featureName, cancellationToken);
+            .GetByFeatureNameAsync(subscription.PlanPricing.PlanId, featureName, cancellationToken: cancellationToken);
         if (planFeature is null)
         {
             _logger.LogWarning(

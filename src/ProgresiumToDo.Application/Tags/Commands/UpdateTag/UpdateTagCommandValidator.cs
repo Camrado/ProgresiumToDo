@@ -15,7 +15,7 @@ internal sealed class UpdateTagCommandValidator : AbstractValidator<UpdateTagCom
             .WithMessage("TagId must not be empty.")
             .MustAsync(async (command, tagId, cancellationToken) =>
             {
-                var tag = await tagRepository.GetByIdAndUserIdAsync(tagId, userContext.UserId, cancellationToken);
+                var tag = await tagRepository.GetByIdAndUserIdAsync(tagId, userContext.UserId, trackChanges: true, cancellationToken);
                 command.Tag = tag;
                 
                 return tag is not null;
@@ -30,7 +30,7 @@ internal sealed class UpdateTagCommandValidator : AbstractValidator<UpdateTagCom
                 if (name == command.Tag?.Name)
                     return true;
 
-                var existingTag = await tagRepository.GetByNameAsync(name, userContext.UserId, cancellationToken);
+                var existingTag = await tagRepository.GetByNameAsync(name, userContext.UserId, cancellationToken: cancellationToken);
                 return existingTag is null;
             })
             .WithMessage("A tag with the same name already exists.");

@@ -18,9 +18,9 @@ internal sealed class UpdateTaskCommandValidator : AbstractValidator<UpdateTaskC
                 TaskItem? taskItem;
 
                 if (command.Tags is not null)
-                    taskItem = await taskItemRepository.GetByIdWithTagsIncludedAsync(taskId, userContext.UserId, cancellationToken);
+                    taskItem = await taskItemRepository.GetByIdWithTagsIncludedAsync(taskId, userContext.UserId, trackChanges: true, cancellationToken);
                 else
-                    taskItem = await taskItemRepository.GetByIdAsync(taskId, userContext.UserId, cancellationToken);
+                    taskItem = await taskItemRepository.GetByIdAsync(taskId, userContext.UserId, trackChanges: true, cancellationToken);
                 
                 command.TaskItem = taskItem;
                 
@@ -67,7 +67,7 @@ internal sealed class UpdateTaskCommandValidator : AbstractValidator<UpdateTaskC
                         return true;
                 
                     var project = await projectRepository
-                        .GetByIdAndUserIdAsync(projectId.Value, userContext.UserId, cancellationToken);
+                        .GetByIdAndUserIdAsync(projectId.Value, userContext.UserId, cancellationToken: cancellationToken);
                     return project != null;
                 }).WithMessage("Project not found.");
 

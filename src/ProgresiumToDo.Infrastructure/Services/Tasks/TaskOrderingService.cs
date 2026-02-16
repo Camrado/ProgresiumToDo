@@ -20,7 +20,7 @@ internal sealed class TaskOrderingService : ITaskOrderingService
         CancellationToken cancellationToken)
     {
         var taskOrder = await _taskOrderRepository
-            .GetByTaskIdAndOrderTypeAsync(taskId, orderContext.OrderType, cancellationToken);
+            .GetByTaskIdAndOrderTypeAsync(taskId, orderContext.OrderType, trackChanges: true, cancellationToken);
 
         if (orderContext.OrderType == OrderType.ByProject)
         {
@@ -77,7 +77,7 @@ internal sealed class TaskOrderingService : ITaskOrderingService
         if (orderContext.ProjectId is { } newProjectId)
         {
             var taskOrder = await _taskOrderRepository
-                .GetByTaskIdAndOrderTypeAsync(taskId, OrderType.ByProject, cancellationToken);
+                .GetByTaskIdAndOrderTypeAsync(taskId, OrderType.ByProject, trackChanges: true, cancellationToken);
 
             var maxOrderIndex = await _taskOrderRepository
                 .GetMaxOrderIndexByProjectAsync(newProjectId, cancellationToken);
@@ -89,7 +89,7 @@ internal sealed class TaskOrderingService : ITaskOrderingService
         if (orderContext.DueDate is { } newDueDate)
         {
             var taskOrder = await _taskOrderRepository
-                .GetByTaskIdAndOrderTypeAsync(taskId, OrderType.ByDueDate, cancellationToken);
+                .GetByTaskIdAndOrderTypeAsync(taskId, OrderType.ByDueDate, trackChanges: true, cancellationToken);
 
             var maxOrderIndex = await _taskOrderRepository
                 .GetMaxOrderIndexByDueDateAsync(newDueDate, cancellationToken);
@@ -103,7 +103,7 @@ internal sealed class TaskOrderingService : ITaskOrderingService
     {
         if (newStatus == TaskStatus.Completed || newStatus == TaskStatus.Cancelled)
         {
-            var taskOrders = await _taskOrderRepository.GetByTaskId(taskItem.Id, cancellationToken);
+            var taskOrders = await _taskOrderRepository.GetByTaskId(taskItem.Id, trackChanges: true, cancellationToken);
             _taskOrderRepository.DeleteRange(taskOrders);
         }
         else

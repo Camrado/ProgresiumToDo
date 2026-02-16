@@ -13,9 +13,9 @@ internal sealed class TaskItemRepository : Repository<TaskItem>, ITaskItemReposi
 
     public async Task<List<TaskItemWithOrder>> GetAllByUserIdIncludingProjectSubtasksTagsAsync(TaskQueryFilter filter, CancellationToken cancellationToken = default)
     {
-        var query = DbContext.TaskItems
-            .AsNoTracking()
-            .Where(ti => ti.UserId == filter.UserId);
+        var query = DbContext.TaskItems.AsNoTracking();
+
+        query = query.Where(ti => ti.UserId == filter.UserId);
 
         if (filter.ProjectId.HasValue && filter.ProjectId != Guid.Empty)
             query = query.Where(ti => ti.ProjectId == filter.ProjectId.Value);
@@ -128,7 +128,9 @@ internal sealed class TaskItemRepository : Repository<TaskItem>, ITaskItemReposi
     
     public async Task<TaskItemWithOrder?> GetByIdIncludingProjectSubtasksTagsAsync(Guid id, Guid userId, CancellationToken cancellationToken = default)
     {
-        var taskItem = await DbContext.TaskItems
+        var query = DbContext.TaskItems.AsNoTracking();
+
+        var taskItem = await query
             .Include(ti => ti.Project)
             .Include(ti => ti.SubTaskItems)
             .Include(ti => ti.Tags)
@@ -145,14 +147,24 @@ internal sealed class TaskItemRepository : Repository<TaskItem>, ITaskItemReposi
         return result;
     }
     
-    public async Task<TaskItem?> GetByIdAsync(Guid id, Guid userId, CancellationToken cancellationToken = default)
+    public async Task<TaskItem?> GetByIdAsync(Guid id, Guid userId, bool trackChanges = false, CancellationToken cancellationToken = default)
     {
-        return await DbContext.TaskItems.FirstOrDefaultAsync(ti => ti.Id == id && ti.UserId == userId, cancellationToken);
+        IQueryable<TaskItem> query = DbContext.TaskItems;
+
+        if (!trackChanges)
+            query = query.AsNoTracking();
+
+        return await query.FirstOrDefaultAsync(ti => ti.Id == id && ti.UserId == userId, cancellationToken);
     }
     
-    public async Task<TaskItem?> GetByIdWithTagsIncludedAsync(Guid id, Guid userId, CancellationToken cancellationToken = default)
+    public async Task<TaskItem?> GetByIdWithTagsIncludedAsync(Guid id, Guid userId, bool trackChanges = false, CancellationToken cancellationToken = default)
     {
-        return await DbContext.TaskItems
+        IQueryable<TaskItem> query = DbContext.TaskItems;
+
+        if (!trackChanges)
+            query = query.AsNoTracking();
+
+        return await query
             .Include(ti => ti.Tags)
             .FirstOrDefaultAsync(ti => ti.Id == id && ti.UserId == userId, cancellationToken);
     }

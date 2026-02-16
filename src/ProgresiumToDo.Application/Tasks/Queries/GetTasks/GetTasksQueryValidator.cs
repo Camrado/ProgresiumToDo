@@ -25,7 +25,7 @@ internal sealed class GetTasksQueryValidator : AbstractValidator<GetTasksQuery>
                 if (!projectId.HasValue || projectId == Guid.Empty)
                     return true;
                 
-                var project = await projectRepository.GetByIdAndUserIdAsync(projectId.Value, userContext.UserId, cancellationToken);
+                var project = await projectRepository.GetByIdAndUserIdAsync(projectId.Value, userContext.UserId, cancellationToken: cancellationToken);
                 return project != null;
             })
             .WithMessage("Project not found.");

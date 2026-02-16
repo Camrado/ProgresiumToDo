@@ -10,21 +10,36 @@ internal sealed class ProjectRepository : Repository<Project>, IProjectRepositor
     {
     }
 
-    public async Task<Project?> GetByNameAndUserIdAsync(string name, Guid userId, CancellationToken cancellationToken = default)
+    public async Task<Project?> GetByNameAndUserIdAsync(string name, Guid userId, bool trackChanges = false, CancellationToken cancellationToken = default)
     {
-        return await DbContext.Set<Project>()
+        IQueryable<Project> query = DbContext.Set<Project>();
+
+        if (!trackChanges)
+            query = query.AsNoTracking();
+
+        return await query
             .FirstOrDefaultAsync(p => p.Name == name && p.UserId == userId, cancellationToken);
     }
 
-    public async Task<Project?> GetByIdAndUserIdAsync(Guid projectId, Guid userId, CancellationToken cancellationToken = default)
+    public async Task<Project?> GetByIdAndUserIdAsync(Guid projectId, Guid userId, bool trackChanges = false, CancellationToken cancellationToken = default)
     {
-        return await DbContext.Set<Project>()
+        IQueryable<Project> query = DbContext.Set<Project>();
+
+        if (!trackChanges)
+            query = query.AsNoTracking();
+
+        return await query
             .FirstOrDefaultAsync(p => p.Id == projectId && p.UserId == userId, cancellationToken);
     }
 
-    public async Task<List<Project>> GetAllByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
+    public async Task<List<Project>> GetAllByUserIdAsync(Guid userId, bool trackChanges = false, CancellationToken cancellationToken = default)
     {
-        return await DbContext.Set<Project>()
+        IQueryable<Project> query = DbContext.Set<Project>();
+
+        if (!trackChanges)
+            query = query.AsNoTracking();
+
+        return await query
             .Where(p => p.UserId == userId)
             .ToListAsync(cancellationToken);
     }

@@ -103,7 +103,7 @@ internal sealed class IdentityService : IIdentityService
             return Result.Failure<AuthenticationResult>([UserErrors.InvalidCredentials]);
         }
         
-        var user = await _userRepository.GetByEmailAsync(email, cancellationToken);
+        var user = await _userRepository.GetByEmailAsync(email, cancellationToken: cancellationToken);
         if (user is null)
         {
             _logger.LogWarning("Login failed. User not found in repository. UserId: {UserId}", appUser.Id);
@@ -146,13 +146,13 @@ internal sealed class IdentityService : IIdentityService
 
     public async Task<Result<AuthenticationResult>> RefreshTokensAsync(string oldRefreshTokenValue, CancellationToken cancellationToken = default)
     {
-        var oldRefreshToken = await _refreshTokenRepository.GetByTokenAsync(oldRefreshTokenValue, cancellationToken);
+        var oldRefreshToken = await _refreshTokenRepository.GetByTokenAsync(oldRefreshTokenValue, trackChanges: true, cancellationToken);
         if (oldRefreshToken is null || !oldRefreshToken.IsActive)
         {
             return Result.Failure<AuthenticationResult>([RefreshTokenErrors.InvalidToken]);
         }
         
-        var user = await _userRepository.GetByIdAsync(oldRefreshToken.UserId, cancellationToken);
+        var user = await _userRepository.GetByIdAsync(oldRefreshToken.UserId, cancellationToken: cancellationToken);
         if (user is null)
         {
             return Result.Failure<AuthenticationResult>([UserErrors.UserNotFound]);
@@ -263,33 +263,33 @@ internal sealed class IdentityService : IIdentityService
     
     public async Task<Result> AddGoogleLoginAsync(string email, string googleIdentitySub, CancellationToken cancellationToken = default)
     {
-        var user = await _userManager.FindByEmailAsync(email);
-        if (user is null)
+        var appUser = await _userManager.FindByEmailAsync(email);
+        if (appUser is null)
         {
             _logger.LogWarning("Google login linking failed. User not found");
             return Result.Failure<bool>([UserErrors.UserNotFound]);
         }
         
-        user.EmailConfirmed = true;
+        appUser.EmailConfirmed = true;
 
         var loginInfo = new UserLoginInfo("Google", googleIdentitySub, "Google");
         
-        var existingLogins = await _userManager.GetLoginsAsync(user);
+        var existingLogins = await _userManager.GetLoginsAsync(appUser);
         if (!existingLogins.Any(userLoginInfo => userLoginInfo.LoginProvider == "Google" && userLoginInfo.ProviderKey == googleIdentitySub))
         {
-            var addLoginResult = await _userManager.AddLoginAsync(user, loginInfo);
+            var addLoginResult = await _userManager.AddLoginAsync(appUser, loginInfo);
             
             if (!addLoginResult.Succeeded)
             {
-                _logger.LogWarning("Google login linking failed. UserId: {UserId}", user.Id);
+                _logger.LogWarning("Google login linking failed. UserId: {UserId}", appUser.Id);
                 return Result.Failure<Result>([OAuthErrors.CannotLinkGoogleAccount]);
             }
             
-            _logger.LogInformation("Google login linked successfully (new link). UserId: {UserId}", user.Id);
+            _logger.LogInformation("Google login linked successfully (new link). UserId: {UserId}", appUser.Id);
         }
         else
         {
-            _logger.LogInformation("Google login already linked. UserId: {UserId}", user.Id);
+            _logger.LogInformation("Google login already linked. UserId: {UserId}", appUser.Id);
         }
         
         return Result.Success();

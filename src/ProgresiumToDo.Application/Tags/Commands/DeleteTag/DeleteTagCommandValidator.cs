@@ -14,7 +14,7 @@ internal sealed class DeleteTagCommandValidator : AbstractValidator<DeleteTagCom
             .WithMessage("TagId must not be empty.")
             .MustAsync(async (command, tagId, cancellationToken) =>
             {
-                var tag = await tagRepository.GetByIdAndUserIdAsync(tagId, userContext.UserId, cancellationToken);
+                var tag = await tagRepository.GetByIdAndUserIdAsync(tagId, userContext.UserId, trackChanges: true, cancellationToken);
                 command.Tag = tag;
                 
                 return tag is not null;

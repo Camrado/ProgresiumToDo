@@ -28,7 +28,7 @@ internal sealed class GetCurrentUserQueryHandler : IQueryHandler<GetCurrentUserQ
     public async Task<Result<GetCurrentUserQueryResponse>> Handle(GetCurrentUserQuery request,
         CancellationToken cancellationToken)
     {
-        var user = await _userRepository.GetByIdAsync(_userContext.UserId, cancellationToken);
+        var user = await _userRepository.GetByIdAsync(_userContext.UserId, cancellationToken: cancellationToken);
         if (user is null)
         {
             return Result.Failure<GetCurrentUserQueryResponse>([UserErrors.UserNotFound]);

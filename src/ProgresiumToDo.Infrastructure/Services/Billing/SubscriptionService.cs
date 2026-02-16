@@ -25,7 +25,7 @@ internal sealed class SubscriptionService : ISubscriptionService
     
     public async Task<Result> SubscribeUserToFreePlanAsync(Guid userId, CancellationToken cancellationToken = default)
     {
-        var freePlan = await _planRepository.GetByNameWithPricingsIncludedAsync(PlanType.Free, cancellationToken);
+        var freePlan = await _planRepository.GetByNameWithPricingsIncludedAsync(PlanType.Free, cancellationToken: cancellationToken);
         
         if (freePlan is null)
         {
@@ -63,7 +63,7 @@ internal sealed class SubscriptionService : ISubscriptionService
         bool isAutoRenew, CancellationToken cancellationToken = default)
     {
         var existingSubscription =
-            await _subscriptionRepository.GetActiveSubscriptionByUserIdAsync(userId, cancellationToken: cancellationToken);
+            await _subscriptionRepository.GetActiveSubscriptionByUserIdAsync(userId, trackChanges: true, cancellationToken: cancellationToken);
         if (existingSubscription is null)
         {
             _logger.LogWarning(
@@ -110,7 +110,7 @@ internal sealed class SubscriptionService : ISubscriptionService
     public async Task<Result> CancelUserSubscriptionAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         var existingSubscription = await _subscriptionRepository
-            .GetActiveSubscriptionByUserIdAsync(userId, includePlan: true, includeRegion: true, cancellationToken: cancellationToken);
+            .GetActiveSubscriptionByUserIdAsync(userId, includePlan: true, includeRegion: true, trackChanges: true, cancellationToken: cancellationToken);
         if (existingSubscription is null)
         {
             _logger.LogWarning(
@@ -127,7 +127,7 @@ internal sealed class SubscriptionService : ISubscriptionService
             return Result.Failure([SubscriptionErrors.AlreadyOnFreePlan]);
         }
 
-        var freePlan = await _planRepository.GetByNameWithPricingsIncludedAsync(PlanType.Free, cancellationToken);
+        var freePlan = await _planRepository.GetByNameWithPricingsIncludedAsync(PlanType.Free, cancellationToken: cancellationToken);
         if (freePlan is null)
         {
             _logger.LogCritical(

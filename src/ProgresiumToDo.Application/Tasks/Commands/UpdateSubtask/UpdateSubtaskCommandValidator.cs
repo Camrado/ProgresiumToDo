@@ -14,7 +14,7 @@ internal sealed class UpdateSubtaskCommandValidator : AbstractValidator<UpdateSu
             .NotNull()
             .MustAsync(async (command, cancellationToken) =>
             {
-                var subtaskItem = await taskItemRepository.GetByIdAsync(command.SubtaskId,  userContext.UserId, cancellationToken);
+                var subtaskItem = await taskItemRepository.GetByIdAsync(command.SubtaskId,  userContext.UserId, trackChanges: true, cancellationToken);
                 command.SubtaskItem = subtaskItem;
 
                 if (subtaskItem is null)

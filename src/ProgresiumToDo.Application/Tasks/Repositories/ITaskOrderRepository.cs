@@ -10,10 +10,10 @@ public interface ITaskOrderRepository
     
     void DeleteRange(IEnumerable<TaskOrder> taskOrders);
 
-    Task<TaskOrder> GetByTaskIdAndOrderTypeAsync(Guid taskId, OrderType orderType,
+    Task<TaskOrder> GetByTaskIdAndOrderTypeAsync(Guid taskId, OrderType orderType, bool trackChanges = false,
         CancellationToken cancellationToken = default);
 
-    Task<List<TaskOrder>> GetByTaskId(Guid taskId, CancellationToken cancellationToken = default);
+    Task<List<TaskOrder>> GetByTaskId(Guid taskId, bool trackChanges = false, CancellationToken cancellationToken = default);
     
     Task<decimal> GetMaxOrderIndexByDueDateAsync(DateOnly dueDate, CancellationToken cancellationToken);
 

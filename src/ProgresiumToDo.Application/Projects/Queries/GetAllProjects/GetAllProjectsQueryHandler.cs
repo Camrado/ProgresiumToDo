@@ -18,7 +18,7 @@ internal sealed class GetAllProjectsQueryHandler : IQueryHandler<GetAllProjectsQ
 
     public async Task<Result<GetAllProjectsQueryResponse>> Handle(GetAllProjectsQuery request, CancellationToken cancellationToken)
     {
-        var projects = await _projectRepository.GetAllByUserIdAsync(_userContext.UserId, cancellationToken);
+        var projects = await _projectRepository.GetAllByUserIdAsync(_userContext.UserId, cancellationToken: cancellationToken);
         
         var projectDtos = projects
             .Select(p => new ProjectItemDto(p.Id, p.Name, p.Description))

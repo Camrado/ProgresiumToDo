@@ -31,9 +31,14 @@ public class UserRepository : Repository<User>, IUserRepository
             cancellationToken);
     }
 
-    public async Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
+    public async Task<User?> GetByEmailAsync(string email, bool trackChanges = false, CancellationToken cancellationToken = default)
     {
-        return await DbContext.Set<User>().FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
+        IQueryable<User> query = DbContext.Set<User>();
+
+        if (!trackChanges)
+            query = query.AsNoTracking();
+
+        return await query.FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
     }
 
     public async Task<bool> ExistsByEmailAsync(string email, CancellationToken cancellationToken = default)

@@ -3,9 +3,9 @@
 namespace ProgresiumToDo.Application.Users.Repositories;
 
 public interface IUserRepository {
-    Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<User?> GetByIdAsync(Guid id, bool trackChanges = false, CancellationToken cancellationToken = default);
     
-    Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default);
+    Task<User?> GetByEmailAsync(string email, bool trackChanges = false, CancellationToken cancellationToken = default);
     
     Task<bool> ExistsByEmailAsync(string email, CancellationToken cancellationToken = default);
 
