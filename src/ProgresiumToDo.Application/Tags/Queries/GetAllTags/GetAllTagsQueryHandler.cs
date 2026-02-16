@@ -18,7 +18,7 @@ internal sealed class GetAllTagsQueryHandler : IQueryHandler<GetAllTagsQuery, Ge
     
     public async Task<Result<GetAllTagsQueryResponse>> Handle(GetAllTagsQuery request, CancellationToken cancellationToken)
     {
-        var tags = await _tagRepository.GetAllAsync(_userContext.UserId, cancellationToken);
+        var tags = await _tagRepository.GetAllAsync(_userContext.UserId, cancellationToken: cancellationToken);
         
         var tagDtos = tags
             .Select(tag => new TagListItemDto(tag.Id, tag.Name, tag.CreatedAt, tag.UpdatedAt))

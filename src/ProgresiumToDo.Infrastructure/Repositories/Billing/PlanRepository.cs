@@ -10,34 +10,43 @@ internal sealed class PlanRepository : Repository<Plan>, IPlanRepository
     {
     }
     
-    public async Task<Plan?> GetByNameWithPricingsIncludedAsync(PlanType name, CancellationToken cancellationToken = default)
+    public async Task<Plan?> GetByNameWithPricingsIncludedAsync(PlanType name, bool trackChanges = false, CancellationToken cancellationToken = default)
     {
-        return await DbContext.Plans
+        IQueryable<Plan> query = DbContext.Plans
             .Include(p => p.PlanPricings)
-                .ThenInclude(pp => pp.Region)
-            .AsNoTracking()
-            .FirstOrDefaultAsync(p => p.Name == name, cancellationToken);
+                .ThenInclude(pp => pp.Region);
+
+        if (!trackChanges)
+            query = query.AsNoTracking();
+
+        return await query.FirstOrDefaultAsync(p => p.Name == name, cancellationToken);
     }
 
-    public async Task<Plan?> GetByIdWithPricingsAndFeaturesIncludedAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<Plan?> GetByIdWithPricingsAndFeaturesIncludedAsync(Guid id, bool trackChanges = false, CancellationToken cancellationToken = default)
     {
-        return await DbContext.Plans
+        IQueryable<Plan> query = DbContext.Plans
             .Include(p => p.PlanPricings)
             .ThenInclude(pp => pp.Region)
             .Include(p => p.PlanFeatures)
-            .ThenInclude(pf => pf.Feature)
-            .AsNoTracking()
-            .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
+            .ThenInclude(pf => pf.Feature);
+
+        if (!trackChanges)
+            query = query.AsNoTracking();
+
+        return await query.FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
     }
 
-    public async Task<List<Plan>> GetAllWithPricingsAndFeaturesIncludedAsync(CancellationToken cancellationToken = default)
+    public async Task<List<Plan>> GetAllWithPricingsAndFeaturesIncludedAsync(bool trackChanges = false, CancellationToken cancellationToken = default)
     {
-        return await DbContext.Plans
+        IQueryable<Plan> query = DbContext.Plans
             .Include(p => p.PlanPricings)
                 .ThenInclude(pp => pp.Region)
             .Include(p => p.PlanFeatures)
-                .ThenInclude(pf => pf.Feature)
-            .AsNoTracking()
-            .ToListAsync(cancellationToken);
+                .ThenInclude(pf => pf.Feature);
+
+        if (!trackChanges)
+            query = query.AsNoTracking();
+
+        return await query.ToListAsync(cancellationToken);
     }
 }

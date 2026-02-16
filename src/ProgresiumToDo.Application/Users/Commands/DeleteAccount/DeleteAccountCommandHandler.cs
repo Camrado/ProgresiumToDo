@@ -25,9 +25,7 @@ internal sealed class DeleteAccountCommandHandler : ICommandHandler<DeleteAccoun
 
     public async Task<Result<DeleteAccountCommandResponse>> Handle(DeleteAccountCommand request, CancellationToken cancellationToken)
     {
-        
-        
-        var user = await _userRepository.GetByIdAsync(_userContext.UserId, cancellationToken);
+        var user = await _userRepository.GetByIdAsync(_userContext.UserId, trackChanges: true, cancellationToken);
         if (user is null)
         {
             return Result.Failure<DeleteAccountCommandResponse>([UserErrors.UserNotFound]);
@@ -35,7 +33,7 @@ internal sealed class DeleteAccountCommandHandler : ICommandHandler<DeleteAccoun
         
         _userRepository.Delete(user);
         
-        var refreshTokens = await _refreshTokenRepository.GetByUserIdAsync(_userContext.UserId, cancellationToken);
+        var refreshTokens = await _refreshTokenRepository.GetByUserIdAsync(_userContext.UserId, trackChanges: true, cancellationToken);
         foreach (var token in refreshTokens)
         {
             token.Revoke();

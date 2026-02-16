@@ -13,17 +13,25 @@ internal sealed class PlanFeatureRepository : IPlanFeatureRepository
         _dbContext = dbContext;
     }
     
-    public async Task<PlanFeature?> GetByFeatureNameAsync(Guid planId, FeatureName featureName, CancellationToken cancellationToken = default)
+    public async Task<PlanFeature?> GetByFeatureNameAsync(Guid planId, FeatureName featureName, bool trackChanges = false, CancellationToken cancellationToken = default)
     {
-        return await _dbContext.PlanFeatures
+        IQueryable<PlanFeature> query = _dbContext.PlanFeatures;
+
+        if (!trackChanges)
+            query = query.AsNoTracking();
+
+        return await query
             .FirstOrDefaultAsync(pf => pf.PlanId == planId && pf.Feature.Name == featureName, cancellationToken);
     }
 
-    public async Task<List<PlanFeature>> GetByPlanIdAsync(Guid planId, bool includeFeature = false, CancellationToken cancellationToken = default)
+    public async Task<List<PlanFeature>> GetByPlanIdAsync(Guid planId, bool includeFeature = false, bool trackChanges = false, CancellationToken cancellationToken = default)
     {
-        var query = _dbContext.PlanFeatures
-            .AsNoTracking()
-            .Where(pf => pf.PlanId == planId);
+        IQueryable<PlanFeature> query = _dbContext.PlanFeatures;
+
+        if (!trackChanges)
+            query = query.AsNoTracking();
+
+        query = query.Where(pf => pf.PlanId == planId);
 
         if (includeFeature)
         {

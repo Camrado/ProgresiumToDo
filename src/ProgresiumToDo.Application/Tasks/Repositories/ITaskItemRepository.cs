@@ -5,9 +5,9 @@ namespace ProgresiumToDo.Application.Tasks.Repositories;
 
 public interface ITaskItemRepository
 {
-    Task<TaskItem?> GetByIdAsync(Guid id, Guid userId, CancellationToken cancellationToken = default);
+    Task<TaskItem?> GetByIdAsync(Guid id, Guid userId, bool trackChanges = false, CancellationToken cancellationToken = default);
 
-    Task<TaskItem?> GetByIdWithTagsIncludedAsync(Guid id, Guid userId, CancellationToken cancellationToken = default);
+    Task<TaskItem?> GetByIdWithTagsIncludedAsync(Guid id, Guid userId, bool trackChanges = false, CancellationToken cancellationToken = default);
     
     Task<List<TaskItemWithOrder>> GetAllByUserIdIncludingProjectSubtasksTagsAsync(TaskQueryFilter filter, CancellationToken cancellationToken = default);
     

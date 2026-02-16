@@ -18,7 +18,7 @@ internal sealed class GetProjectQueryValidator : AbstractValidator<GetProjectQue
             .NotEmpty()
             .MustAsync(async (query, projectId, cancellationToken) =>
             {
-                var project = await _projectRepository.GetByIdAndUserIdAsync(projectId, _userContext.UserId, cancellationToken);
+                var project = await _projectRepository.GetByIdAndUserIdAsync(projectId, _userContext.UserId, cancellationToken: cancellationToken);
                 query.Project = project;
                 
                 return project != null;

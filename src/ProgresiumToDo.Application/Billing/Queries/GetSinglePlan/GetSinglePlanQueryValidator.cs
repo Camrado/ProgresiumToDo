@@ -12,7 +12,7 @@ internal sealed class GetSinglePlanQueryValidator : AbstractValidator<GetSingleP
             .WithMessage("Plan ID must not be empty.")
             .MustAsync(async (query, planId, cancellationToken) =>
             {
-                var plan = await planRepository.GetByIdWithPricingsAndFeaturesIncludedAsync(planId, cancellationToken);
+                var plan = await planRepository.GetByIdWithPricingsAndFeaturesIncludedAsync(planId, cancellationToken: cancellationToken);
                 query.Plan = plan;
                 
                 return plan is not null;

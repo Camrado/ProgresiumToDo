@@ -12,9 +12,14 @@ public abstract class Repository<T> where T : BaseEntity
         DbContext = dbContext;
     }
     
-    public virtual async Task<T?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default) 
+    public virtual async Task<T?> GetByIdAsync(Guid id, bool trackChanges = false, CancellationToken cancellationToken = default) 
     {
-        return await DbContext.Set<T>().FirstOrDefaultAsync(entity => entity.Id == id, cancellationToken);
+        IQueryable<T> query = DbContext.Set<T>();
+
+        if (!trackChanges)
+            query = query.AsNoTracking();
+
+        return await query.FirstOrDefaultAsync(entity => entity.Id == id, cancellationToken);
     }
     
     public virtual void Add(T entity) 

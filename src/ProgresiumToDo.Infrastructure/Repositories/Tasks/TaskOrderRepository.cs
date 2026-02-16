@@ -28,18 +28,28 @@ internal sealed class TaskOrderRepository : ITaskOrderRepository
         _dbContext.TaskOrders.RemoveRange(taskOrders);
     }
 
-    public async Task<TaskOrder> GetByTaskIdAndOrderTypeAsync(Guid taskId, OrderType orderType,
+    public async Task<TaskOrder> GetByTaskIdAndOrderTypeAsync(Guid taskId, OrderType orderType, bool trackChanges = false,
         CancellationToken cancellationToken = default)
     {
-        return await _dbContext.TaskOrders
+        IQueryable<TaskOrder> query = _dbContext.TaskOrders;
+
+        if (!trackChanges)
+            query = query.AsNoTracking();
+
+        return await query
             .Where(to => to.OrderType == orderType && to.TaskId == taskId)
             .OrderByDescending(to => to.OrderIndex)
             .FirstAsync(cancellationToken);
     }
 
-    public async Task<List<TaskOrder>> GetByTaskId(Guid taskId, CancellationToken cancellationToken = default)
+    public async Task<List<TaskOrder>> GetByTaskId(Guid taskId, bool trackChanges = false, CancellationToken cancellationToken = default)
     {
-        return await _dbContext.TaskOrders
+        IQueryable<TaskOrder> query = _dbContext.TaskOrders;
+
+        if (!trackChanges)
+            query = query.AsNoTracking();
+
+        return await query
             .Where(to => to.TaskId == taskId)
             .ToListAsync(cancellationToken);
     }

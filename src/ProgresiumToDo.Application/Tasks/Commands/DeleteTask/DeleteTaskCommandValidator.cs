@@ -12,7 +12,7 @@ internal sealed class DeleteTaskCommandValidator : AbstractValidator<DeleteTaskC
             .NotEmpty()
             .MustAsync(async (command, taskId, cancellationToken) =>
             {
-                var taskItem = await taskItemRepository.GetByIdAsync(taskId, userContext.UserId, cancellationToken);
+                var taskItem = await taskItemRepository.GetByIdAsync(taskId, userContext.UserId, trackChanges: true, cancellationToken);
                 command.TaskItem = taskItem;
 
                 return taskItem != null;

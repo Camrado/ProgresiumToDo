@@ -49,7 +49,7 @@ internal sealed class GoogleCallbackOAuthCommandHandler : ICommandHandler<Google
         var googleIdentityResult =
             await _oAuthService.GetGoogleIdentityAsync(request.Code, verifier, nonce, cancellationToken);
         
-        var user = await _userRepository.GetByEmailAsync(googleIdentityResult.Email, cancellationToken);
+        var user = await _userRepository.GetByEmailAsync(googleIdentityResult.Email, cancellationToken: cancellationToken);
         
         if (user is not null)
         {

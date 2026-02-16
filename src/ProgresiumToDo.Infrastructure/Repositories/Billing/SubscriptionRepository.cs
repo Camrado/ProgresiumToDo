@@ -11,9 +11,12 @@ internal sealed class SubscriptionRepository : Repository<Subscription>, ISubscr
     }
 
     public async Task<Subscription?> GetActiveSubscriptionByUserIdAsync(Guid userId, bool includePlanPricing = false, bool includeRegion = false, 
-        bool includePlan = false, CancellationToken cancellationToken = default)
+        bool includePlan = false, bool trackChanges = false, CancellationToken cancellationToken = default)
     {
         IQueryable<Subscription> query = DbContext.Subscriptions;
+
+        if (!trackChanges)
+            query = query.AsNoTracking();
         
         if (includePlan)
         {
@@ -35,9 +38,12 @@ internal sealed class SubscriptionRepository : Repository<Subscription>, ISubscr
     }
     
     public async Task<List<Subscription>> GetPaidSubscriptionsByUserIdAsync(Guid userId, bool includePlan = false,
-        CancellationToken cancellationToken = default)
+        bool trackChanges = false, CancellationToken cancellationToken = default)
     {
         IQueryable<Subscription> query = DbContext.Subscriptions;
+
+        if (!trackChanges)
+            query = query.AsNoTracking();
 
         if (includePlan)
         {

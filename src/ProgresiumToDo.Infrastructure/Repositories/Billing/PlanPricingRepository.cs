@@ -11,9 +11,12 @@ internal sealed class PlanPricingRepository : Repository<PlanPricing>, IPlanPric
     }
 
     public async Task<PlanPricing?> GetByIdAsync(Guid id, bool includePlan = false, bool includeRegion = false,
-        CancellationToken cancellationToken = default)
+        bool trackChanges = false, CancellationToken cancellationToken = default)
     {
         IQueryable<PlanPricing> query = DbContext.PlanPricings;
+
+        if (!trackChanges)
+            query = query.AsNoTracking();
         
         if (includePlan)
             query = query.Include(pp => pp.Plan);

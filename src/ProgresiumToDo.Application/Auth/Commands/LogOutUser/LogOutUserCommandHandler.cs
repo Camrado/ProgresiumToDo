@@ -19,7 +19,7 @@ internal sealed class LogOutUserCommandHandler : ICommandHandler<LogOutUserComma
 
     public async Task<Result<LogOutUserCommandResponse>> Handle(LogOutUserCommand request, CancellationToken cancellationToken)
     {
-        var token = await _refreshTokenRepository.GetByTokenAsync(request.RefreshToken, cancellationToken);
+        var token = await _refreshTokenRepository.GetByTokenAsync(request.RefreshToken, trackChanges: true, cancellationToken);
         if (token is null || token.UserId != _userContext.UserId)
         {
             return Result.Failure<LogOutUserCommandResponse>([RefreshTokenErrors.InvalidToken]);

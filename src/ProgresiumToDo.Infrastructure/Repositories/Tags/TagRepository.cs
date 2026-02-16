@@ -15,29 +15,49 @@ internal sealed class TagRepository : Repository<Tag>, ITagRepository
         DbContext.Tags.Remove(tag);
     }
 
-    public async Task<Tag?> GetByNameAsync(string name, Guid userId, CancellationToken cancellationToken = default)
+    public async Task<Tag?> GetByNameAsync(string name, Guid userId, bool trackChanges = false, CancellationToken cancellationToken = default)
     {
-        return await DbContext.Tags
+        IQueryable<Tag> query = DbContext.Tags;
+
+        if (!trackChanges)
+            query = query.AsNoTracking();
+
+        return await query
             .FirstOrDefaultAsync(t => t.Name == name && t.UserId == userId, cancellationToken);
     }
 
-    public async Task<List<Tag>> GetAllAsync(Guid userId, CancellationToken cancellationToken = default)
+    public async Task<List<Tag>> GetAllAsync(Guid userId, bool trackChanges = false, CancellationToken cancellationToken = default)
     {
-        return await DbContext.Tags
+        IQueryable<Tag> query = DbContext.Tags;
+
+        if (!trackChanges)
+            query = query.AsNoTracking();
+
+        return await query
             .Where(t => t.UserId == userId)
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<List<Tag>> GetByNamesAsync(List<string> names, Guid userId, CancellationToken cancellationToken = default)
+    public async Task<List<Tag>> GetByNamesAsync(List<string> names, Guid userId, bool trackChanges = false, CancellationToken cancellationToken = default)
     {
-        return await DbContext.Tags
+        IQueryable<Tag> query = DbContext.Tags;
+
+        if (!trackChanges)
+            query = query.AsNoTracking();
+
+        return await query
             .Where(t => names.Contains(t.Name) && t.UserId == userId)
             .ToListAsync(cancellationToken);
     }
     
-    public async Task<Tag?> GetByIdAndUserIdAsync(Guid tagId, Guid userId, CancellationToken cancellationToken = default)
+    public async Task<Tag?> GetByIdAndUserIdAsync(Guid tagId, Guid userId, bool trackChanges = false, CancellationToken cancellationToken = default)
     {
-        return await DbContext.Tags
+        IQueryable<Tag> query = DbContext.Tags;
+
+        if (!trackChanges)
+            query = query.AsNoTracking();
+
+        return await query
             .FirstOrDefaultAsync(t => t.Id == tagId && t.UserId == userId, cancellationToken);
     }
 }

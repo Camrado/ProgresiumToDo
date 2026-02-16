@@ -12,7 +12,7 @@ internal sealed class DeleteProjectCommandValidator : AbstractValidator<DeletePr
             .NotEmpty()
             .MustAsync(async (command, projectId, cancellationToken) =>
             {
-                var project = await projectRepository.GetByIdAndUserIdAsync(projectId, userContext.UserId, cancellationToken);
+                var project = await projectRepository.GetByIdAndUserIdAsync(projectId, userContext.UserId, trackChanges: true, cancellationToken);
                 command.Project = project;
                 
                 return project != null;

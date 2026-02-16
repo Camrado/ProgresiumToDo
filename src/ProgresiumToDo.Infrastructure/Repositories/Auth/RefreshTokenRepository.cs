@@ -13,15 +13,25 @@ public class RefreshTokenRepository : IRefreshTokenRepository
         _dbContext = dbContext;
     }
     
-    public async Task<RefreshToken?> GetByTokenAsync(string token, CancellationToken cancellationToken = default)
+    public async Task<RefreshToken?> GetByTokenAsync(string token, bool trackChanges = false, CancellationToken cancellationToken = default)
     {
-        return await _dbContext.Set<RefreshToken>()
+        IQueryable<RefreshToken> query = _dbContext.RefreshTokens;
+
+        if (!trackChanges)
+            query = query.AsNoTracking();
+        
+        return await query
             .FirstOrDefaultAsync(rt => rt.Token == token, cancellationToken);
     }
 
-    public async Task<List<RefreshToken>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
+    public async Task<List<RefreshToken>> GetByUserIdAsync(Guid userId, bool trackChanges = false, CancellationToken cancellationToken = default)
     {
-        return await _dbContext.Set<RefreshToken>().Where(rt => rt.UserId == userId).ToListAsync(cancellationToken);
+        IQueryable<RefreshToken> query = _dbContext.RefreshTokens;
+
+        if (!trackChanges)
+            query = query.AsNoTracking();
+        
+        return await query.Where(rt => rt.UserId == userId).ToListAsync(cancellationToken);
     }
 
     public void Add(RefreshToken refreshToken)

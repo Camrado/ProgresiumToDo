@@ -15,7 +15,7 @@ internal sealed class CreateTagCommandValidator : AbstractValidator<CreateTagCom
             .WithMessage("Tag name must not exceed 255 characters.")
             .MustAsync(async (command, name, cancellationToken) =>
             {
-                var existingTag = await tagRepository.GetByNameAsync(name, userContext.UserId, cancellationToken);
+                var existingTag = await tagRepository.GetByNameAsync(name, userContext.UserId, cancellationToken: cancellationToken);
                 return existingTag is null;
             })
             .WithMessage("A tag with the same name already exists.");

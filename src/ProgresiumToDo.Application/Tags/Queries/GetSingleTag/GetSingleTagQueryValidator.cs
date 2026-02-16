@@ -14,7 +14,7 @@ internal sealed class GetSingleTagQueryValidator : AbstractValidator<GetSingleTa
             .WithMessage("TagId must not be empty.")
             .MustAsync(async (query, tagId, cancellationToken) =>
             {
-                var tag = await tagRepository.GetByIdAndUserIdAsync(tagId, userContext.UserId, cancellationToken);
+                var tag = await tagRepository.GetByIdAndUserIdAsync(tagId, userContext.UserId, cancellationToken: cancellationToken);
                 query.Tag = tag;
                 
                 return tag is not null;

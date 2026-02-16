@@ -23,7 +23,7 @@ internal sealed class CreateTaskCommandValidator : AbstractValidator<CreateTaskC
                 if (!projectId.HasValue)
                     return true;
                 
-                var project = await projectRepository.GetByIdAndUserIdAsync(projectId.Value, userContext.UserId, cancellationToken);
+                var project = await projectRepository.GetByIdAndUserIdAsync(projectId.Value, userContext.UserId, cancellationToken: cancellationToken);
                 return project != null;
             }).WithMessage("Project not found.");
 

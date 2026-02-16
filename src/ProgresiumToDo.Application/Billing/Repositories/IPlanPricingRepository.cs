@@ -5,5 +5,5 @@ namespace ProgresiumToDo.Application.Billing.Repositories;
 public interface IPlanPricingRepository
 {
     Task<PlanPricing?> GetByIdAsync(Guid id, bool includePlan = false, bool includeRegion = false,
-        CancellationToken cancellationToken = default);
+        bool trackChanges = false, CancellationToken cancellationToken = default);
 }

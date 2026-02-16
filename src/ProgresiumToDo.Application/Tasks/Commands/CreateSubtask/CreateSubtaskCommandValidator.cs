@@ -14,12 +14,8 @@ internal sealed class CreateSubtaskCommandValidator : AbstractValidator<CreateSu
             .WithMessage("ParentTaskId is required.")
             .MustAsync(async (command, parentTaskId, cancellationToken) =>
             {
-                var parentTask = await taskItemRepository.GetByIdAsync(parentTaskId, userContext.UserId, cancellationToken);
-                if (parentTask is null)
-                    return false;
-                
-                command.ParentTaskItem = parentTask;
-                return true;
+                var parentTask = await taskItemRepository.GetByIdAsync(parentTaskId, userContext.UserId, cancellationToken: cancellationToken);
+                return parentTask is not null;
             })
             .WithMessage("Parent task not found.");
         

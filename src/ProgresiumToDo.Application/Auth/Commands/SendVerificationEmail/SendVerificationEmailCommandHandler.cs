@@ -27,7 +27,7 @@ internal sealed class SendVerificationEmailCommandHandler :
     public async Task<Result<SendVerificationEmailCommandResponse>> Handle(SendVerificationEmailCommand request,
         CancellationToken cancellationToken)
     {
-        var user = await _userRepository.GetByIdAsync(_userContext.UserId, cancellationToken);
+        var user = await _userRepository.GetByIdAsync(_userContext.UserId, cancellationToken: cancellationToken);
         if (user is null)
         {
             return Result.Failure<SendVerificationEmailCommandResponse>([UserErrors.UserNotFound]);

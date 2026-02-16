@@ -28,7 +28,7 @@ internal sealed class UpdateProfileCommandValidator : AbstractValidator<UpdatePr
                 .WithMessage("A valid email address is required.")
                 .MustAsync(async (command, email, cancellationToken) =>
                 {
-                    var user = await userRepository.GetByIdAsync(userContext.UserId, cancellationToken);
+                    var user = await userRepository.GetByIdAsync(userContext.UserId, cancellationToken: cancellationToken);
                     if (user is null)
                         return false;
                     
@@ -39,7 +39,7 @@ internal sealed class UpdateProfileCommandValidator : AbstractValidator<UpdatePr
                 .WithMessage("The new email address must be different from the current one.")
                 .MustAsync(async (command, email, cancellationToken) =>
                 {
-                    var existingUser = await userRepository.GetByEmailAsync(email, cancellationToken);
+                    var existingUser = await userRepository.GetByEmailAsync(email, cancellationToken: cancellationToken);
                     return existingUser is null;
                 })
                 .WithMessage("The email address is already in use.");
