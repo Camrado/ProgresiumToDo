@@ -1,9 +1,9 @@
 using dotenv.net;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi;
 using ProgresiumToDo.API.Extensions;
 using ProgresiumToDo.Application;
 using ProgresiumToDo.Infrastructure;
+using Scalar.AspNetCore;
 
 DotEnv.Load();
 
@@ -11,14 +11,15 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options =>
+builder.Services.AddOpenApi("v1", options =>
 {
-    options.SwaggerDoc("v1", new OpenApiInfo
+    options.AddDocumentTransformer((document, context, cancellationToken) =>
     {
-        Title = "Progresium ToDo API",
-        Version = "v1",
-        Description = "API documentation for the Progresium ToDo application."
+        document.Info.Title = "Progresium ToDo API";
+        document.Info.Version = "v1";
+        document.Info.Description = "API documentation for the Progresium ToDo application.";
+        
+        return Task.CompletedTask;
     });
 });
 
@@ -61,13 +62,17 @@ if (app.Environment.IsProduction())
     db.Database.Migrate();
 }
 
+app.MapOpenApi();
+
 // Temporarily enable Swagger in all environments
 // if (app.Environment.IsDevelopment())
 // {
-    app.UseSwagger();
-    app.UseSwaggerUI(options =>
+    app.MapScalarApiReference(options =>
     {
-        options.SwaggerEndpoint("/swagger/v1/swagger.json", "Progresium ToDo API v1");
+        options
+            .WithTitle("Progresium ToDo API")
+            .WithTheme(ScalarTheme.Moon)
+            .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient);
     });
 // }
 
