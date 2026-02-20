@@ -20,7 +20,7 @@ internal sealed class TagService : ITagService
     {
         tagNames = tagNames.Distinct().ToList();
             
-        var tagsExistingInDb = await _tagRepository.GetByNamesAsync(tagNames, _userContext.UserId, cancellationToken: cancellationToken);
+        var tagsExistingInDb = await _tagRepository.GetByNamesAsync(tagNames, _userContext.UserId, trackChanges: true, cancellationToken: cancellationToken);
         var tagNamesNotExistingInDb = tagNames
             .Where(name => !tagsExistingInDb
                 .Select(t => t.Name)

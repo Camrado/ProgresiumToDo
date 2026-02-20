@@ -40,7 +40,7 @@ internal sealed class UpdateTaskCommandHandler : ICommandHandler<UpdateTaskComma
         
         // Task order recalculation logic
         // 1. Update order if OrderIndex and OrderType are provided. Case when user wants to change order explicitly.
-        if (request.NextTaskOrderIndex.HasValue && request.PreviousTaskOrderIndex.HasValue && !string.IsNullOrEmpty(request.OrderType))
+        if ((request.NextTaskOrderIndex.HasValue || request.PreviousTaskOrderIndex.HasValue) && !string.IsNullOrEmpty(request.OrderType))
         {
             var orderContext = new TaskOrderContext
             {
