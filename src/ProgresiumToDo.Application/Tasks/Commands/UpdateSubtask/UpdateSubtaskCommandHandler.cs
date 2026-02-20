@@ -28,14 +28,16 @@ internal sealed class UpdateSubtaskCommandHandler : ICommandHandler<UpdateSubtas
         
         // Task order recalculation logic
         // 1. Update order if OrderIndex is provided. Case when user wants to change order explicitly.
-        if (request.OrderIndex.HasValue)
+        if (request.NextTaskOrderIndex.HasValue || request.PreviousTaskOrderIndex.HasValue)
         {
             var orderContext = new TaskOrderContext
             {
                 OrderType = OrderType.ByParentTask,
-                ParentTaskId = request.SubtaskItem.ParentTaskItemId
+                ParentTaskId = request.SubtaskItem.ParentTaskItemId,
+                PreviousTaskOrderIndex = request.PreviousTaskOrderIndex,
+                NextTaskOrderIndex = request.NextTaskOrderIndex
             };
-            await _taskOrderingService.UpdateOrderAsync(request.SubtaskId, orderContext, request.OrderIndex.Value, cancellationToken);
+            await _taskOrderingService.UpdateOrderAsync(request.SubtaskId, orderContext, cancellationToken);
         }
         // 2. Apply status change if logical group has changed.
         // Case when task is moved between logical groups like InProgress -> Finished.

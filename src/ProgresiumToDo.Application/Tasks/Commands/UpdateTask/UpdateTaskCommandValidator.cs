@@ -41,10 +41,6 @@ internal sealed class UpdateTaskCommandValidator : AbstractValidator<UpdateTaskC
 
         When(utc => IsOrderCorrectlyUpdated(utc) && !IsStatusUpdated(utc) && !IsRegularFieldUpdated(utc), () =>
         {
-            RuleFor(utc => utc.OrderIndex)
-                .GreaterThan(0)
-                .WithMessage("OrderIndex must be greater than 0.");
-
             RuleFor(utc => utc.OrderType)
                 .Must(orderType => Enum.TryParse<OrderType>(orderType, ignoreCase: true, out _))
                 .WithMessage("Invalid OrderType. Valid values are: ByDueDate, ByProject, ByParentTask.");
@@ -103,8 +99,8 @@ internal sealed class UpdateTaskCommandValidator : AbstractValidator<UpdateTaskC
     private static bool IsValidUpdateCombination(UpdateTaskCommand command)
     {
         var isStatusUpdate = IsStatusUpdated(command);
-        var isOrderUpdate = command.OrderIndex.HasValue && !string.IsNullOrEmpty(command.OrderType);
-        var isMixedOrder = command.OrderIndex.HasValue ^ !string.IsNullOrEmpty(command.OrderType);
+        var isOrderUpdate = (command.NextTaskOrderIndex.HasValue || command.PreviousTaskOrderIndex.HasValue) && !string.IsNullOrEmpty(command.OrderType);
+        var isMixedOrder = (command.NextTaskOrderIndex.HasValue || command.PreviousTaskOrderIndex.HasValue) ^ !string.IsNullOrEmpty(command.OrderType);
 
         if (isMixedOrder)
             return false;
@@ -120,7 +116,8 @@ internal sealed class UpdateTaskCommandValidator : AbstractValidator<UpdateTaskC
                 command.EndTime is null &&
                 command.ProjectId is null &&
                 command.Tags is null &&
-                command.OrderIndex is null &&
+                command.NextTaskOrderIndex is null &&
+                command.PreviousTaskOrderIndex is null &&
                 string.IsNullOrEmpty(command.OrderType);
         }
 
@@ -148,12 +145,12 @@ internal sealed class UpdateTaskCommandValidator : AbstractValidator<UpdateTaskC
     
     private static bool IsOrderCorrectlyUpdated(UpdateTaskCommand command)
     {
-        return command.OrderIndex.HasValue && !string.IsNullOrEmpty(command.OrderType);
+        return (command.NextTaskOrderIndex.HasValue || command.PreviousTaskOrderIndex.HasValue) && !string.IsNullOrEmpty(command.OrderType);
     }
     
     private static bool IsOrderUpdated(UpdateTaskCommand command)
     {
-        return command.OrderIndex.HasValue || !string.IsNullOrEmpty(command.OrderType);
+        return command.NextTaskOrderIndex.HasValue || command.PreviousTaskOrderIndex.HasValue || !string.IsNullOrEmpty(command.OrderType);
     }
     
     private static bool IsRegularFieldUpdated(UpdateTaskCommand command)

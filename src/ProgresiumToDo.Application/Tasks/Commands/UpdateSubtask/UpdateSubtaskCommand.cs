@@ -10,7 +10,8 @@ public sealed record UpdateSubtaskCommand(
     TimeOnly? EndTime,
     string? Priority,
     string? Status,
-    decimal? OrderIndex
+    decimal? PreviousTaskOrderIndex,
+    decimal? NextTaskOrderIndex
 ) : ICommand<UpdateSubtaskCommandResponse>
 {
     public Guid ParentTaskId { get; set; }

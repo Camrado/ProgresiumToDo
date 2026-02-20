@@ -8,4 +8,6 @@ public sealed record TaskOrderContext
     public Guid? ProjectId { get; init; }
     public DateOnly? DueDate { get; init; }
     public Guid? ParentTaskId { get; init; }
+    public decimal? NextTaskOrderIndex { get; init; }
+    public decimal? PreviousTaskOrderIndex { get; init; }
 }

@@ -16,8 +16,7 @@ internal sealed class TaskOrderingService : ITaskOrderingService
         _taskOrderRepository = taskOrderRepository;
     }
     
-    public async Task UpdateOrderAsync(Guid taskId, TaskOrderContext orderContext, decimal newOrderIndex,
-        CancellationToken cancellationToken)
+    public async Task UpdateOrderAsync(Guid taskId, TaskOrderContext orderContext, CancellationToken cancellationToken)
     {
         var taskOrder = await _taskOrderRepository
             .GetByTaskIdAndOrderTypeAsync(taskId, orderContext.OrderType, trackChanges: true, cancellationToken);
@@ -34,7 +33,15 @@ internal sealed class TaskOrderingService : ITaskOrderingService
         {
             taskOrder.UpdateParentTaskId(orderContext.ParentTaskId);
         }
-
+        
+        var newOrderIndex = (orderContext.PreviousTaskOrderIndex, orderContext.NextTaskOrderIndex) switch
+        {
+            ({ } prev, { } next) => (decimal)(prev + next) / 2,
+            (null, { } next) => (decimal)next - OrderIncrement,
+            ({ } prev, null) => (decimal)prev + OrderIncrement,
+            _ => OrderIncrement
+        };
+        
         taskOrder.UpdateOrderIndex(newOrderIndex);
     }
     
