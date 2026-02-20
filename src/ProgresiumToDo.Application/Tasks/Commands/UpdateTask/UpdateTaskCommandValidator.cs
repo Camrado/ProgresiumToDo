@@ -41,10 +41,6 @@ internal sealed class UpdateTaskCommandValidator : AbstractValidator<UpdateTaskC
 
         When(utc => IsOrderCorrectlyUpdated(utc) && !IsStatusUpdated(utc) && !IsRegularFieldUpdated(utc), () =>
         {
-            RuleFor(utc => utc)
-                .Must(command => command.NextTaskOrderIndex.HasValue || command.PreviousTaskOrderIndex.HasValue)
-                .WithMessage("Either NextTaskId or PreviousTaskId must be provided when updating order.");
-
             RuleFor(utc => utc.OrderType)
                 .Must(orderType => Enum.TryParse<OrderType>(orderType, ignoreCase: true, out _))
                 .WithMessage("Invalid OrderType. Valid values are: ByDueDate, ByProject, ByParentTask.");

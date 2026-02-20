@@ -39,7 +39,7 @@ internal sealed class UpdateTaskCommandHandler : ICommandHandler<UpdateTaskComma
         var hasStatusChanged = Enum.TryParse<TaskStatus>(request.Status, ignoreCase: true, out var newStatus);
         
         // Task order recalculation logic
-        // 1. Update order if OrderIndex and OrderType are provided. Case when user wants to change order explicitly.
+        // 1. Update order if PreviousTaskOrderIndex/NextTaskOrderIndex and OrderType are provided. Case when user wants to change order explicitly.
         if ((request.NextTaskOrderIndex.HasValue || request.PreviousTaskOrderIndex.HasValue) && !string.IsNullOrEmpty(request.OrderType))
         {
             var orderContext = new TaskOrderContext

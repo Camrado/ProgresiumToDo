@@ -38,13 +38,6 @@ internal sealed class UpdateSubtaskCommandValidator : AbstractValidator<UpdateSu
                 .WithMessage("Invalid status. Valid values are: pending, inprogress, completed, cancelled.");
         });
 
-        When(usc => IsOrderUpdated(usc) && !IsStatusUpdated(usc) && !IsRegularFieldUpdated(usc), () =>
-        {
-            RuleFor(utc => utc)
-                .Must(command => command.NextTaskOrderIndex.HasValue || command.PreviousTaskOrderIndex.HasValue)
-                .WithMessage("Either NextTaskId or PreviousTaskId must be provided when updating order.");
-        });
-
         When(usc => IsRegularFieldUpdated(usc) && !IsStatusUpdated(usc) && !IsOrderUpdated(usc), () =>
         {
             RuleFor(usc => usc.Title)
