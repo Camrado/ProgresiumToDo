@@ -40,9 +40,9 @@ internal sealed class UpdateSubtaskCommandValidator : AbstractValidator<UpdateSu
 
         When(usc => IsOrderUpdated(usc) && !IsStatusUpdated(usc) && !IsRegularFieldUpdated(usc), () =>
         {
-            RuleFor(utc => utc.OrderIndex)
-                .GreaterThanOrEqualTo(0)
-                .WithMessage("OrderIndex must be greater than or equal to 0.");
+            RuleFor(utc => utc)
+                .Must(command => command.NextTaskOrderIndex.HasValue || command.PreviousTaskOrderIndex.HasValue)
+                .WithMessage("Either NextTaskId or PreviousTaskId must be provided when updating order.");
         });
 
         When(usc => IsRegularFieldUpdated(usc) && !IsStatusUpdated(usc) && !IsOrderUpdated(usc), () =>
@@ -89,7 +89,8 @@ internal sealed class UpdateSubtaskCommandValidator : AbstractValidator<UpdateSu
                 command.Priority is null &&
                 command.StartTime is null &&
                 command.EndTime is null &&
-                command.OrderIndex is null;
+                command.NextTaskOrderIndex is null &&
+                command.PreviousTaskOrderIndex is null;
         }
 
         if (isOrderUpdate)
@@ -113,7 +114,7 @@ internal sealed class UpdateSubtaskCommandValidator : AbstractValidator<UpdateSu
     
     private static bool IsOrderUpdated(UpdateSubtaskCommand command)
     {
-        return command.OrderIndex.HasValue;
+        return command.NextTaskOrderIndex.HasValue || command.PreviousTaskOrderIndex.HasValue;
     }
     
     private static bool IsRegularFieldUpdated(UpdateSubtaskCommand command)

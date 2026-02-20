@@ -13,7 +13,8 @@ public sealed record UpdateTaskCommand(
     DateOnly? DueDate,
     TimeOnly? StartTime,
     TimeOnly? EndTime,
-    decimal? OrderIndex,
+    decimal? PreviousTaskOrderIndex,
+    decimal? NextTaskOrderIndex,
     string? OrderType,
     Guid? ProjectId,
     List<string>? Tags) : ICommand<UpdateTaskCommandResponse>, IEntitledRequest

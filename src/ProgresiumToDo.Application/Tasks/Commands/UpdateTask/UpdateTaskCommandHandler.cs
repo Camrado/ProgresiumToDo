@@ -40,15 +40,17 @@ internal sealed class UpdateTaskCommandHandler : ICommandHandler<UpdateTaskComma
         
         // Task order recalculation logic
         // 1. Update order if OrderIndex and OrderType are provided. Case when user wants to change order explicitly.
-        if (request.OrderIndex.HasValue && !string.IsNullOrEmpty(request.OrderType))
+        if (request.NextTaskOrderIndex.HasValue && request.PreviousTaskOrderIndex.HasValue && !string.IsNullOrEmpty(request.OrderType))
         {
             var orderContext = new TaskOrderContext
             {
                 OrderType = Enum.Parse<OrderType>(request.OrderType, ignoreCase: true),
                 DueDate = request.DueDate,
-                ProjectId = request.ProjectId
+                ProjectId = request.ProjectId,
+                PreviousTaskOrderIndex = request.PreviousTaskOrderIndex,
+                NextTaskOrderIndex = request.NextTaskOrderIndex
             };
-            await _taskOrderingService.UpdateOrderAsync(request.TaskItem.Id, orderContext, request.OrderIndex.Value, cancellationToken);
+            await _taskOrderingService.UpdateOrderAsync(request.TaskItem.Id, orderContext, cancellationToken);
         }
         // 2. Recalculate orders if status hasn't changed and task is not completed or cancelled,
         // or if status changed but stayed in the "In Progress" logical group. 
