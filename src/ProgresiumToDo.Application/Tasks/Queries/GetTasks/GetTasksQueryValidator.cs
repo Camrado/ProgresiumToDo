@@ -9,6 +9,20 @@ internal sealed class GetTasksQueryValidator : AbstractValidator<GetTasksQuery>
 {
     public GetTasksQueryValidator(IProjectRepository projectRepository, IUserContext userContext)
     {
+        When(gtq => Enum.TryParse<OrderType>(gtq.OrderType, ignoreCase: true, out var byDueDateType) && byDueDateType == OrderType.ByDueDate, () =>
+        {
+            RuleFor(gtq => gtq)
+                .Must(q => q.DueDateFrom.HasValue || q.DueDateTo.HasValue)
+                .WithMessage("At least one of 'DueDateFrom' or 'DueDateTo' must be provided when OrderType is 'ByDueDate'.");
+        });
+
+        When(gtq => Enum.TryParse<OrderType>(gtq.OrderType, ignoreCase: true, out var byProjectType) && byProjectType == OrderType.ByProject, () =>
+        {
+            RuleFor(gtq => gtq.ProjectId)
+                .NotNull()
+                .WithMessage("'ProjectId' must be provided when OrderType is 'ByProject'.");
+        });
+        
         RuleFor(gtq => gtq)
             .Must(query =>
             {
