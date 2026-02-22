@@ -91,8 +91,9 @@ internal sealed class OAuthService : IOAuthService
         _logger.LogInformation("Initiating Google OAuth token exchange");
         var stopwatch = Stopwatch.StartNew();
         
+        using var requestContent = new FormUrlEncodedContent(tokenRequestBody);
         var response = await httpClient.PostAsync("https://oauth2.googleapis.com/token",
-            new FormUrlEncodedContent(tokenRequestBody), cancellationToken);
+            requestContent, cancellationToken);
         
         stopwatch.Stop();
         _logger.LogInformation(
@@ -116,8 +117,8 @@ internal sealed class OAuthService : IOAuthService
         
         try 
         {
-            var doc = JsonDocument.Parse(json).RootElement;
-            var idToken = doc.GetProperty("id_token").GetString();
+            using var doc = JsonDocument.Parse(json);
+            var idToken = doc.RootElement.GetProperty("id_token").GetString();
         
             var validationSettings = new GoogleJsonWebSignature.ValidationSettings
             {
