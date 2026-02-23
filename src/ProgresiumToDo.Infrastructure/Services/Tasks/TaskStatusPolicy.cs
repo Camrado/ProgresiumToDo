@@ -1,5 +1,4 @@
-﻿using System;
-using ProgresiumToDo.Application.Abstractions.Tasks;
+﻿using ProgresiumToDo.Application.Abstractions.Tasks;
 using TaskStatus = ProgresiumToDo.Domain.Tasks.TaskStatus;
 
 namespace ProgresiumToDo.Infrastructure.Services.Tasks;
