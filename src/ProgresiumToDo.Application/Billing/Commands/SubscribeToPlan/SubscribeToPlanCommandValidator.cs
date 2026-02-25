@@ -14,7 +14,7 @@ internal sealed class SubscribeToPlanCommandValidator : AbstractValidator<Subscr
             .MustAsync(async (command, planPricingId, cancellationToken) =>
             {
                 var planPricing = await planPricingRepository.GetByIdAsync(
-                    planPricingId, includePlan: true, includeRegion: true, cancellationToken: cancellationToken);
+                    planPricingId, includePlan: true, includeRegion: true, trackChanges: true, cancellationToken: cancellationToken);
                 if (planPricing is null)
                     return false;
                 
