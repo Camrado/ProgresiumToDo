@@ -14,7 +14,8 @@ internal sealed class VerificationCodeConfiguration : IEntityTypeConfiguration<V
         builder.HasKey(vc => vc.Id);
 
         builder.Property(vc => vc.CodeHash)
-            .IsRequired();
+            .IsRequired()
+            .HasMaxLength(128);
 
         builder.Property(vc => vc.Type)
             .HasConversion<string>()
@@ -27,6 +28,8 @@ internal sealed class VerificationCodeConfiguration : IEntityTypeConfiguration<V
             .IsRequired();
 
         builder.Ignore(vc => vc.IsExpired);
+        
+        builder.HasIndex(vc => new { vc.ApplicationUserId, vc.Type }).IsUnique();
 
         builder.HasOne<ApplicationUser>()
             .WithMany()

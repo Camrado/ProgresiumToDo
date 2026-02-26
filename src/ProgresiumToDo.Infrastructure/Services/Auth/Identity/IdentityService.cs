@@ -30,7 +30,6 @@ internal sealed class IdentityService : IIdentityService
     private readonly string _jwtSecret;
     private readonly int _jwtLifespan;
     private readonly int _refreshTokenLifespan;
-    private readonly string _baseUrl;
     private readonly MailtrapSettings _mailtrapSettings;
     
     public IdentityService(
@@ -57,8 +56,6 @@ internal sealed class IdentityService : IIdentityService
                                  throw new ApplicationException("Jwt token lifetime is missing."));
         _refreshTokenLifespan = int.Parse(Environment.GetEnvironmentVariable("REFRESH_TOKEN_LIFETIME_IN_DAYS") ??
                                          throw new ApplicationException("Refresh token lifetime is missing."));
-        _baseUrl = Environment.GetEnvironmentVariable("BASE_URL") ??
-                   throw new ApplicationException("Base url is missing.");
     }
     
     public async Task<Result<Guid>> RegisterUserAsync(string email, string? password = null)
@@ -189,7 +186,7 @@ internal sealed class IdentityService : IIdentityService
             return Result.Failure([UserErrors.EmailVerificationCodeExpired]);
         }
 
-        var hashedInput = HashCode(code);
+        var hashedInput = HashVerificationCode(code);
         if (verificationCode.CodeHash != hashedInput)
         {
             return Result.Failure([UserErrors.InvalidEmailVerificationCode]);
@@ -224,20 +221,20 @@ internal sealed class IdentityService : IIdentityService
         if (verificationCode?.LastSentAt is not null &&
             DateTime.UtcNow < verificationCode.LastSentAt.Value.Add(cooldown))
         {
-            var remainingSeconds = (verificationCode.LastSentAt.Value.Add(cooldown) - DateTime.UtcNow).Seconds;
-            return Result.Failure<string>([UserErrors.EmailCooldown(remainingSeconds)]);
+            var remainingSeconds = (verificationCode.LastSentAt.Value.Add(cooldown) - DateTime.UtcNow).TotalSeconds;
+            return Result.Failure<string>([UserErrors.EmailCooldown((int)Math.Ceiling(remainingSeconds))]);
         }
 
         var plainCode = Random.Shared.Next(100000, 999999).ToString();
         if (verificationCode is not null)
         {
-            verificationCode.UpdateCode(HashCode(plainCode), DateTime.UtcNow.AddMinutes(_mailtrapSettings.VerificationCodeLifespanInMinutes));
+            verificationCode.UpdateCode(HashVerificationCode(plainCode), DateTime.UtcNow.AddMinutes(_mailtrapSettings.VerificationCodeLifespanInMinutes));
         }
         else
         {
             var newVerificationCode = VerificationCode.CreateEmailVerificationCode(
                 appUser.Id, 
-                HashCode(plainCode), 
+                HashVerificationCode(plainCode), 
                 DateTime.UtcNow.AddMinutes(_mailtrapSettings.VerificationCodeLifespanInMinutes));
             
             _verificationCodeRepository.Add(newVerificationCode);
@@ -329,20 +326,20 @@ internal sealed class IdentityService : IIdentityService
         if (verificationCode?.LastSentAt is not null &&
             DateTime.UtcNow < verificationCode.LastSentAt.Value.Add(cooldown))
         {
-            var remainingSeconds = (verificationCode.LastSentAt.Value.Add(cooldown) - DateTime.UtcNow).Seconds;
-            return Result.Failure<string>([UserErrors.EmailCooldown(remainingSeconds)]);
+            var remainingSeconds = (verificationCode.LastSentAt.Value.Add(cooldown) - DateTime.UtcNow).TotalSeconds;
+            return Result.Failure<string>([UserErrors.EmailCooldown((int)Math.Ceiling(remainingSeconds))]);
         }
 
         var plainCode = Random.Shared.Next(100000, 999999).ToString();
         if (verificationCode is not null)
         {
-            verificationCode.UpdateCode(HashCode(plainCode), DateTime.UtcNow.AddMinutes(_mailtrapSettings.VerificationCodeLifespanInMinutes));
+            verificationCode.UpdateCode(HashVerificationCode(plainCode), DateTime.UtcNow.AddMinutes(_mailtrapSettings.VerificationCodeLifespanInMinutes));
         }
         else
         {
             var newVerificationCode = VerificationCode.CreatePasswordResetCode(
                 appUser.Id, 
-                HashCode(plainCode), 
+                HashVerificationCode(plainCode), 
                 DateTime.UtcNow.AddMinutes(_mailtrapSettings.VerificationCodeLifespanInMinutes));
             
             _verificationCodeRepository.Add(newVerificationCode);
@@ -364,10 +361,10 @@ internal sealed class IdentityService : IIdentityService
             appUser.Id, VerificationCodeType.PasswordReset);
         if (verificationCode is null || verificationCode.IsExpired)
         {
-            return Result.Failure([UserErrors.EmailVerificationCodeExpired]);
+            return Result.Failure([UserErrors.PasswordResetCodeExpired]);
         }
 
-        var hashedInput = HashCode(code);
+        var hashedInput = HashVerificationCode(code);
         if (verificationCode.CodeHash != hashedInput)
         {
             return Result.Failure([UserErrors.InvalidPasswordResetCode]);
@@ -385,7 +382,7 @@ internal sealed class IdentityService : IIdentityService
         return Result.Success();
     }
 
-    private static string HashCode(string code)
+    private static string HashVerificationCode(string code)
     {
         var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(code));
         return Convert.ToHexString(bytes);
