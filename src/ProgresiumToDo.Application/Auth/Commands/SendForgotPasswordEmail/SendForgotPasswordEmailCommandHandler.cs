@@ -43,8 +43,6 @@ internal sealed class SendForgotPasswordEmailCommandHandler :
             return Result.Failure<SendForgotPasswordEmailCommandResponse>(result.Errors);
         }
         
-        await _identityService.MarkPasswordResetEmailAsSentAsync(request.Email);
-
         return new SendForgotPasswordEmailCommandResponse("If an account with that email exists, a password reset code has been sent.");
     }
 }

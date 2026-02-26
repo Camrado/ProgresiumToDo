@@ -35,6 +35,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
     public DbSet<TaskOrder> TaskOrders { get; set; }
     public DbSet<TaskAttachment> TaskAttachments { get; set; }
     public DbSet<WaitlistEntry> WaitlistEntries { get; set; }
+    public DbSet<VerificationCode> VerificationCodes { get; set; }
 
     public async Task<IApplicationTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default)
     {

@@ -1,5 +1,6 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
@@ -24,6 +25,7 @@ internal sealed class IdentityService : IIdentityService
     private readonly IConfiguration _configuration;
     private readonly IRefreshTokenRepository _refreshTokenRepository;
     private readonly IUserRepository _userRepository;
+    private readonly IVerificationCodeRepository _verificationCodeRepository;
     private readonly ILogger<IdentityService> _logger;
     private readonly string _jwtSecret;
     private readonly int _jwtLifespan;
@@ -37,6 +39,7 @@ internal sealed class IdentityService : IIdentityService
         IConfiguration configuration,
         IRefreshTokenRepository refreshTokenRepository,
         IUserRepository userRepository,
+        IVerificationCodeRepository verificationCodeRepository,
         ILogger<IdentityService> logger,
         IOptions<MailtrapSettings> mailtrapOptions)
     {
@@ -45,6 +48,7 @@ internal sealed class IdentityService : IIdentityService
         _configuration = configuration;
         _refreshTokenRepository = refreshTokenRepository;
         _userRepository = userRepository;
+        _verificationCodeRepository = verificationCodeRepository;
         _logger = logger;
         _mailtrapSettings = mailtrapOptions.Value;
         _jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET") ??
@@ -178,19 +182,21 @@ internal sealed class IdentityService : IIdentityService
             return Result.Failure<bool>([UserErrors.EmailAlreadyVerified]);
         }
 
-        if (appUser.EmailVerificationCodeExpiresOn < DateTime.UtcNow)
+        var verificationCode = await _verificationCodeRepository.GetByUserIdAndTypeAsync(
+            appUser.Id, VerificationCodeType.EmailVerification);
+        if (verificationCode is null || verificationCode.IsExpired)
         {
             return Result.Failure([UserErrors.EmailVerificationCodeExpired]);
         }
-        if (appUser.EmailVerificationCode is null || appUser.EmailVerificationCode != code)
+
+        var hashedInput = HashCode(code);
+        if (verificationCode.CodeHash != hashedInput)
         {
             return Result.Failure([UserErrors.InvalidEmailVerificationCode]);
         }
-        
+        _verificationCodeRepository.Remove(verificationCode);
+
         appUser.EmailConfirmed = true;
-        appUser.EmailVerificationCode = null;
-        appUser.EmailVerificationCodeExpiresOn = null;
-        appUser.LastVerificationEmailSentTime = null;
         var updateResult = await _userManager.UpdateAsync(appUser);
         if (!updateResult.Succeeded)
         {
@@ -205,45 +211,39 @@ internal sealed class IdentityService : IIdentityService
     
     public async Task<Result<string>> GenerateEmailVerificationCodeAsync(string email)
     {
-        var user = await _userManager.FindByEmailAsync(email);
-        if (user is null)
+        var appUser = await _userManager.FindByEmailAsync(email);
+        if (appUser is null)
         {
             return Result.Failure<string>([UserErrors.UserNotFound]);
         }
-        
+
+        var verificationCode = await _verificationCodeRepository
+            .GetByUserIdAndTypeAsync(appUser.Id, VerificationCodeType.EmailVerification);
+
         var cooldown = TimeSpan.FromSeconds(_mailtrapSettings.EmailCooldownInSeconds);
-        if (user.LastVerificationEmailSentTime.HasValue && 
-            DateTime.UtcNow < user.LastVerificationEmailSentTime.Value.Add(cooldown))
+        if (verificationCode?.LastSentAt is not null &&
+            DateTime.UtcNow < verificationCode.LastSentAt.Value.Add(cooldown))
         {
-            var remainingSeconds = (user.LastVerificationEmailSentTime.Value.Add(cooldown) - DateTime.UtcNow).Seconds;
-        
+            var remainingSeconds = (verificationCode.LastSentAt.Value.Add(cooldown) - DateTime.UtcNow).Seconds;
             return Result.Failure<string>([UserErrors.EmailCooldown(remainingSeconds)]);
         }
 
-        var code = Random.Shared.Next(100000, 999999).ToString();
-        
-        user.EmailVerificationCode = code;
-        user.EmailVerificationCodeExpiresOn = DateTime.UtcNow.AddMinutes(_mailtrapSettings.VerificationCodeLifespanInMinutes);
-        
-        await _userManager.UpdateAsync(user);
-
-        return code;
-    }
-
-    public async Task<Result> MarkVerificationEmailAsSentAsync(string email)
-    {
-        var user = await _userManager.FindByEmailAsync(email);
-        if (user is null)
+        var plainCode = Random.Shared.Next(100000, 999999).ToString();
+        if (verificationCode is not null)
         {
-            _logger.LogWarning("Marking verification email as sent failed. User not found. Email: {Email}", email);
-            return Result.Failure([UserErrors.UserNotFound]);
+            verificationCode.UpdateCode(HashCode(plainCode), DateTime.UtcNow.AddMinutes(_mailtrapSettings.VerificationCodeLifespanInMinutes));
         }
-
-        user.LastVerificationEmailSentTime = DateTime.UtcNow;
+        else
+        {
+            var newVerificationCode = VerificationCode.CreateEmailVerificationCode(
+                appUser.Id, 
+                HashCode(plainCode), 
+                DateTime.UtcNow.AddMinutes(_mailtrapSettings.VerificationCodeLifespanInMinutes));
+            
+            _verificationCodeRepository.Add(newVerificationCode);
+        }
         
-        await _userManager.UpdateAsync(user);
-
-        return Result.Success();
+        return plainCode;
     }
 
     public async Task<Result> DeleteAccountAsync(string email)
@@ -307,9 +307,6 @@ internal sealed class IdentityService : IIdentityService
         user.Email = newEmail;
         user.UserName = $"{newEmail}_{Guid.NewGuid()}";
         user.EmailConfirmed = false;
-        user.LastVerificationEmailSentTime = null;
-        user.EmailVerificationCode = null;
-        user.EmailVerificationCodeExpiresOn = null;
 
         await _userManager.UpdateAsync(user);
 
@@ -319,45 +316,39 @@ internal sealed class IdentityService : IIdentityService
 
     public async Task<Result<string>> GeneratePasswordResetCodeAsync(string email)
     {
-        var user = await _userManager.FindByEmailAsync(email);
-        if (user is null)
+        var appUser = await _userManager.FindByEmailAsync(email);
+        if (appUser is null)
         {
             return Result.Failure<string>([UserErrors.UserNotFound]);
         }
 
-        var cooldown = TimeSpan.FromSeconds(_mailtrapSettings.EmailCooldownInSeconds);
-        if (user.LastPasswordResetEmailSentTime.HasValue &&
-            DateTime.UtcNow < user.LastPasswordResetEmailSentTime.Value.Add(cooldown))
-        {
-            var remainingSeconds = (user.LastPasswordResetEmailSentTime.Value.Add(cooldown) - DateTime.UtcNow).Seconds;
+        var verificationCode = await _verificationCodeRepository
+            .GetByUserIdAndTypeAsync(appUser.Id, VerificationCodeType.PasswordReset);
 
+        var cooldown = TimeSpan.FromSeconds(_mailtrapSettings.EmailCooldownInSeconds);
+        if (verificationCode?.LastSentAt is not null &&
+            DateTime.UtcNow < verificationCode.LastSentAt.Value.Add(cooldown))
+        {
+            var remainingSeconds = (verificationCode.LastSentAt.Value.Add(cooldown) - DateTime.UtcNow).Seconds;
             return Result.Failure<string>([UserErrors.EmailCooldown(remainingSeconds)]);
         }
 
-        var code = Random.Shared.Next(100000, 999999).ToString();
-
-        user.PasswordResetCode = code;
-        user.PasswordResetCodeExpiresOn = DateTime.UtcNow.AddMinutes(15);
-
-        await _userManager.UpdateAsync(user);
-
-        return code;
-    }
-    
-    public async Task<Result> MarkPasswordResetEmailAsSentAsync(string email)
-    {
-        var user = await _userManager.FindByEmailAsync(email);
-        if (user is null)
+        var plainCode = Random.Shared.Next(100000, 999999).ToString();
+        if (verificationCode is not null)
         {
-            _logger.LogWarning("Marking password reset email as sent failed. User not found. Email: {Email}", email);
-            return Result.Failure([UserErrors.UserNotFound]);
+            verificationCode.UpdateCode(HashCode(plainCode), DateTime.UtcNow.AddMinutes(_mailtrapSettings.VerificationCodeLifespanInMinutes));
+        }
+        else
+        {
+            var newVerificationCode = VerificationCode.CreatePasswordResetCode(
+                appUser.Id, 
+                HashCode(plainCode), 
+                DateTime.UtcNow.AddMinutes(_mailtrapSettings.VerificationCodeLifespanInMinutes));
+            
+            _verificationCodeRepository.Add(newVerificationCode);
         }
 
-        user.LastPasswordResetEmailSentTime = DateTime.UtcNow;
-        
-        await _userManager.UpdateAsync(user);
-
-        return Result.Success();
+        return plainCode;
     }
 
     public async Task<Result> ResetPasswordAsync(string email, string code, string newPassword)
@@ -369,15 +360,19 @@ internal sealed class IdentityService : IIdentityService
             return Result.Failure([UserErrors.UserNotFound]);
         }
 
-        if (appUser.PasswordResetCodeExpiresOn < DateTime.UtcNow)
+        var verificationCode = await _verificationCodeRepository.GetByUserIdAndTypeAsync(
+            appUser.Id, VerificationCodeType.PasswordReset);
+        if (verificationCode is null || verificationCode.IsExpired)
         {
-            return Result.Failure([UserErrors.PasswordResetCodeExpired]);
+            return Result.Failure([UserErrors.EmailVerificationCodeExpired]);
         }
 
-        if (appUser.PasswordResetCode is null || appUser.PasswordResetCode != code)
+        var hashedInput = HashCode(code);
+        if (verificationCode.CodeHash != hashedInput)
         {
             return Result.Failure([UserErrors.InvalidPasswordResetCode]);
         }
+        _verificationCodeRepository.Remove(verificationCode);
 
         await _userManager.RemovePasswordAsync(appUser);
         var resetResult = await _userManager.AddPasswordAsync(appUser, newPassword);
@@ -386,13 +381,13 @@ internal sealed class IdentityService : IIdentityService
             return Result.Failure([UserErrors.PasswordResetFailed]);
         }
 
-        appUser.PasswordResetCode = null;
-        appUser.PasswordResetCodeExpiresOn = null;
-        appUser.LastPasswordResetEmailSentTime = null;
-        
-        await _userManager.UpdateAsync(appUser);
-
         _logger.LogInformation("Password reset successfully. Email: {Email}", email);
         return Result.Success();
+    }
+
+    private static string HashCode(string code)
+    {
+        var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(code));
+        return Convert.ToHexString(bytes);
     }
 }

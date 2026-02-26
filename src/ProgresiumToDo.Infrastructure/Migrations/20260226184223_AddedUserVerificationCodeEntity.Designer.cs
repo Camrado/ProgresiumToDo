@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ProgresiumToDo.Infrastructure;
@@ -11,9 +12,11 @@ using ProgresiumToDo.Infrastructure;
 namespace ProgresiumToDo.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260226184223_AddedUserVerificationCodeEntity")]
+    partial class AddedUserVerificationCodeEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -306,7 +309,7 @@ namespace ProgresiumToDo.Infrastructure.Migrations
                     b.ToTable("users", (string)null);
                 });
 
-            modelBuilder.Entity("ProgresiumToDo.Domain.Auth.VerificationCode", b =>
+            modelBuilder.Entity("ProgresiumToDo.Domain.Auth.UserVerificationCode", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -339,13 +342,17 @@ namespace ProgresiumToDo.Infrastructure.Migrations
                         .HasColumnType("text")
                         .HasColumnName("type");
 
+                    b.Property<DateTime?>("UsedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("used_at");
+
                     b.HasKey("Id")
-                        .HasName("pk_verification_codes");
+                        .HasName("pk_user_verification_codes");
 
                     b.HasIndex("ApplicationUserId")
-                        .HasDatabaseName("ix_verification_codes_application_user_id");
+                        .HasDatabaseName("ix_user_verification_codes_application_user_id");
 
-                    b.ToTable("verification_codes", (string)null);
+                    b.ToTable("user_verification_codes", (string)null);
                 });
 
             modelBuilder.Entity("ProgresiumToDo.Domain.Billing.Plan", b =>
@@ -1090,14 +1097,14 @@ namespace ProgresiumToDo.Infrastructure.Migrations
                         .HasConstraintName("fk_users_asp_net_users_application_user_id");
                 });
 
-            modelBuilder.Entity("ProgresiumToDo.Domain.Auth.VerificationCode", b =>
+            modelBuilder.Entity("ProgresiumToDo.Domain.Auth.UserVerificationCode", b =>
                 {
                     b.HasOne("ProgresiumToDo.Infrastructure.Services.Auth.Identity.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("ApplicationUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_verification_codes_asp_net_users_application_user_id");
+                        .HasConstraintName("fk_user_verification_codes_asp_net_users_application_user_id");
                 });
 
             modelBuilder.Entity("ProgresiumToDo.Domain.Billing.PlanPricing", b =>

@@ -100,6 +100,7 @@ public static class DependencyInjection
                 options.Password.RequireDigit = true;
                 options.Password.RequireLowercase = true;
                 options.Password.RequireUppercase = true;
+                options.Password.RequireNonAlphanumeric = false;
                 options.User.RequireUniqueEmail = false;
             })
             .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -189,6 +190,8 @@ public static class DependencyInjection
         services.AddScoped<IFeatureUsageRepository, FeatureUsageRepository>();
 
         services.AddScoped<IWaitlistEntryRepository, WaitlistEntryRepository>();
+
+        services.AddScoped<IVerificationCodeRepository, VerificationCodeRepository>();
     }
     
     private static void AddEmailService(IServiceCollection services, IConfiguration configuration)
