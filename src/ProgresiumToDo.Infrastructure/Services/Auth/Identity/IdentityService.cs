@@ -316,4 +316,83 @@ internal sealed class IdentityService : IIdentityService
         _logger.LogInformation("Email updated successfully. UserId: {UserId}", user.Id);
         return Result.Success();
     }
+
+    public async Task<Result<string>> GeneratePasswordResetCodeAsync(string email)
+    {
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user is null)
+        {
+            return Result.Failure<string>([UserErrors.UserNotFound]);
+        }
+
+        var cooldown = TimeSpan.FromSeconds(_mailtrapSettings.EmailCooldownInSeconds);
+        if (user.LastPasswordResetEmailSentTime.HasValue &&
+            DateTime.UtcNow < user.LastPasswordResetEmailSentTime.Value.Add(cooldown))
+        {
+            var remainingSeconds = (user.LastPasswordResetEmailSentTime.Value.Add(cooldown) - DateTime.UtcNow).Seconds;
+
+            return Result.Failure<string>([UserErrors.EmailCooldown(remainingSeconds)]);
+        }
+
+        var code = Random.Shared.Next(100000, 999999).ToString();
+
+        user.PasswordResetCode = code;
+        user.PasswordResetCodeExpiresOn = DateTime.UtcNow.AddMinutes(15);
+
+        await _userManager.UpdateAsync(user);
+
+        return code;
+    }
+    
+    public async Task<Result> MarkPasswordResetEmailAsSentAsync(string email)
+    {
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user is null)
+        {
+            _logger.LogWarning("Marking password reset email as sent failed. User not found. Email: {Email}", email);
+            return Result.Failure([UserErrors.UserNotFound]);
+        }
+
+        user.LastPasswordResetEmailSentTime = DateTime.UtcNow;
+        
+        await _userManager.UpdateAsync(user);
+
+        return Result.Success();
+    }
+
+    public async Task<Result> ResetPasswordAsync(string email, string code, string newPassword)
+    {
+        var appUser = await _userManager.FindByEmailAsync(email);
+        if (appUser is null)
+        {
+            _logger.LogWarning("Password reset failed. User not found. Email: {Email}", email);
+            return Result.Failure([UserErrors.UserNotFound]);
+        }
+
+        if (appUser.PasswordResetCodeExpiresOn < DateTime.UtcNow)
+        {
+            return Result.Failure([UserErrors.PasswordResetCodeExpired]);
+        }
+
+        if (appUser.PasswordResetCode is null || appUser.PasswordResetCode != code)
+        {
+            return Result.Failure([UserErrors.InvalidPasswordResetCode]);
+        }
+
+        await _userManager.RemovePasswordAsync(appUser);
+        var resetResult = await _userManager.AddPasswordAsync(appUser, newPassword);
+        if (!resetResult.Succeeded)
+        {
+            return Result.Failure([UserErrors.PasswordResetFailed]);
+        }
+
+        appUser.PasswordResetCode = null;
+        appUser.PasswordResetCodeExpiresOn = null;
+        appUser.LastPasswordResetEmailSentTime = null;
+        
+        await _userManager.UpdateAsync(appUser);
+
+        _logger.LogInformation("Password reset successfully. Email: {Email}", email);
+        return Result.Success();
+    }
 }

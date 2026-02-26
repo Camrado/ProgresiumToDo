@@ -4,7 +4,7 @@ using ProgresiumToDo.Domain.Auth;
 
 namespace ProgresiumToDo.Infrastructure.Repositories.Auth;
 
-public class RefreshTokenRepository : IRefreshTokenRepository
+internal sealed class RefreshTokenRepository : IRefreshTokenRepository
 {
     private readonly ApplicationDbContext _dbContext;
     
@@ -24,7 +24,7 @@ public class RefreshTokenRepository : IRefreshTokenRepository
             .FirstOrDefaultAsync(rt => rt.Token == token, cancellationToken);
     }
 
-    public async Task<List<RefreshToken>> GetByUserIdAsync(Guid userId, bool trackChanges = false, CancellationToken cancellationToken = default)
+    public async Task<List<RefreshToken>> GetAllByUserIdAsync(Guid userId, bool trackChanges = false, CancellationToken cancellationToken = default)
     {
         IQueryable<RefreshToken> query = _dbContext.RefreshTokens;
 
@@ -32,6 +32,18 @@ public class RefreshTokenRepository : IRefreshTokenRepository
             query = query.AsNoTracking();
         
         return await query.Where(rt => rt.UserId == userId).ToListAsync(cancellationToken);
+    }
+
+    public async Task<List<RefreshToken>> GetAllActiveByUserIdAsync(Guid userId, bool trackChanges = false, CancellationToken cancellationToken = default)
+    {
+        IQueryable<RefreshToken> query = _dbContext.RefreshTokens;
+
+        if (!trackChanges)
+            query = query.AsNoTracking();
+        
+        return await query
+            .Where(rt => rt.UserId == userId && rt.RevokedAt == null && DateTime.UtcNow < rt.ExpiresAt)
+            .ToListAsync(cancellationToken);
     }
 
     public void Add(RefreshToken refreshToken)
