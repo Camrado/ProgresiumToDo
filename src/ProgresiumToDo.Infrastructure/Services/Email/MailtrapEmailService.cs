@@ -401,7 +401,7 @@ Message:
                             </div>
 
                             <p style=""margin: 0; font-size: 13px; color: {TextSecondary}; text-align: center;"">
-                                This code will expire in 15 minutes.
+                                This code will expire in {_mailtrapSettings.VerificationCodeLifespanInMinutes} minutes.
                             </p>
                         </td>
                     </tr>

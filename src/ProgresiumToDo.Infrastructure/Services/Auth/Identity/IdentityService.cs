@@ -395,7 +395,6 @@ internal sealed class IdentityService : IIdentityService
     
     private static string GenerateSecureCode(int length = 6)
     {
-        // The pool of allowed characters: uppercase, lowercase, and numbers
         const string allowedChars = "0123456789";
         return RandomNumberGenerator.GetString(allowedChars, length);
     }

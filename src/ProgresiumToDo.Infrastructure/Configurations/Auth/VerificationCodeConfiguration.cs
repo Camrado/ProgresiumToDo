@@ -29,7 +29,7 @@ internal sealed class VerificationCodeConfiguration : IEntityTypeConfiguration<V
 
         builder.Ignore(vc => vc.IsExpired);
         
-        builder.HasIndex(vc => new { vc.ApplicationUserId, vc.Type }).IsUnique();
+        builder.HasIndex(vc => new { vc.ApplicationUserId, vc.Type });
 
         builder.HasOne<ApplicationUser>()
             .WithMany()
