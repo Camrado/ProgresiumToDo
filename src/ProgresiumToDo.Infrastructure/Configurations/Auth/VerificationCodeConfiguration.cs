@@ -15,7 +15,7 @@ internal sealed class VerificationCodeConfiguration : IEntityTypeConfiguration<V
 
         builder.Property(vc => vc.CodeHash)
             .IsRequired()
-            .HasMaxLength(128);
+            .HasMaxLength(64); // SHA-256 hash length
 
         builder.Property(vc => vc.Type)
             .HasConversion<string>()

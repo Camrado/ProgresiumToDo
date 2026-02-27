@@ -1,7 +1,7 @@
 using dotenv.net;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using ProgresiumToDo.API.Extensions;
+using ProgresiumToDo.API.Extensions.ExceptionHandling;
+using ProgresiumToDo.API.Extensions.RateLimiting;
 using ProgresiumToDo.Application;
 using ProgresiumToDo.Infrastructure;
 using Scalar.AspNetCore;
@@ -31,7 +31,7 @@ builder.Services.AddMemoryCache();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
-builder.Services.AddContactUsRateLimiting();
+builder.Services.AddCustomRateLimitings(builder.Configuration);
 
 // var origins = (Environment.GetEnvironmentVariable("CORS_ORIGINS") ??
 //                throw new ApplicationException("CORS origins secret is missing."))

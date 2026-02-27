@@ -225,7 +225,7 @@ internal sealed class IdentityService : IIdentityService
             return Result.Failure<string>([UserErrors.EmailCooldown((int)Math.Ceiling(remainingSeconds))]);
         }
 
-        var plainCode = Random.Shared.Next(100000, 999999).ToString();
+        var plainCode = GenerateSecureCode();
         if (verificationCode is not null)
         {
             verificationCode.UpdateCode(HashVerificationCode(plainCode), DateTime.UtcNow.AddMinutes(_mailtrapSettings.VerificationCodeLifespanInMinutes));
@@ -330,7 +330,7 @@ internal sealed class IdentityService : IIdentityService
             return Result.Failure<string>([UserErrors.EmailCooldown((int)Math.Ceiling(remainingSeconds))]);
         }
 
-        var plainCode = Random.Shared.Next(100000, 999999).ToString();
+        var plainCode = GenerateSecureCode();
         if (verificationCode is not null)
         {
             verificationCode.UpdateCode(HashVerificationCode(plainCode), DateTime.UtcNow.AddMinutes(_mailtrapSettings.VerificationCodeLifespanInMinutes));
@@ -386,5 +386,12 @@ internal sealed class IdentityService : IIdentityService
     {
         var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(code));
         return Convert.ToHexString(bytes);
+    }
+    
+    private static string GenerateSecureCode(int length = 6)
+    {
+        // The pool of allowed characters: uppercase, lowercase, and numbers
+        const string allowedChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        return RandomNumberGenerator.GetString(allowedChars, length);
     }
 }

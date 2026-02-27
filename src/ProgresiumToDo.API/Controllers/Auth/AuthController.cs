@@ -1,6 +1,8 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+using ProgresiumToDo.API.Extensions.RateLimiting;
 using ProgresiumToDo.Application.Auth.Commands.LogInUser;
 using ProgresiumToDo.Application.Auth.Commands.LogOutUser;
 using ProgresiumToDo.Application.Auth.Commands.RefreshTokens;
@@ -83,6 +85,7 @@ public class AuthController : ApiControllerBase
     
     [AllowAnonymous]
     [HttpPost("reset-password")]
+    [EnableRateLimiting(RateLimitingExtensions.ResetPasswordPolicyName)]
     public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordCommand resetPasswordCommand,
         CancellationToken cancellationToken)
     {

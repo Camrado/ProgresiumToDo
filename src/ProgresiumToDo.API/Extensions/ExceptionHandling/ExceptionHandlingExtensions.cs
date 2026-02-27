@@ -1,9 +1,9 @@
 ﻿using System.Text.Json;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using ProgresiumToDo.API.ExceptionHandlers;
-using FluentValidation;
 
-namespace ProgresiumToDo.API.Extensions;
+namespace ProgresiumToDo.API.Extensions.ExceptionHandling;
 
 public static class ExceptionHandlingExtensions
 {
