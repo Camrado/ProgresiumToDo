@@ -23,7 +23,7 @@ internal sealed class RegisterUserCommandValidator : AbstractValidator<RegisterU
         
         RuleFor(ruc => ruc.Password)
             .NotEmpty()
-            .WithMessage("New password is required")
+            .WithMessage("Password is required")
             .MinimumLength(8)
             .WithMessage("Password must be at least 8 characters long.")
             .Matches("[A-Z]")

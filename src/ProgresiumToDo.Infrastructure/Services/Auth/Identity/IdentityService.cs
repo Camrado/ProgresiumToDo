@@ -354,7 +354,7 @@ internal sealed class IdentityService : IIdentityService
         if (appUser is null)
         {
             _logger.LogWarning("Password reset failed. User not found. Email: {Email}", email);
-            return Result.Failure([UserErrors.UserNotFound]);
+            return Result.Failure([UserErrors.PasswordResetFailed]);
         }
 
         var verificationCode = await _verificationCodeRepository.GetByUserIdAndTypeAsync(
@@ -371,7 +371,12 @@ internal sealed class IdentityService : IIdentityService
         }
         _verificationCodeRepository.Remove(verificationCode);
 
-        await _userManager.RemovePasswordAsync(appUser);
+        var removePasswordAsync = await _userManager.RemovePasswordAsync(appUser);
+        if (!removePasswordAsync.Succeeded)
+        {
+            return Result.Failure([UserErrors.PasswordResetFailed]);
+        }
+        
         var resetResult = await _userManager.AddPasswordAsync(appUser, newPassword);
         if (!resetResult.Succeeded)
         {
@@ -391,7 +396,7 @@ internal sealed class IdentityService : IIdentityService
     private static string GenerateSecureCode(int length = 6)
     {
         // The pool of allowed characters: uppercase, lowercase, and numbers
-        const string allowedChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        const string allowedChars = "0123456789";
         return RandomNumberGenerator.GetString(allowedChars, length);
     }
 }
