@@ -1,5 +1,6 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
@@ -24,11 +25,11 @@ internal sealed class IdentityService : IIdentityService
     private readonly IConfiguration _configuration;
     private readonly IRefreshTokenRepository _refreshTokenRepository;
     private readonly IUserRepository _userRepository;
+    private readonly IVerificationCodeRepository _verificationCodeRepository;
     private readonly ILogger<IdentityService> _logger;
     private readonly string _jwtSecret;
     private readonly int _jwtLifespan;
     private readonly int _refreshTokenLifespan;
-    private readonly string _baseUrl;
     private readonly MailtrapSettings _mailtrapSettings;
     
     public IdentityService(
@@ -37,6 +38,7 @@ internal sealed class IdentityService : IIdentityService
         IConfiguration configuration,
         IRefreshTokenRepository refreshTokenRepository,
         IUserRepository userRepository,
+        IVerificationCodeRepository verificationCodeRepository,
         ILogger<IdentityService> logger,
         IOptions<MailtrapSettings> mailtrapOptions)
     {
@@ -45,6 +47,7 @@ internal sealed class IdentityService : IIdentityService
         _configuration = configuration;
         _refreshTokenRepository = refreshTokenRepository;
         _userRepository = userRepository;
+        _verificationCodeRepository = verificationCodeRepository;
         _logger = logger;
         _mailtrapSettings = mailtrapOptions.Value;
         _jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET") ??
@@ -53,8 +56,6 @@ internal sealed class IdentityService : IIdentityService
                                  throw new ApplicationException("Jwt token lifetime is missing."));
         _refreshTokenLifespan = int.Parse(Environment.GetEnvironmentVariable("REFRESH_TOKEN_LIFETIME_IN_DAYS") ??
                                          throw new ApplicationException("Refresh token lifetime is missing."));
-        _baseUrl = Environment.GetEnvironmentVariable("BASE_URL") ??
-                   throw new ApplicationException("Base url is missing.");
     }
     
     public async Task<Result<Guid>> RegisterUserAsync(string email, string? password = null)
@@ -178,19 +179,21 @@ internal sealed class IdentityService : IIdentityService
             return Result.Failure<bool>([UserErrors.EmailAlreadyVerified]);
         }
 
-        if (appUser.EmailVerificationCodeExpiresOn < DateTime.UtcNow)
+        var verificationCode = await _verificationCodeRepository.GetByUserIdAndTypeAsync(
+            appUser.Id, VerificationCodeType.EmailVerification);
+        if (verificationCode is null || verificationCode.IsExpired)
         {
             return Result.Failure([UserErrors.EmailVerificationCodeExpired]);
         }
-        if (appUser.EmailVerificationCode is null || appUser.EmailVerificationCode != code)
+
+        var hashedInput = HashVerificationCode(code);
+        if (verificationCode.CodeHash != hashedInput)
         {
             return Result.Failure([UserErrors.InvalidEmailVerificationCode]);
         }
-        
+        _verificationCodeRepository.Remove(verificationCode);
+
         appUser.EmailConfirmed = true;
-        appUser.EmailVerificationCode = null;
-        appUser.EmailVerificationCodeExpiresOn = null;
-        appUser.LastVerificationEmailSentTime = null;
         var updateResult = await _userManager.UpdateAsync(appUser);
         if (!updateResult.Succeeded)
         {
@@ -205,45 +208,31 @@ internal sealed class IdentityService : IIdentityService
     
     public async Task<Result<string>> GenerateEmailVerificationCodeAsync(string email)
     {
-        var user = await _userManager.FindByEmailAsync(email);
-        if (user is null)
+        var appUser = await _userManager.FindByEmailAsync(email);
+        if (appUser is null)
         {
             return Result.Failure<string>([UserErrors.UserNotFound]);
         }
-        
+
+        var prevVerificationCode = await _verificationCodeRepository
+            .GetByUserIdAndTypeAsync(appUser.Id, VerificationCodeType.EmailVerification);
+
         var cooldown = TimeSpan.FromSeconds(_mailtrapSettings.EmailCooldownInSeconds);
-        if (user.LastVerificationEmailSentTime.HasValue && 
-            DateTime.UtcNow < user.LastVerificationEmailSentTime.Value.Add(cooldown))
+        if (prevVerificationCode?.LastSentAt is not null &&
+            DateTime.UtcNow < prevVerificationCode.LastSentAt.Value.Add(cooldown))
         {
-            var remainingSeconds = (user.LastVerificationEmailSentTime.Value.Add(cooldown) - DateTime.UtcNow).Seconds;
-        
-            return Result.Failure<string>([UserErrors.EmailCooldown(remainingSeconds)]);
+            var remainingSeconds = (prevVerificationCode.LastSentAt.Value.Add(cooldown) - DateTime.UtcNow).TotalSeconds;
+            return Result.Failure<string>([UserErrors.EmailCooldown((int)Math.Ceiling(remainingSeconds))]);
         }
 
-        var code = Random.Shared.Next(100000, 999999).ToString();
+        var plainCode = GenerateSecureCode();
+        await _verificationCodeRepository.AddOrUpdateAsync(
+            appUser.Id,
+            VerificationCodeType.EmailVerification,
+            HashVerificationCode(plainCode),
+            DateTime.UtcNow.AddMinutes(_mailtrapSettings.VerificationCodeLifespanInMinutes));
         
-        user.EmailVerificationCode = code;
-        user.EmailVerificationCodeExpiresOn = DateTime.UtcNow.AddMinutes(_mailtrapSettings.VerificationCodeLifespanInMinutes);
-        
-        await _userManager.UpdateAsync(user);
-
-        return code;
-    }
-
-    public async Task<Result> MarkVerificationEmailAsSentAsync(string email)
-    {
-        var user = await _userManager.FindByEmailAsync(email);
-        if (user is null)
-        {
-            _logger.LogWarning("Marking verification email as sent failed. User not found. Email: {Email}", email);
-            return Result.Failure([UserErrors.UserNotFound]);
-        }
-
-        user.LastVerificationEmailSentTime = DateTime.UtcNow;
-        
-        await _userManager.UpdateAsync(user);
-
-        return Result.Success();
+        return plainCode;
     }
 
     public async Task<Result> DeleteAccountAsync(string email)
@@ -307,13 +296,90 @@ internal sealed class IdentityService : IIdentityService
         user.Email = newEmail;
         user.UserName = $"{newEmail}_{Guid.NewGuid()}";
         user.EmailConfirmed = false;
-        user.LastVerificationEmailSentTime = null;
-        user.EmailVerificationCode = null;
-        user.EmailVerificationCodeExpiresOn = null;
 
         await _userManager.UpdateAsync(user);
 
         _logger.LogInformation("Email updated successfully. UserId: {UserId}", user.Id);
         return Result.Success();
+    }
+
+    public async Task<Result<string>> GeneratePasswordResetCodeAsync(string email)
+    {
+        var appUser = await _userManager.FindByEmailAsync(email);
+        if (appUser is null)
+        {
+            return Result.Failure<string>([UserErrors.UserNotFound]);
+        }
+
+        var prevVerificationCode = await _verificationCodeRepository
+            .GetByUserIdAndTypeAsync(appUser.Id, VerificationCodeType.PasswordReset);
+
+        var cooldown = TimeSpan.FromSeconds(_mailtrapSettings.EmailCooldownInSeconds);
+        if (prevVerificationCode?.LastSentAt is not null &&
+            DateTime.UtcNow < prevVerificationCode.LastSentAt.Value.Add(cooldown))
+        {
+            var remainingSeconds = (prevVerificationCode.LastSentAt.Value.Add(cooldown) - DateTime.UtcNow).TotalSeconds;
+            return Result.Failure<string>([UserErrors.EmailCooldown((int)Math.Ceiling(remainingSeconds))]);
+        }
+
+        var plainCode = GenerateSecureCode();
+        await _verificationCodeRepository.AddOrUpdateAsync(
+            appUser.Id,
+            VerificationCodeType.PasswordReset,
+            HashVerificationCode(plainCode),
+            DateTime.UtcNow.AddMinutes(_mailtrapSettings.VerificationCodeLifespanInMinutes));
+
+        return plainCode;
+    }
+
+    public async Task<Result> ResetPasswordAsync(string email, string code, string newPassword)
+    {
+        var appUser = await _userManager.FindByEmailAsync(email);
+        if (appUser is null)
+        {
+            _logger.LogWarning("Password reset failed. User not found. Email: {Email}", email);
+            return Result.Failure([UserErrors.PasswordResetFailed]);
+        }
+
+        var verificationCode = await _verificationCodeRepository.GetByUserIdAndTypeAsync(
+            appUser.Id, VerificationCodeType.PasswordReset);
+        if (verificationCode is null || verificationCode.IsExpired)
+        {
+            return Result.Failure([UserErrors.PasswordResetCodeExpired]);
+        }
+
+        var hashedInput = HashVerificationCode(code);
+        if (verificationCode.CodeHash != hashedInput)
+        {
+            return Result.Failure([UserErrors.InvalidPasswordResetCode]);
+        }
+        _verificationCodeRepository.Remove(verificationCode);
+
+        var removePasswordAsync = await _userManager.RemovePasswordAsync(appUser);
+        if (!removePasswordAsync.Succeeded)
+        {
+            return Result.Failure([UserErrors.PasswordResetFailed]);
+        }
+        
+        var resetResult = await _userManager.AddPasswordAsync(appUser, newPassword);
+        if (!resetResult.Succeeded)
+        {
+            return Result.Failure([UserErrors.PasswordResetFailed]);
+        }
+
+        _logger.LogInformation("Password reset successfully. Email: {Email}", email);
+        return Result.Success();
+    }
+
+    private static string HashVerificationCode(string code)
+    {
+        var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(code));
+        return Convert.ToHexString(bytes);
+    }
+    
+    private static string GenerateSecureCode(int length = 6)
+    {
+        const string allowedChars = "0123456789";
+        return RandomNumberGenerator.GetString(allowedChars, length);
     }
 }

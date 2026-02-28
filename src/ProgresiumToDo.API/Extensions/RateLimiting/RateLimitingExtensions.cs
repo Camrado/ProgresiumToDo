@@ -2,25 +2,42 @@
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ProgresiumToDo.API.Extensions;
+namespace ProgresiumToDo.API.Extensions.RateLimiting;
 
 public static class RateLimitingExtensions
 {
     public const string ContactUsPolicyName = "ContactUsPolicy";
+    public const string ResetPasswordPolicyName = "ResetPasswordPolicy";
+    
+    public static IServiceCollection AddCustomRateLimitings(this IServiceCollection services, IConfiguration configuration)
+    {
+        var contactUsSettings = configuration
+            .GetSection("RateLimiting:ContactUsPolicy")
+            .Get<RateLimitSettings>() ?? throw new InvalidOperationException("ContactUsPolicy settings are missing in configuration.");
+        
+        var resetPasswordSettings = configuration
+            .GetSection("RateLimiting:ResetPasswordPolicy")
+            .Get<RateLimitSettings>() ?? throw new InvalidOperationException("ResetPasswordPolicy settings are missing in configuration.");
+        
+        services.AddPolicyRateLimiting(ContactUsPolicyName, contactUsSettings.PermitLimit, TimeSpan.FromMinutes(contactUsSettings.WindowInMinutes));
+        services.AddPolicyRateLimiting(ResetPasswordPolicyName, resetPasswordSettings.PermitLimit, TimeSpan.FromMinutes(resetPasswordSettings.WindowInMinutes));
 
-    public static IServiceCollection AddContactUsRateLimiting(this IServiceCollection services)
+        return services;
+    }
+
+    private static IServiceCollection AddPolicyRateLimiting(this IServiceCollection services, string policyName, int permitLimit, TimeSpan window)
     {
         services.AddRateLimiter(options =>
         {
-            options.AddPolicy(ContactUsPolicyName, context =>
+            options.AddPolicy(policyName, context =>
             {
                 var remoteIp = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
 
                 return RateLimitPartition.GetFixedWindowLimiter(remoteIp, _ =>
                     new FixedWindowRateLimiterOptions
                     {
-                        PermitLimit = 1,
-                        Window = TimeSpan.FromMinutes(5),
+                        PermitLimit = permitLimit,
+                        Window = window,
                         QueueLimit = 0
                     });
             });

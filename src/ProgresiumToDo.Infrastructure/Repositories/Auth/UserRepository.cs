@@ -5,7 +5,7 @@ using ProgresiumToDo.Domain.Auth;
 
 namespace ProgresiumToDo.Infrastructure.Repositories.Auth;
 
-public class UserRepository : Repository<User>, IUserRepository
+internal sealed class UserRepository : Repository<User>, IUserRepository
 {
     private readonly ILogger<UserRepository> _logger;
     

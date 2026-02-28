@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ProgresiumToDo.Infrastructure;
@@ -11,9 +12,11 @@ using ProgresiumToDo.Infrastructure;
 namespace ProgresiumToDo.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260226070051_AddedPasswordResetColumnsToAspNetUser")]
+    partial class AddedPasswordResetColumnsToAspNetUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -304,50 +307,6 @@ namespace ProgresiumToDo.Infrastructure.Migrations
                         .HasFilter("\"deleted_at\" IS NULL");
 
                     b.ToTable("users", (string)null);
-                });
-
-            modelBuilder.Entity("ProgresiumToDo.Domain.Auth.VerificationCode", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<Guid>("ApplicationUserId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("application_user_id");
-
-                    b.Property<string>("CodeHash")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("character varying(64)")
-                        .HasColumnName("code_hash");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<DateTime>("ExpiresOn")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("expires_on");
-
-                    b.Property<DateTime?>("LastSentAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("last_sent_at");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("type");
-
-                    b.HasKey("Id")
-                        .HasName("pk_verification_codes");
-
-                    b.HasIndex("ApplicationUserId", "Type")
-                        .IsUnique()
-                        .HasDatabaseName("ix_verification_codes_application_user_id_type");
-
-                    b.ToTable("verification_codes", (string)null);
                 });
 
             modelBuilder.Entity("ProgresiumToDo.Domain.Billing.Plan", b =>
@@ -931,6 +890,22 @@ namespace ProgresiumToDo.Infrastructure.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("email_confirmed");
 
+                    b.Property<string>("EmailVerificationCode")
+                        .HasColumnType("text")
+                        .HasColumnName("email_verification_code");
+
+                    b.Property<DateTime?>("EmailVerificationCodeExpiresOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("email_verification_code_expires_on");
+
+                    b.Property<DateTime?>("LastPasswordResetEmailSentTime")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_password_reset_email_sent_time");
+
+                    b.Property<DateTime?>("LastVerificationEmailSentTime")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_verification_email_sent_time");
+
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("boolean")
                         .HasColumnName("lockout_enabled");
@@ -952,6 +927,14 @@ namespace ProgresiumToDo.Infrastructure.Migrations
                     b.Property<string>("PasswordHash")
                         .HasColumnType("text")
                         .HasColumnName("password_hash");
+
+                    b.Property<string>("PasswordResetCode")
+                        .HasColumnType("text")
+                        .HasColumnName("password_reset_code");
+
+                    b.Property<DateTime?>("PasswordResetCodeExpiresOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("password_reset_code_expires_on");
 
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("text")
@@ -1090,16 +1073,6 @@ namespace ProgresiumToDo.Infrastructure.Migrations
                         .HasForeignKey("ProgresiumToDo.Domain.Auth.User", "ApplicationUserId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .HasConstraintName("fk_users_asp_net_users_application_user_id");
-                });
-
-            modelBuilder.Entity("ProgresiumToDo.Domain.Auth.VerificationCode", b =>
-                {
-                    b.HasOne("ProgresiumToDo.Infrastructure.Services.Auth.Identity.ApplicationUser", null)
-                        .WithMany()
-                        .HasForeignKey("ApplicationUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_verification_codes_asp_net_users_application_user_id");
                 });
 
             modelBuilder.Entity("ProgresiumToDo.Domain.Billing.PlanPricing", b =>

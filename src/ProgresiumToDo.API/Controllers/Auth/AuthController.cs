@@ -1,10 +1,14 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+using ProgresiumToDo.API.Extensions.RateLimiting;
 using ProgresiumToDo.Application.Auth.Commands.LogInUser;
 using ProgresiumToDo.Application.Auth.Commands.LogOutUser;
 using ProgresiumToDo.Application.Auth.Commands.RefreshTokens;
 using ProgresiumToDo.Application.Auth.Commands.RegisterUser;
+using ProgresiumToDo.Application.Auth.Commands.ResetPassword;
+using ProgresiumToDo.Application.Auth.Commands.SendForgotPasswordEmail;
 using ProgresiumToDo.Application.Auth.Commands.SendVerificationEmail;
 using ProgresiumToDo.Application.Auth.Commands.VerifyEmail;
 
@@ -67,6 +71,25 @@ public class AuthController : ApiControllerBase
     public async Task<IActionResult> SendVerificationEmail(CancellationToken cancellationToken)
     {
         var result = await Mediator.Send(new SendVerificationEmailCommand(), cancellationToken);
+        return FromResult(result);
+    }
+    
+    [AllowAnonymous]
+    [HttpPost("forgot-password")]
+    public async Task<IActionResult> ForgotPassword([FromBody] SendForgotPasswordEmailCommand sendForgotPasswordEmailCommand,
+        CancellationToken cancellationToken)
+    {
+        var result = await Mediator.Send(sendForgotPasswordEmailCommand, cancellationToken);
+        return FromResult(result);
+    }
+    
+    [AllowAnonymous]
+    [HttpPost("reset-password")]
+    [EnableRateLimiting(RateLimitingExtensions.ResetPasswordPolicyName)]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordCommand resetPasswordCommand,
+        CancellationToken cancellationToken)
+    {
+        var result = await Mediator.Send(resetPasswordCommand, cancellationToken);
         return FromResult(result);
     }
 }

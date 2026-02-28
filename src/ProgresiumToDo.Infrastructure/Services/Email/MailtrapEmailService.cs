@@ -62,7 +62,7 @@ internal sealed class MailtrapEmailService : IEmailService
 
         var mail = new MailDto(
             [to],
-            $"Email Verification: {verificationCode}",
+            "Verify Your Email",
             "Email Verification",
             htmlBody,
             null);
@@ -109,6 +109,20 @@ Message:
             htmlBody,
             null);
         
+        return await SendEmailAsync(mail, cancellationToken);
+    }
+    
+    public async Task<Result> SendPasswordResetEmailAsync(string to, string resetCode, CancellationToken cancellationToken = default)
+    {
+        var htmlBody = BuildPasswordResetEmailHtmlBody(resetCode);
+
+        var mail = new MailDto(
+            [to],
+            "Reset Your Password",
+            "Password Reset",
+            htmlBody,
+            null);
+
         return await SendEmailAsync(mail, cancellationToken);
     }
 
@@ -318,7 +332,106 @@ Message:
 </body>
 </html>";
     }
-    
+
+    private string BuildPasswordResetEmailHtmlBody(string code)
+    {
+        const string BackgroundColor = "#f0f0f4";
+        const string CardColor = "#ffffff";
+        const string TextPrimary = "#15141A";
+        const string TextSecondary = "#5B5B66";
+        const string BrandColor = "#0060DF";
+
+        return $@"
+<!DOCTYPE html>
+<html lang=""en"">
+<head>
+    <meta charset=""UTF-8"">
+    <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"">
+    <title>Reset Password</title>
+    <style>
+        /* Reset & Basics */
+        body, table, td, a {{ -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }}
+        table, td {{ mso-table-lspace: 0pt; mso-table-rspace: 0pt; }}
+        img {{ -ms-interpolation-mode: bicubic; }}
+        
+        /* Typography */
+        body {{
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            width: 100% !important;
+            line-height: 1.5;
+            color: {TextPrimary};
+        }}
+        
+        /* Mobile Responsive */
+        @media screen and (max-width: 600px) {{
+            .email-container {{ width: 100% !important; }}
+            .content-padding {{ padding: 20px !important; }}
+            .code-block {{ font-size: 28px !important; letter-spacing: 4px !important; padding: 15px !important; }}
+        }}
+    </style>
+</head>
+<body style=""margin: 0; padding: 0; background-color: {BackgroundColor};"">
+    <table border=""0"" cellpadding=""0"" cellspacing=""0"" width=""100%"" style=""background-color: {BackgroundColor};"">
+        <tr>
+            <td align=""center"" style=""padding: 40px 10px;"">
+                
+                <table class=""email-container"" border=""0"" cellpadding=""0"" cellspacing=""0"" width=""480"" style=""background-color: {CardColor}; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow: hidden;"">
+                    
+                    <tr>
+                        <td align=""center"" style=""padding: 30px 0 0 0;"">
+                            <h2 style=""margin: 0; font-size: 24px; font-weight: 800; color: {BrandColor}; letter-spacing: -0.5px;"">Progresium</h2>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td class=""content-padding"" style=""padding: 30px 40px;"">
+                            
+                            <h1 style=""margin: 0 0 20px 0; font-size: 20px; font-weight: 700; color: {TextPrimary}; text-align: center;"">Reset your password</h1>
+                            
+                            <p style=""margin: 0 0 24px 0; font-size: 15px; line-height: 24px; color: {TextSecondary}; text-align: center;"">
+                                We received a request to reset your password. Use the code below to set a new password for your account.
+                            </p>
+
+                            <div style=""background-color: #f0f0f4; border-radius: 6px; padding: 20px; text-align: center; margin-bottom: 24px;"">
+                                <span class=""code-block"" style=""font-family: 'Segoe UI'; font-size: 32px; font-weight: 700; color: {TextPrimary}; letter-spacing: 6px;"">
+                                    {code}
+                                </span>
+                            </div>
+
+                            <p style=""margin: 0; font-size: 13px; color: {TextSecondary}; text-align: center;"">
+                                This code will expire in {_mailtrapSettings.VerificationCodeLifespanInMinutes} minutes.
+                            </p>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td style=""background-color: #f9f9fb; padding: 20px; text-align: center; border-top: 1px solid #eeeeee;"">
+                            <p style=""margin: 0; font-size: 12px; color: #999999;"">
+                                If you didn't request a password reset, you can safely ignore this email.
+                            </p>
+                        </td>
+                    </tr>
+
+                </table>
+                
+                <table border=""0"" cellpadding=""0"" cellspacing=""0"" width=""100%"">
+                    <tr>
+                        <td align=""center"" style=""padding-top: 20px; color: #999999; font-size: 12px;"">
+                            <p style=""margin: 0;"">&copy; {DateTime.Now.Year} Progresium. All rights reserved.</p> 
+                        </td>
+                    </tr>
+                </table>
+
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>";
+    }
+
     private static string Sanitize(string input)
     {
         if (string.IsNullOrWhiteSpace(input)) return string.Empty;

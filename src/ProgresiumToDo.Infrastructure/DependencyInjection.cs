@@ -12,6 +12,7 @@ using ProgresiumToDo.Application.Abstractions.Auth.Entitlement;
 using ProgresiumToDo.Application.Abstractions.Auth.Identity;
 using ProgresiumToDo.Application.Abstractions.Auth.OAuth;
 using ProgresiumToDo.Application.Abstractions.Auth.Onboarding;
+using ProgresiumToDo.Application.Abstractions.Auth.Tokens;
 using ProgresiumToDo.Application.Abstractions.Behaviors.Contracts;
 using ProgresiumToDo.Application.Abstractions.Billing;
 using ProgresiumToDo.Application.Abstractions.EmailService;
@@ -36,6 +37,7 @@ using ProgresiumToDo.Infrastructure.Services.Auth.Entitlement;
 using ProgresiumToDo.Infrastructure.Services.Auth.Identity;
 using ProgresiumToDo.Infrastructure.Services.Auth.OAuth;
 using ProgresiumToDo.Infrastructure.Services.Auth.Onboarding;
+using ProgresiumToDo.Infrastructure.Services.Auth.Tokens;
 using ProgresiumToDo.Infrastructure.Services.Billing;
 using ProgresiumToDo.Infrastructure.Services.Email;
 using ProgresiumToDo.Infrastructure.Services.Tags;
@@ -98,6 +100,7 @@ public static class DependencyInjection
                 options.Password.RequireDigit = true;
                 options.Password.RequireLowercase = true;
                 options.Password.RequireUppercase = true;
+                options.Password.RequireNonAlphanumeric = false;
                 options.User.RequireUniqueEmail = false;
             })
             .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -145,6 +148,8 @@ public static class DependencyInjection
         services.AddScoped<IUserContext, UserContext>();
 
         services.AddTransient<IOAuthService, OAuthService>();
+
+        services.AddTransient<IRefreshTokenService, RefreshTokenService>();
     }
     
     private static void AddAuthorization(IServiceCollection services) {
@@ -185,6 +190,8 @@ public static class DependencyInjection
         services.AddScoped<IFeatureUsageRepository, FeatureUsageRepository>();
 
         services.AddScoped<IWaitlistEntryRepository, WaitlistEntryRepository>();
+
+        services.AddScoped<IVerificationCodeRepository, VerificationCodeRepository>();
     }
     
     private static void AddEmailService(IServiceCollection services, IConfiguration configuration)

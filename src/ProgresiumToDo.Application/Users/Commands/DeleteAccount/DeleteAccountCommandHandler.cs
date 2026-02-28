@@ -33,7 +33,7 @@ internal sealed class DeleteAccountCommandHandler : ICommandHandler<DeleteAccoun
         
         _userRepository.Delete(user);
         
-        var refreshTokens = await _refreshTokenRepository.GetByUserIdAsync(_userContext.UserId, trackChanges: true, cancellationToken);
+        var refreshTokens = await _refreshTokenRepository.GetAllByUserIdAsync(_userContext.UserId, trackChanges: true, cancellationToken);
         foreach (var token in refreshTokens)
         {
             token.Revoke();

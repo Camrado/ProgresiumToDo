@@ -31,4 +31,16 @@ public static class UserErrors
     public static Error EmailCooldown(int remainingSeconds) => new(
         "User.EmailCooldown",
         $"Please wait {remainingSeconds} seconds before requesting a new code.");
+    
+    public static Error InvalidPasswordResetCode => new(
+        "User.InvalidPasswordResetCode",
+        "The provided password reset code is invalid.");
+    
+    public static Error PasswordResetCodeExpired => new(
+        "User.PasswordResetCodeExpired",
+        "The password reset code has expired.");
+    
+    public static Error PasswordResetFailed => new(
+        "User.PasswordResetFailed",
+        "Password reset failed.");
 }

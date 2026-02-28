@@ -51,8 +51,6 @@ internal sealed class SendVerificationEmailCommandHandler :
             return Result.Failure<SendVerificationEmailCommandResponse>(result.Errors);
         }
         
-        await _identityService.MarkVerificationEmailAsSentAsync(user.Email);
-
         return new SendVerificationEmailCommandResponse("Verification email sent successfully.");
     }
 }

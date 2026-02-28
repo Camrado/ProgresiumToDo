@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
-using ProgresiumToDo.API.Extensions;
+using ProgresiumToDo.API.Extensions.RateLimiting;
 using ProgresiumToDo.Application.Support.Commands.ContactUs;
 
 namespace ProgresiumToDo.API.Controllers.Support;

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ProgresiumToDo.Infrastructure;
@@ -11,9 +12,11 @@ using ProgresiumToDo.Infrastructure;
 namespace ProgresiumToDo.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260227114845_RemovedUniqueIndexButLeftIndex")]
+    partial class RemovedUniqueIndexButLeftIndex
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -344,7 +347,6 @@ namespace ProgresiumToDo.Infrastructure.Migrations
                         .HasName("pk_verification_codes");
 
                     b.HasIndex("ApplicationUserId", "Type")
-                        .IsUnique()
                         .HasDatabaseName("ix_verification_codes_application_user_id_type");
 
                     b.ToTable("verification_codes", (string)null);

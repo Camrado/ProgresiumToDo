@@ -16,8 +16,6 @@ public interface IIdentityService
     Task<Result> VerifyEmailAsync(User user, string code);
 
     Task<Result<string>> GenerateEmailVerificationCodeAsync(string email);
-
-    Task<Result> MarkVerificationEmailAsSentAsync(string email);
     
     Task<Result> DeleteAccountAsync(string email);
 
@@ -25,4 +23,8 @@ public interface IIdentityService
         CancellationToken cancellationToken = default);
     
     Task<Result> UpdateEmailAsync(string currentEmail, string newEmail);
+    
+    Task<Result<string>> GeneratePasswordResetCodeAsync(string email);
+    
+    Task<Result> ResetPasswordAsync(string email, string code, string newPassword);
 }

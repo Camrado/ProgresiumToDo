@@ -21,6 +21,16 @@ internal sealed class RegisterUserCommandValidator : AbstractValidator<RegisterU
             })
             .WithMessage("An account with this email already exists.");
         
-        RuleFor(ruc => ruc.Password).NotEmpty(); // The password complexity check is done in the identity service
+        RuleFor(ruc => ruc.Password)
+            .NotEmpty()
+            .WithMessage("Password is required")
+            .MinimumLength(8)
+            .WithMessage("Password must be at least 8 characters long.")
+            .Matches("[A-Z]")
+            .WithMessage("Password must contain at least one uppercase letter.")
+            .Matches("[a-z]")
+            .WithMessage("Password must contain at least one lowercase letter.")
+            .Matches("[0-9]")
+            .WithMessage("Password must contain at least one number.");
     }
 }
