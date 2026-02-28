@@ -1,6 +1,5 @@
 using dotenv.net;
 using Hangfire;
-using Hangfire.PostgreSql;
 using Microsoft.EntityFrameworkCore;
 using ProgresiumToDo.API.Extensions.ExceptionHandling;
 using ProgresiumToDo.API.Filters;
