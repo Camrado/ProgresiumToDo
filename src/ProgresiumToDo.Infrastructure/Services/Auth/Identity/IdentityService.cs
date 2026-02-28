@@ -214,31 +214,23 @@ internal sealed class IdentityService : IIdentityService
             return Result.Failure<string>([UserErrors.UserNotFound]);
         }
 
-        var verificationCode = await _verificationCodeRepository
+        var prevVerificationCode = await _verificationCodeRepository
             .GetByUserIdAndTypeAsync(appUser.Id, VerificationCodeType.EmailVerification);
 
         var cooldown = TimeSpan.FromSeconds(_mailtrapSettings.EmailCooldownInSeconds);
-        if (verificationCode?.LastSentAt is not null &&
-            DateTime.UtcNow < verificationCode.LastSentAt.Value.Add(cooldown))
+        if (prevVerificationCode?.LastSentAt is not null &&
+            DateTime.UtcNow < prevVerificationCode.LastSentAt.Value.Add(cooldown))
         {
-            var remainingSeconds = (verificationCode.LastSentAt.Value.Add(cooldown) - DateTime.UtcNow).TotalSeconds;
+            var remainingSeconds = (prevVerificationCode.LastSentAt.Value.Add(cooldown) - DateTime.UtcNow).TotalSeconds;
             return Result.Failure<string>([UserErrors.EmailCooldown((int)Math.Ceiling(remainingSeconds))]);
         }
 
         var plainCode = GenerateSecureCode();
-        if (verificationCode is not null)
-        {
-            verificationCode.UpdateCode(HashVerificationCode(plainCode), DateTime.UtcNow.AddMinutes(_mailtrapSettings.VerificationCodeLifespanInMinutes));
-        }
-        else
-        {
-            var newVerificationCode = VerificationCode.CreateEmailVerificationCode(
-                appUser.Id, 
-                HashVerificationCode(plainCode), 
-                DateTime.UtcNow.AddMinutes(_mailtrapSettings.VerificationCodeLifespanInMinutes));
-            
-            _verificationCodeRepository.Add(newVerificationCode);
-        }
+        await _verificationCodeRepository.AddOrUpdateAsync(
+            appUser.Id,
+            VerificationCodeType.EmailVerification,
+            HashVerificationCode(plainCode),
+            DateTime.UtcNow.AddMinutes(_mailtrapSettings.VerificationCodeLifespanInMinutes));
         
         return plainCode;
     }
@@ -319,31 +311,23 @@ internal sealed class IdentityService : IIdentityService
             return Result.Failure<string>([UserErrors.UserNotFound]);
         }
 
-        var verificationCode = await _verificationCodeRepository
+        var prevVerificationCode = await _verificationCodeRepository
             .GetByUserIdAndTypeAsync(appUser.Id, VerificationCodeType.PasswordReset);
 
         var cooldown = TimeSpan.FromSeconds(_mailtrapSettings.EmailCooldownInSeconds);
-        if (verificationCode?.LastSentAt is not null &&
-            DateTime.UtcNow < verificationCode.LastSentAt.Value.Add(cooldown))
+        if (prevVerificationCode?.LastSentAt is not null &&
+            DateTime.UtcNow < prevVerificationCode.LastSentAt.Value.Add(cooldown))
         {
-            var remainingSeconds = (verificationCode.LastSentAt.Value.Add(cooldown) - DateTime.UtcNow).TotalSeconds;
+            var remainingSeconds = (prevVerificationCode.LastSentAt.Value.Add(cooldown) - DateTime.UtcNow).TotalSeconds;
             return Result.Failure<string>([UserErrors.EmailCooldown((int)Math.Ceiling(remainingSeconds))]);
         }
 
         var plainCode = GenerateSecureCode();
-        if (verificationCode is not null)
-        {
-            verificationCode.UpdateCode(HashVerificationCode(plainCode), DateTime.UtcNow.AddMinutes(_mailtrapSettings.VerificationCodeLifespanInMinutes));
-        }
-        else
-        {
-            var newVerificationCode = VerificationCode.CreatePasswordResetCode(
-                appUser.Id, 
-                HashVerificationCode(plainCode), 
-                DateTime.UtcNow.AddMinutes(_mailtrapSettings.VerificationCodeLifespanInMinutes));
-            
-            _verificationCodeRepository.Add(newVerificationCode);
-        }
+        await _verificationCodeRepository.AddOrUpdateAsync(
+            appUser.Id,
+            VerificationCodeType.PasswordReset,
+            HashVerificationCode(plainCode),
+            DateTime.UtcNow.AddMinutes(_mailtrapSettings.VerificationCodeLifespanInMinutes));
 
         return plainCode;
     }

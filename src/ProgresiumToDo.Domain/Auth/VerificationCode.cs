@@ -6,17 +6,13 @@ public class VerificationCode
     public Guid ApplicationUserId { get; private set; }
 
     public VerificationCodeType Type { get; private set; }
-    public string CodeHash { get; private set; } = string.Empty;
+    public string CodeHash { get; private set; }
 
     public DateTime ExpiresOn { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime? LastSentAt { get; private set; }
 
     public bool IsExpired => ExpiresOn <= DateTime.UtcNow;
-
-    private VerificationCode()
-    {
-    }
 
     private VerificationCode(Guid applicationUserId, VerificationCodeType type, string codeHash, DateTime expiresOn)
     {
