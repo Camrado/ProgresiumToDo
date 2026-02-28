@@ -29,9 +29,13 @@ internal sealed class JoinWaitlistCommandHandler : ICommandHandler<JoinWaitlistC
             var waitlistEntry = WaitlistEntry.Create(request.Email);
             _waitlistEntryRepository.Add(waitlistEntry);
 
-            await _emailService.SendWaitlistWelcomeEmailAsync(request.Email, cancellationToken);
-            
             await _unitOfWork.SaveChangesAsync(cancellationToken);
+            
+            var emailResult = await _emailService.SendWaitlistWelcomeEmailAsync(request.Email, cancellationToken);
+            if (emailResult.IsFailure)
+            {
+                return Result.Failure<JoinWaitlistCommandResponse>(emailResult.Errors);
+            }
         }
         
         return new JoinWaitlistCommandResponse("You've successfully joined the waitlist!");

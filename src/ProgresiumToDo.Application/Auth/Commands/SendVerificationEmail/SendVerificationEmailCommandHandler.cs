@@ -46,15 +46,14 @@ internal sealed class SendVerificationEmailCommandHandler :
         {
             return Result.Failure<SendVerificationEmailCommandResponse>(verificationCode.Errors);
         }
+        
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        var result = await _emailService.SendVerificationEmailAsync(
-            user.Email, verificationCode.Value, cancellationToken);
+        var result = await _emailService.SendVerificationEmailAsync(user.Email, verificationCode.Value, cancellationToken);
         if (result.IsFailure)
         {
             return Result.Failure<SendVerificationEmailCommandResponse>(result.Errors);
         }
-        
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
         
         return new SendVerificationEmailCommandResponse("Verification email sent successfully.");
     }

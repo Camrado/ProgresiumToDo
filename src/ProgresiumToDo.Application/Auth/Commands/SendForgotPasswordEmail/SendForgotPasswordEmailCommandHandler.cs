@@ -39,13 +39,13 @@ internal sealed class SendForgotPasswordEmailCommandHandler :
             return Result.Failure<SendForgotPasswordEmailCommandResponse>(resetCode.Errors);
         }
 
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        
         var result = await _emailService.SendPasswordResetEmailAsync(request.Email, resetCode.Value, cancellationToken);
         if (result.IsFailure)
         {
             return Result.Failure<SendForgotPasswordEmailCommandResponse>(result.Errors);
         }
-        
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
         
         return new SendForgotPasswordEmailCommandResponse("If an account with that email exists, a password reset code has been sent.");
     }
