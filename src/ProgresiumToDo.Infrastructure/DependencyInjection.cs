@@ -1,5 +1,7 @@
 ﻿using System.Net.Http.Headers;
 using System.Text;
+using Hangfire;
+using Hangfire.PostgreSql;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -15,6 +17,7 @@ using ProgresiumToDo.Application.Abstractions.Auth.Onboarding;
 using ProgresiumToDo.Application.Abstractions.Auth.Tokens;
 using ProgresiumToDo.Application.Abstractions.Behaviors.Contracts;
 using ProgresiumToDo.Application.Abstractions.Billing;
+using ProgresiumToDo.Application.Abstractions.BackgroundJobs;
 using ProgresiumToDo.Application.Abstractions.EmailService;
 using ProgresiumToDo.Application.Abstractions.Tags;
 using ProgresiumToDo.Application.Abstractions.Tasks;
@@ -39,6 +42,7 @@ using ProgresiumToDo.Infrastructure.Services.Auth.OAuth;
 using ProgresiumToDo.Infrastructure.Services.Auth.Onboarding;
 using ProgresiumToDo.Infrastructure.Services.Auth.Tokens;
 using ProgresiumToDo.Infrastructure.Services.Billing;
+using ProgresiumToDo.Infrastructure.Services.BackgroundJobs;
 using ProgresiumToDo.Infrastructure.Services.Email;
 using ProgresiumToDo.Infrastructure.Services.Tags;
 using ProgresiumToDo.Infrastructure.Services.Tasks;
@@ -62,6 +66,8 @@ public static class DependencyInjection
         AddRepositories(services);
 
         AddEmailService(services, configuration);
+
+        AddHangfire(services);
         
         services.AddTransient<IUserOnboardingService, UserOnboardingService>();
         
@@ -209,5 +215,25 @@ public static class DependencyInjection
             
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiToken);
         });
+    }
+
+    private static void AddHangfire(IServiceCollection services)
+    {
+        var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING") ??
+                               throw new ApplicationException("Database connection string secret is missing.");
+        
+        services.AddHangfire(config => config
+            .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+            .UseSimpleAssemblyNameTypeSerializer()
+            .UseRecommendedSerializerSettings()
+            .UsePostgreSqlStorage(options =>
+                options.UseNpgsqlConnection(connectionString)));
+        
+        services.AddHangfireServer(options =>
+        {
+            options.WorkerCount = Environment.ProcessorCount;
+        });
+        
+        services.AddTransient<IBackgroundJobService, HangfireBackgroundJobService>();
     }
 }

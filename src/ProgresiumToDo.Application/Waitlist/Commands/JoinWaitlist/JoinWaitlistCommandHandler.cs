@@ -1,4 +1,5 @@
-﻿using ProgresiumToDo.Application.Abstractions.Behaviors.Contracts;
+﻿using ProgresiumToDo.Application.Abstractions.BackgroundJobs;
+using ProgresiumToDo.Application.Abstractions.Behaviors.Contracts;
 using ProgresiumToDo.Application.Abstractions.EmailService;
 using ProgresiumToDo.Application.Abstractions.Messaging;
 using ProgresiumToDo.Application.Waitlist.Repositories;
@@ -10,14 +11,14 @@ namespace ProgresiumToDo.Application.Waitlist.Commands.JoinWaitlist;
 internal sealed class JoinWaitlistCommandHandler : ICommandHandler<JoinWaitlistCommand, JoinWaitlistCommandResponse>
 {
     private readonly IWaitlistEntryRepository _waitlistEntryRepository;
-    private readonly IEmailService _emailService;
+    private readonly IBackgroundJobService _backgroundJobService;
     private readonly IUnitOfWork _unitOfWork;
 
     public JoinWaitlistCommandHandler(IWaitlistEntryRepository waitlistEntryRepository,
-        IEmailService emailService, IUnitOfWork unitOfWork)
+        IBackgroundJobService backgroundJobService, IUnitOfWork unitOfWork)
     {
         _waitlistEntryRepository = waitlistEntryRepository;
-        _emailService = emailService;
+        _backgroundJobService = backgroundJobService;
         _unitOfWork = unitOfWork;
     } 
     
@@ -31,11 +32,8 @@ internal sealed class JoinWaitlistCommandHandler : ICommandHandler<JoinWaitlistC
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);
             
-            var emailResult = await _emailService.SendWaitlistWelcomeEmailAsync(request.Email, cancellationToken);
-            if (emailResult.IsFailure)
-            {
-                return Result.Failure<JoinWaitlistCommandResponse>(emailResult.Errors);
-            }
+            _backgroundJobService.EnqueueFireAndForgetJob<IEmailService>(es =>
+                es.SendWaitlistWelcomeEmailAsync(request.Email, CancellationToken.None));
         }
         
         return new JoinWaitlistCommandResponse("You've successfully joined the waitlist!");

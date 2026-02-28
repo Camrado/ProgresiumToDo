@@ -1,6 +1,9 @@
 using dotenv.net;
+using Hangfire;
+using Hangfire.PostgreSql;
 using Microsoft.EntityFrameworkCore;
 using ProgresiumToDo.API.Extensions.ExceptionHandling;
+using ProgresiumToDo.API.Filters;
 using ProgresiumToDo.API.Extensions.RateLimiting;
 using ProgresiumToDo.Application;
 using ProgresiumToDo.Infrastructure;
@@ -54,6 +57,11 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+app.UseHangfireDashboard("/hangfire", new DashboardOptions
+{
+    Authorization = [new HangfireDashboardAuthorizationFilter(app.Environment)]
+});
 
 // Remove this block in future in production deployments
 if (app.Environment.IsProduction())
