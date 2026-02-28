@@ -21,11 +21,11 @@ public sealed class UnitOfWorkBehavior<TRequest, TResponse> : IPipelineBehavior<
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next,
         CancellationToken cancellationToken)
     {
-        if (request is IBaseQuery)
+        if (request is IBaseQuery || request is INonTransactionalCommand)
         {
             return await next(cancellationToken);
         }
-        
+
         var requestName = request.GetType().Name;
         await using var transaction = await _unitOfWork.BeginTransactionAsync(cancellationToken);
 

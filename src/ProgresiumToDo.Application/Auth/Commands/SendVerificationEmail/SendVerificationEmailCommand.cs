@@ -2,4 +2,4 @@
 
 namespace ProgresiumToDo.Application.Auth.Commands.SendVerificationEmail;
 
-public sealed record SendVerificationEmailCommand() : ICommand<SendVerificationEmailCommandResponse>;
+public sealed record SendVerificationEmailCommand() : ICommand<SendVerificationEmailCommandResponse>, INonTransactionalCommand;

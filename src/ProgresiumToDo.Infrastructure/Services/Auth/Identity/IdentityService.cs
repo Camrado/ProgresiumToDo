@@ -281,6 +281,13 @@ internal sealed class IdentityService : IIdentityService
             _logger.LogInformation("Google login already linked. UserId: {UserId}", appUser.Id);
         }
         
+        var updateResult = await _userManager.UpdateAsync(appUser);
+        if (!updateResult.Succeeded)
+        {
+            _logger.LogWarning("Failed to update user after linking Google login. UserId: {UserId}", appUser.Id);
+            return Result.Failure([OAuthErrors.CannotLinkGoogleAccount]);
+        }
+        
         return Result.Success();
     }
 

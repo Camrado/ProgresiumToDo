@@ -1,4 +1,5 @@
 using ProgresiumToDo.Application.Abstractions.Auth.Identity;
+using ProgresiumToDo.Application.Abstractions.Behaviors.Contracts;
 using ProgresiumToDo.Application.Abstractions.EmailService;
 using ProgresiumToDo.Application.Abstractions.Messaging;
 using ProgresiumToDo.Application.Users.Repositories;
@@ -12,13 +13,15 @@ internal sealed class SendForgotPasswordEmailCommandHandler :
     private readonly IIdentityService _identityService;
     private readonly IEmailService _emailService;
     private readonly IUserRepository _userRepository;
+    private readonly IUnitOfWork _unitOfWork;
 
     public SendForgotPasswordEmailCommandHandler(IIdentityService identityService,
-        IEmailService emailService, IUserRepository userRepository)
+        IEmailService emailService, IUserRepository userRepository, IUnitOfWork unitOfWork)
     {
         _identityService = identityService;
         _emailService = emailService;
         _userRepository = userRepository;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<Result<SendForgotPasswordEmailCommandResponse>> Handle(SendForgotPasswordEmailCommand request,
@@ -27,7 +30,6 @@ internal sealed class SendForgotPasswordEmailCommandHandler :
         var doesUserExist = await _userRepository.ExistsByEmailAsync(request.Email, cancellationToken: cancellationToken);
         if (!doesUserExist)
         {
-            // Return success to prevent email enumeration
             return new SendForgotPasswordEmailCommandResponse("If an account with that email exists, a password reset code has been sent.");
         }
 
@@ -37,6 +39,8 @@ internal sealed class SendForgotPasswordEmailCommandHandler :
             return Result.Failure<SendForgotPasswordEmailCommandResponse>(resetCode.Errors);
         }
 
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        
         var result = await _emailService.SendPasswordResetEmailAsync(request.Email, resetCode.Value, cancellationToken);
         if (result.IsFailure)
         {

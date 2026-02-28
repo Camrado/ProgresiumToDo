@@ -6,4 +6,4 @@ public sealed record ContactUsCommand(
     string Email, 
     string Name, 
     string Subject, 
-    string Message) : ICommand<ContactUsCommandResponse>;
+    string Message) : ICommand<ContactUsCommandResponse>, INonTransactionalCommand;
