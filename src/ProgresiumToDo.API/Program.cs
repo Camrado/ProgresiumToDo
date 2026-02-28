@@ -57,10 +57,13 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-app.UseHangfireDashboard("/hangfire", new DashboardOptions
+if (app.Environment.IsDevelopment())
 {
-    Authorization = [new HangfireDashboardAuthorizationFilter(app.Environment)]
-});
+    app.UseHangfireDashboard("/hangfire", new DashboardOptions
+    {
+        Authorization = [new HangfireDashboardAuthorizationFilter(app.Environment)]
+    });
+}
 
 // Remove this block in future in production deployments
 if (app.Environment.IsProduction())
