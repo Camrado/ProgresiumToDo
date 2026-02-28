@@ -62,7 +62,7 @@ internal sealed class MailtrapEmailService : IEmailService
 
         var mail = new MailDto(
             [to],
-            $"Verify Your Email",
+            "Verify Your Email",
             "Email Verification",
             htmlBody,
             null);
@@ -118,7 +118,7 @@ Message:
 
         var mail = new MailDto(
             [to],
-            $"Reset Your Password",
+            "Reset Your Password",
             "Password Reset",
             htmlBody,
             null);
