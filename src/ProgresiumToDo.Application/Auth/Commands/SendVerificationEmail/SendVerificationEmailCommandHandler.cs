@@ -1,4 +1,5 @@
 ﻿using ProgresiumToDo.Application.Abstractions.Auth.Identity;
+using ProgresiumToDo.Application.Abstractions.Behaviors.Contracts;
 using ProgresiumToDo.Application.Abstractions.EmailService;
 using ProgresiumToDo.Application.Abstractions.Messaging;
 using ProgresiumToDo.Application.Users.Repositories;
@@ -14,14 +15,16 @@ internal sealed class SendVerificationEmailCommandHandler :
     private readonly IUserContext _userContext;
     private readonly IEmailService _emailService;
     private readonly IUserRepository _userRepository;
+    private readonly IUnitOfWork _unitOfWork;
 
     public SendVerificationEmailCommandHandler(IIdentityService identityService, IUserContext userContext,
-        IEmailService emailService, IUserRepository userRepository)
+        IEmailService emailService, IUserRepository userRepository, IUnitOfWork unitOfWork)
     {
         _identityService = identityService;
         _userContext = userContext;
         _emailService = emailService;
         _userRepository = userRepository;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<Result<SendVerificationEmailCommandResponse>> Handle(SendVerificationEmailCommand request,
@@ -43,13 +46,15 @@ internal sealed class SendVerificationEmailCommandHandler :
         {
             return Result.Failure<SendVerificationEmailCommandResponse>(verificationCode.Errors);
         }
-        
+
         var result = await _emailService.SendVerificationEmailAsync(
             user.Email, verificationCode.Value, cancellationToken);
         if (result.IsFailure)
         {
             return Result.Failure<SendVerificationEmailCommandResponse>(result.Errors);
         }
+        
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
         
         return new SendVerificationEmailCommandResponse("Verification email sent successfully.");
     }

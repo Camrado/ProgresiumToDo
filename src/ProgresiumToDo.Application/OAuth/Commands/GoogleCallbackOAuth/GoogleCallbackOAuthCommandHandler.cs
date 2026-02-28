@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using ProgresiumToDo.Application.Abstractions.Auth.Identity;
 using ProgresiumToDo.Application.Abstractions.Auth.OAuth;
+using ProgresiumToDo.Application.Abstractions.Behaviors.Contracts;
 using ProgresiumToDo.Application.Abstractions.Billing;
 using ProgresiumToDo.Application.Abstractions.Messaging;
 using ProgresiumToDo.Application.Users.Repositories;
@@ -18,6 +19,7 @@ internal sealed class GoogleCallbackOAuthCommandHandler : ICommandHandler<Google
     private readonly IUserRepository _userRepository;
     private readonly IIdentityService _identityService;
     private readonly ISubscriptionService _subscriptionService;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<GoogleCallbackOAuthCommandHandler> _logger;
     
     public GoogleCallbackOAuthCommandHandler(
@@ -26,6 +28,7 @@ internal sealed class GoogleCallbackOAuthCommandHandler : ICommandHandler<Google
         IUserRepository userRepository,
         IIdentityService identityService,
         ISubscriptionService subscriptionService,
+        IUnitOfWork unitOfWork,
         ILogger<GoogleCallbackOAuthCommandHandler> logger)
     {
         _memoryCache = memoryCache;
@@ -33,6 +36,7 @@ internal sealed class GoogleCallbackOAuthCommandHandler : ICommandHandler<Google
         _userRepository = userRepository;
         _identityService = identityService;
         _subscriptionService = subscriptionService;
+        _unitOfWork = unitOfWork;
         _logger = logger;
     }
     
@@ -49,6 +53,8 @@ internal sealed class GoogleCallbackOAuthCommandHandler : ICommandHandler<Google
         var googleIdentityResult =
             await _oAuthService.GetGoogleIdentityAsync(request.Code, verifier, nonce, cancellationToken);
         
+        await using var transaction = await _unitOfWork.BeginTransactionAsync(cancellationToken);
+
         var user = await _userRepository.GetByEmailAsync(googleIdentityResult.Email, cancellationToken: cancellationToken);
         
         if (user is not null)
@@ -103,6 +109,9 @@ internal sealed class GoogleCallbackOAuthCommandHandler : ICommandHandler<Google
         }
         
         var tokens = _identityService.GenerateTokens(user);
+        
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
         
         return new GoogleCallbackOAuthCommandResponse(
             "OAuth login successful.",

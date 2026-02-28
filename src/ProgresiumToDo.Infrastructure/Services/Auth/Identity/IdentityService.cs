@@ -281,6 +281,8 @@ internal sealed class IdentityService : IIdentityService
             _logger.LogInformation("Google login already linked. UserId: {UserId}", appUser.Id);
         }
         
+        await _userManager.UpdateAsync(appUser);
+        
         return Result.Success();
     }
 
