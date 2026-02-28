@@ -227,7 +227,8 @@ public static class DependencyInjection
             .UseSimpleAssemblyNameTypeSerializer()
             .UseRecommendedSerializerSettings()
             .UsePostgreSqlStorage(options =>
-                options.UseNpgsqlConnection(connectionString)));
+                options.UseNpgsqlConnection(connectionString))
+            .UseFilter(new ResultCheckJobFilter()));
         
         services.AddHangfireServer(options =>
         {
