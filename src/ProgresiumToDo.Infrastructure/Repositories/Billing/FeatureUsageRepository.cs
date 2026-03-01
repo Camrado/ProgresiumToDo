@@ -51,6 +51,7 @@ internal sealed class FeatureUsageRepository : IFeatureUsageRepository
         }
 
         // This prevents race conditions on the unique constraint (UserId, FeatureId, UsageDate)
+        // Using raw SQL for performance and to leverage ON CONFLICT for atomic upsert
         await _dbContext.Database.ExecuteSqlInterpolatedAsync(
             $"""
              INSERT INTO feature_usages (id, user_id, feature_id, usage_date, usage_count)
