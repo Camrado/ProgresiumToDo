@@ -12,5 +12,7 @@
   <Folder Name="/src/Presentation/">
     <Project Path="src/ProgresiumToDo.API/ProgresiumToDo.API.csproj" />
   </Folder>
-  <Folder Name="/tests/" />
+  <Folder Name="/tests/">
+    <Project Path="tests\ProgresiumToDo.Unit.Tests\ProgresiumToDo.Unit.Tests.csproj" Type="Classic C#" />
+  </Folder>
 </Solution>
