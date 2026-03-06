@@ -12,4 +12,7 @@
       <ProjectReference Include="..\ProgresiumToDo.Domain\ProgresiumToDo.Domain.csproj" />
     </ItemGroup>
     
+    <ItemGroup>
+        <InternalsVisibleTo Include="ProgresiumToDo.Unit.Tests" />
+    </ItemGroup>
 </Project>
