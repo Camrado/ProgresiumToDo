@@ -11,6 +11,7 @@ Backend API for **Progresium**, a focus-first task and project management SaaS. 
 
 | | |
 |---|---|
+| Hand-written C# (excl. migrations) | ~9,700 lines |
 | Projects | 4 (Domain, Application, Infrastructure, API) |
 | HTTP endpoints | 37 across 10 controllers |
 | FluentValidation validators | 28 |
@@ -219,6 +220,7 @@ Business invariants are enforced in the schema, not only in code:
 | `subscriptions(user_id) WHERE status = 'Active'` | a user has at most one active subscription |
 | `users(email) WHERE deleted_at IS NULL` | emails are unique among live accounts; a deleted account frees its email |
 | `projects(user_id, name) WHERE deleted_at IS NULL` | no duplicate project names per user |
+| `tags(user_id, name) WHERE deleted_at IS NULL` | no duplicate tag names per user |
 | `refresh_tokens(token)` | token lookup is unique and indexed |
 
 ---
@@ -605,7 +607,6 @@ Documented honestly, roughly in priority order:
 - **OAuth state storage.** `state` is kept in an in-process `IMemoryCache` and is not removed after use, so it only works on a single instance and is valid until its 5-minute TTL. Planned: a distributed cache and single-use consumption. Linking a Google login to an existing account by email should also require Google's `email_verified` claim.
 - **CORS** currently allows any origin. The origin allow-list is prepared and will be enabled before deployment.
 - **Automated tests.** The `tests/` solution folder is empty. Priorities are integration tests for the concurrency paths (quota locking, verification-code races) against a real PostgreSQL instance via Testcontainers, and unit tests for ordering and billing-cycle calculation.
-- **Tag name uniqueness** is enforced by a unique index on `name` alone, so two users cannot both create a tag with the same name. The index should be `(user_id, name)`, matching projects.
 - **Migrations on startup** are convenient for a single instance but should move to a separate deployment step before running multiple replicas.
 
 ---
