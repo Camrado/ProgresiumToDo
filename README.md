@@ -11,7 +11,6 @@ Backend API for **Progresium**, a focus-first task and project management SaaS. 
 
 | | |
 |---|---|
-| Hand-written C# (excl. migrations) | ~9,700 lines |
 | Projects | 4 (Domain, Application, Infrastructure, API) |
 | HTTP endpoints | 37 across 10 controllers |
 | FluentValidation validators | 28 |
