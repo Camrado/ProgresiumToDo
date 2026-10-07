@@ -601,9 +601,7 @@ docker run -p 8080:8080 --env-file .env progresium-todo-api
 
 Documented honestly, roughly in priority order:
 
-- **Transactional outbox.** Background jobs are enqueued after the business transaction commits. A crash between the commit and the enqueue loses that job (for example, a waitlist welcome email). Writing an outbox row in the same transaction and dispatching it separately would close the gap.
 - **Refresh-token hardening.** Tokens are stored in plaintext rather than hashed, and rotation has no reuse detection. Two concurrent refreshes with the same token can both succeed. Planned: store a SHA-256 hash, lock the token row during rotation, and revoke the whole token family when a revoked token is presented.
-- **OAuth state storage.** `state` is kept in an in-process `IMemoryCache` and is not removed after use, so it only works on a single instance and is valid until its 5-minute TTL. Planned: a distributed cache and single-use consumption. Linking a Google login to an existing account by email should also require Google's `email_verified` claim.
 - **CORS** currently allows any origin. The origin allow-list is prepared and will be enabled before deployment.
 - **Automated tests.** The `tests/` solution folder is empty. Priorities are integration tests for the concurrency paths (quota locking, verification-code races) against a real PostgreSQL instance via Testcontainers, and unit tests for ordering and billing-cycle calculation.
 - **Migrations on startup** are convenient for a single instance but should move to a separate deployment step before running multiple replicas.
